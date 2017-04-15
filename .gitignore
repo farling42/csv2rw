@@ -1,3 +1,4 @@
 *.rwexport
 *.csv
 *.rwstructure
+Installer/packages/com.amusingtime.csv2rw/data/
