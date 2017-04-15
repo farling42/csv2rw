@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>RW CSV Importer</Name>
+    <Version>1.0.0</Version>
+    <Title>Realm Works CSV Importer</Title>
+    <Publisher>Martin Smith</Publisher>
+    <StartMenuDir>Amusing Time</StartMenuDir>
+    <TargetDir>@ApplicationsDir@/RW2CSV</TargetDir>
+	<RunProgram>@TargetDir@/RealmWorksImport.exe</RunProgram>
+</Installer>
