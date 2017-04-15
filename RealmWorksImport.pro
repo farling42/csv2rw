@@ -11,7 +11,7 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = RealmWorksImport
 TEMPLATE = app
 
-CONFIG += static
+CONFIG += windeployqt
 
 SOURCES += main.cpp\
         mainwindow.cpp \
@@ -41,3 +41,16 @@ HEADERS  += mainwindow.h \
     fieldcombobox.h
 
 FORMS    += mainwindow.ui
+
+COMPANY = com.amusingtime.csv2rw
+
+#DISTFILES += $${PWD}/install/
+
+INST_DIR_DATA = install/$${COMPANY}/data
+INST_DIR_META = install/$${COMPANY}/meta
+
+WINDEPLOYQT_OPTIONS = -verbose 3
+
+DESTDIR = $${INST_DIR_DATA}
+
+QMAKE_POST_LINK += $$quote(\$(COPY_DIR) ..\\RealmWorksImport\\installer\\$${COMPANY} install\\$${COMPANY}$$escape_expand(\\n\\t))
