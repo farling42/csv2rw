@@ -28,42 +28,17 @@
 
 function Component()
 {
-    // constructor
-    component.loaded.connect(this, Component.prototype.loaded);
-    if (!installer.addWizardPage(component, "Page", QInstaller.TargetDirectory))
-        console.log("Could not add the dynamic page.");
-}
-
-Component.prototype.isDefault = function()
-{
-    // select the component by default
-    return true;
+    // default constructor
 }
 
 Component.prototype.createOperations = function()
 {
-    try {
-        // call the base create operations function
-        component.createOperations();
-    } catch (e) {
-        console.log(e);
-    }
-}
+    // call default implementation to actually install README.txt!
+    component.createOperations();
 
-Component.prototype.loaded = function ()
-{
-    var page = gui.pageByObjectName("DynamicPage");
-    if (page != null) {
-        console.log("Connecting the dynamic page entered signal.");
-        page.entered.connect(Component.prototype.dynamicPageEntered);
-    }
-}
-
-Component.prototype.dynamicPageEntered = function ()
-{
-    var pageWidget = gui.pageWidgetByObjectName("DynamicPage");
-    if (pageWidget != null) {
-        console.log("Setting the widgets label text.")
-        pageWidget.m_pageLabel.text = "This is a dynamically created page.";
+    if (systemInfo.productType === "windows") {
+        component.addOperation("CreateShortcut", "@TargetDir@/RealmWorksImport.exe", "@StartMenuDir@/CSV to Realm Works.lnk",
+            "workingDirectory=@TargetDir@", "iconPath=%SystemRoot%/system32/SHELL32.dll",
+            "iconId=24");
     }
 }
