@@ -99,35 +99,38 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
         // Maybe an ANNOTATION or CONTENTS
         if (modelColumnForText() >= 0)
         {
-            QString sub_element;
-            switch (p_snippet_type)
+            const QString user_text = modelValueForText(index);
+            if (!user_text.isEmpty())
             {
-            case Multi_Line:
-                sub_element = "contents";
-                break;
-            case Labeled_Text:
-                sub_element = "contents";
-                break;
-            case Tag_Standard:
-                sub_element = "annotation";
-                break;
-            case Hybrid_Tag:
-                sub_element = "annotation";
-                break;
-            default:
-                qFatal("RWFacet::writeToContents: invalid snippet type: %d", p_snippet_type);
-                break;
+                QString sub_element;
+                switch (p_snippet_type)
+                {
+                case Multi_Line:
+                    sub_element = "contents";
+                    break;
+                case Labeled_Text:
+                    sub_element = "contents";
+                    break;
+                case Tag_Standard:
+                    sub_element = "annotation";
+                    break;
+                case Hybrid_Tag:
+                    sub_element = "annotation";
+                    break;
+                default:
+                    qFatal("RWFacet::writeToContents: invalid snippet type: %d", p_snippet_type);
+                    break;
+                }
+
+                // Maybe the snippet has some contents
+                writer->writeStartElement(sub_element);
+                writer->writeCharacters(xmlParagraphStart());
+                writer->writeCharacters(xmlSpanStart(bold));
+                writer->writeCharacters(user_text);
+                writer->writeCharacters(xmlSpanFinish() + xmlParagraphFinish());
+                writer->writeEndElement();  // for contents or annotation
             }
-
-            // Maybe the snippet has some contents
-            writer->writeStartElement(sub_element);
-            writer->writeCharacters(xmlParagraphStart());
-            writer->writeCharacters(xmlSpanStart(bold));
-            writer->writeCharacters(modelValueForText(index));   // TODO
-            writer->writeCharacters(xmlSpanFinish() + xmlParagraphFinish());
-            writer->writeEndElement();  // for contents or annotation
         }
-
     }
     writer->writeEndElement();  // snippet
 }

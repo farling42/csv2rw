@@ -85,7 +85,11 @@ void RWBaseItem::writeToContents(QXmlStreamWriter *writer, const QModelIndex &in
     writer->writeAttribute("name", modelColumnForName() >= 0 ? modelValueForName(index) : name());
 
     if (modelColumnForText() >= 0)
-        writer->writeCharacters(modelValueForText(index));
+    {
+        const QString user_text = modelValueForText(index);
+        if (!user_text.isEmpty())
+            writer->writeCharacters(modelValueForText(index));
+    }
 //    else if (!p_text.isEmpty())
 //        writer->writeCharacters(p_text);
 

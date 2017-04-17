@@ -44,25 +44,29 @@ void RWPartition::writeToContents(QXmlStreamWriter *writer, const QModelIndex &i
     // It may have some text directly on it, not stored in a facet
     if (modelColumnForText() >= 0)
     {
-        bool bold = false;
-
-        writer->writeStartElement("snippet");
+        const QString user_text = modelValueForText(index);
+        if (!user_text.isEmpty())
         {
-            writer->writeAttribute("type", "Multi_Line");
-            // no facet_id
-            if (isRevealed()) writer->writeAttribute("is_revealed", "true");
+            bool bold = false;
 
-            writer->writeStartElement("contents");
+            writer->writeStartElement("snippet");
             {
-                // Maybe the snippet has some contents
-                writer->writeCharacters(xmlParagraphStart());
-                writer->writeCharacters(xmlSpanStart(bold));
-                writer->writeCharacters(modelValueForText(index));
-                writer->writeCharacters(xmlSpanFinish() + xmlParagraphFinish());
-            }
-            writer->writeEndElement(); // contents
+                writer->writeAttribute("type", "Multi_Line");
+                // no facet_id
+                if (isRevealed()) writer->writeAttribute("is_revealed", "true");
 
-            // </snippet>
+                writer->writeStartElement("contents");
+                {
+                    // Maybe the snippet has some contents
+                    writer->writeCharacters(xmlParagraphStart());
+                    writer->writeCharacters(xmlSpanStart(bold));
+                    writer->writeCharacters(user_text);
+                    writer->writeCharacters(xmlSpanFinish() + xmlParagraphFinish());
+                }
+                writer->writeEndElement(); // contents
+
+                // </snippet>
+            }
         }
         writer->writeEndElement(); // snippet
     }
