@@ -153,7 +153,6 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
     foreach (RWFacet *child, child_facets)
     {
         QRadioButton *reveal = 0;
-        QRadioButton *gm_only = 0;
         QLabel *label = 0;
         FieldComboBox *combo = 0;
         FieldLineEdit *edit = 0;
@@ -167,12 +166,6 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
         reveal->setAutoExclusive(false);
         reveal->setToolTip("revealed?");
         connect(reveal, &QRadioButton::toggled, child, &RWFacet::setIsRevealed);
-
-        // Every snippet could be GM only
-        gm_only = new QRadioButton(QString());
-        gm_only->setAutoExclusive(false);
-        gm_only->setToolTip("GM only?");
-        connect(gm_only, &QRadioButton::toggled, child, &RWFacet::setIsGMonly);
 
         if (child->snippetType() == RWFacet::Labeled_Text || child->snippetType() == RWFacet::Hybrid_Tag)
         {
@@ -217,7 +210,6 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
         QHBoxLayout *boxl = new QHBoxLayout;
         boxl->setContentsMargins(0,0,0,0);
         if (reveal) boxl->addWidget(reveal);
-        if (gm_only) boxl->addWidget(gm_only);
         if (label) boxl->addWidget(label);
         if (combo) boxl->addWidget(combo);
         if (edit) boxl->addWidget(edit);
@@ -233,12 +225,6 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
     reveal->setChecked(partition->isRevealed());
     connect(reveal, &QRadioButton::toggled, partition, &RWFacet::setIsRevealed);
 
-    QRadioButton *gm_only = new QRadioButton(QString());
-    gm_only->setAutoExclusive(false);
-    gm_only->setToolTip("GM only?");
-    gm_only->setChecked(partition->isGMonly());
-    connect(gm_only, &QRadioButton::toggled, partition, &RWFacet::setIsGMonly);
-
     FieldLineEdit *edit = new FieldLineEdit;
     connect (edit, &FieldLineEdit::modelColumnSelected, partition, &RWBaseItem::setModelColumnForText);
     edit->setToolTip("contents");
@@ -249,11 +235,10 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
 
     QHBoxLayout *textlayout = new QHBoxLayout;
     textlayout->addWidget(reveal);
-    textlayout->addWidget(gm_only);
     textlayout->addWidget(edit);
     layout->addLayout(textlayout);
 
-#if 0
+#ifdef ADD_SNIPPET
     // Add a button to allow a second <contents> section to be added.
     QPushButton *insert_button = new QPushButton("+");
     connect(insert_button, &QPushButton::clicked, this, &RWCategoryWidget::do_insert);
