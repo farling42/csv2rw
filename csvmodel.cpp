@@ -74,6 +74,8 @@ QVariant CsvModel::data(const QModelIndex &index, int role) const
     if ((role == Qt::DisplayRole || role == Qt::EditRole) &&
             hasIndex(index.row(), index.column()))
     {
+        // Reading in the CSV ensures that the row will have
+        // the correct number of entries
         return lines.at(index.row()).at(index.column());
     }
     return QVariant();
@@ -95,6 +97,8 @@ void CsvModel::readCSV(QTextStream &stream)
         while (stream.readLineInto(&line))
         {
             QStringList fields = parseCSV(line);
+            // Ensure this row of the table is the same length as the header row
+            while (fields.size() < headers.size()) fields.append(QString());
             lines.append(fields);
         }
     }
