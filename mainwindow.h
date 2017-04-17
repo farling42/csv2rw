@@ -49,9 +49,9 @@ public Q_SLOTS:
     void on_categoryComboBox_currentIndexChanged(const QString&);
 
 private slots:
-    void on_pushButton_clicked();
+    void on_generateButton_clicked();
 
-    void on_pushButton_2_clicked();
+    void on_helpButton_clicked();
 
 private:
     Ui::MainWindow *ui;

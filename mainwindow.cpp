@@ -141,8 +141,16 @@ void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selectio
 }
 
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_generateButton_clicked()
 {
+    // Check that the topic has been configured correctly.
+    if (!category_widget->category()->canBeGenerated())
+    {
+        QMessageBox::critical(this, "Incomplete Data",
+                              "The topic/article needs to have a field allocated to the name.");
+        return;
+    }
+
     // Prompt for output filename
     QString filename = QFileDialog::getSaveFileName(this, tr("RealmWorks Export File"), /*dir*/ QString(), /*filter*/ tr("RealmWorks Export Files (*.rwexport)"));
     if (filename.isEmpty()) return;
@@ -156,7 +164,7 @@ void MainWindow::on_pushButton_clicked()
     file.close();
 }
 
-void MainWindow::on_pushButton_2_clicked()
+void MainWindow::on_helpButton_clicked()
 {
     static QString help_text = "There are various steps to converting your CSV data into a RealmWorks import file\n\n"
             "Step 1: Use the 'Load 'CSV' button to choose the file containing your data in CSV file format. The first line in the file should contain the header for each column.\n\n"

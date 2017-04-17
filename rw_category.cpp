@@ -40,6 +40,16 @@ void RWCategory::postLoad()
     }
 }
 
+/**
+ * @brief RWCategory::canBeGenerated
+ * @return true if a model index has been set on the modelValueForName
+ */
+bool RWCategory::canBeGenerated() const
+{
+    return modelColumnForName() >= 0 &&
+            RWBaseItem::canBeGenerated();
+}
+
 void RWCategory::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index)
 {
     static int topic_id = 1;

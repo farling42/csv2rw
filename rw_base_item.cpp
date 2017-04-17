@@ -157,6 +157,20 @@ void RWBaseItem::setModelColumnForTag(int column)
     p_model_column_for_tag = column;
 }
 
+/**
+ * @brief RWBaseItem::canBeGenerated
+ * @return true if this element has all the data required for the GENERATE to be a success.
+ */
+bool RWBaseItem::canBeGenerated() const
+{
+    QList<RWBaseItem*> list = findChildren<RWBaseItem*>();
+    foreach (RWBaseItem *item, list)
+    {
+        if (!item->canBeGenerated()) return false;
+    }
+    return true;
+}
+
 int RWBaseItem::modelColumnForTag() const
 {
     return p_model_column_for_tag;

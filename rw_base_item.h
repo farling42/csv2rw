@@ -56,6 +56,7 @@ public:
     bool global() const { return p_global; }
     QString uuid() const { return p_uuid; }
     QString signature() const { return p_signature; }
+    virtual bool canBeGenerated() const;
 
     virtual void writeToStructure(QXmlStreamWriter*);
     virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index);

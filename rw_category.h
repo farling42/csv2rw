@@ -32,6 +32,8 @@ public:
 
     virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index);
     virtual void postLoad();
+
+    virtual bool canBeGenerated() const;
 };
 
 #endif // RWCATEGORY_H

@@ -336,7 +336,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="QPushButton" name="pushButton_2">
+              <widget class="QPushButton" name="helpButton">
                <property name="text">
                 <string>HELP</string>
                </property>
@@ -356,7 +356,7 @@
               </spacer>
              </item>
              <item>
-              <widget class="QPushButton" name="pushButton">
+              <widget class="QPushButton" name="generateButton">
                <property name="text">
                 <string>GENERATE</string>
                </property>
