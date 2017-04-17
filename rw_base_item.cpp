@@ -219,27 +219,16 @@ QDebug operator<<(QDebug stream, const RWBaseItem &item)
 
 
 
-QString RWBaseItem::xmlParagraphStart()
+QString RWBaseItem::xmlParagraph(const QString &text)
 {
-    return "<p class=\"RWDefault\">";
+    return "<p class=\"RWDefault\">" + text + "</p>";
 }
 
-QString RWBaseItem::xmlParagraphFinish()
+QString RWBaseItem::xmlSpan(const QString &text, bool bold)
 {
-    return "</p>";
-}
-
-QString RWBaseItem::xmlSpanStart(bool bold)
-{
-    if (bold)
-        return "<span class=\"RWSnippet\" style=\"font-weight:bold\">";
-    else
-        return "<span class=\"RWSnippet\">";
-}
-
-QString RWBaseItem::xmlSpanFinish()
-{
-    return "</span>";
+    QString style;
+    if (bold) style = " style=\"font-weight:bold\">";
+    return "<span class=\"RWSnippet\"" + style + ">" + text + "</span>";
 }
 
 RWBaseItem *RWBaseItem::childElement(const QString &element_name) const

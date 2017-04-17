@@ -61,7 +61,40 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
         if (isRevealed()) writer->writeAttribute("is_revealed", "true");
         writer->writeAttribute("type", snip_enum.valueToKey(p_snippet_type));
 
-        // Maybe one or more TAG assigns
+        // Maybe an ANNOTATION or CONTENTS (before TAG_ASSIGN)
+        if (modelColumnForText() >= 0)
+        {
+            const QString user_text = modelValueForText(index);
+            if (!user_text.isEmpty())
+            {
+                QString sub_element;
+                switch (p_snippet_type)
+                {
+                case Multi_Line:
+                    sub_element = "contents";
+                    break;
+                case Labeled_Text:
+                    sub_element = "contents";
+                    break;
+                case Tag_Standard:
+                    sub_element = "annotation";
+                    break;
+                case Hybrid_Tag:
+                    sub_element = "annotation";
+                    break;
+                default:
+                    qFatal("RWFacet::writeToContents: invalid snippet type: %d", p_snippet_type);
+                    break;
+                }
+
+                // Maybe the snippet has some contents
+                writer->writeStartElement(sub_element);
+                writer->writeCharacters(xmlParagraph(xmlSpan(user_text, bold)));
+                writer->writeEndElement();  // for contents or annotation
+            }
+        }
+
+        // Maybe one or more TAG_ASSIGN (to be entered AFTER the contents/annotation)
         if (modelColumnForTag() >= 0)
         {
             // Find the domain to use
@@ -96,41 +129,6 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
                 qWarning() << "domain_id does not exist on FACET" << id();
         }
 
-        // Maybe an ANNOTATION or CONTENTS
-        if (modelColumnForText() >= 0)
-        {
-            const QString user_text = modelValueForText(index);
-            if (!user_text.isEmpty())
-            {
-                QString sub_element;
-                switch (p_snippet_type)
-                {
-                case Multi_Line:
-                    sub_element = "contents";
-                    break;
-                case Labeled_Text:
-                    sub_element = "contents";
-                    break;
-                case Tag_Standard:
-                    sub_element = "annotation";
-                    break;
-                case Hybrid_Tag:
-                    sub_element = "annotation";
-                    break;
-                default:
-                    qFatal("RWFacet::writeToContents: invalid snippet type: %d", p_snippet_type);
-                    break;
-                }
-
-                // Maybe the snippet has some contents
-                writer->writeStartElement(sub_element);
-                writer->writeCharacters(xmlParagraphStart());
-                writer->writeCharacters(xmlSpanStart(bold));
-                writer->writeCharacters(user_text);
-                writer->writeCharacters(xmlSpanFinish() + xmlParagraphFinish());
-                writer->writeEndElement();  // for contents or annotation
-            }
-        }
     }
     writer->writeEndElement();  // snippet
 }

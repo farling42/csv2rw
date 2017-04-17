@@ -58,10 +58,7 @@ void RWPartition::writeToContents(QXmlStreamWriter *writer, const QModelIndex &i
                 writer->writeStartElement("contents");
                 {
                     // Maybe the snippet has some contents
-                    writer->writeCharacters(xmlParagraphStart());
-                    writer->writeCharacters(xmlSpanStart(bold));
-                    writer->writeCharacters(user_text);
-                    writer->writeCharacters(xmlSpanFinish() + xmlParagraphFinish());
+                    writer->writeCharacters(xmlParagraph(xmlSpan(user_text, bold)));
                 }
                 writer->writeEndElement(); // contents
 

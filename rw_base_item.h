@@ -88,10 +88,8 @@ public:
     QString namespaceUri() const { return p_namespace_uri; }
     const QXmlStreamAttributes &attributes() const { return p_attributes; }
 
-    static QString xmlParagraphStart();
-    static QString xmlParagraphFinish();
-    static QString xmlSpanStart(bool bold = false);
-    static QString xmlSpanFinish();
+    static QString xmlParagraph(const QString &text);
+    static QString xmlSpan(const QString &text, bool bold = false);
 
     void setIgnoreForContents(bool flag) { p_ignore_for_contents = flag; }
     bool ignoreForContents() const { return p_ignore_for_contents; }
