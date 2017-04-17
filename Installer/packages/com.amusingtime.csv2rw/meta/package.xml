@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>Realm Works CSV Converter</DisplayName>
+    <Description>This application converts the contents of a CSV into a RealmWorks import file.</Description>
+    <Version>1.1</Version>
+    <ReleaseDate>2017-04-17</ReleaseDate>
+    <Licenses>
+        <License name="GNU General Public License, version 3.0" file="LICENSE.txt" />
+    </Licenses>
+    <Default>true</Default>
+</Package>
