@@ -178,7 +178,7 @@ void RealmWorksStructure::writeExportFile(QIODevice *device, RWCategory *categor
             writer->writeStartElement("details");
             {
                 writer->writeAttribute("name", "Test Import");
-                writer->writeAttribute("import_tag_id", "Tag_1");
+                writer->writeAttribute("import_tag_id", "CSVimportTag");
 
                 writer->writeTextElement("summary", "Imported");
                 writer->writeTextElement("requirements", "None");
