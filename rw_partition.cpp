@@ -64,8 +64,8 @@ void RWPartition::writeToContents(QXmlStreamWriter *writer, const QModelIndex &i
 
                 // </snippet>
             }
+            writer->writeEndElement(); // snippet
         }
-        writer->writeEndElement(); // snippet
     }
 
     // And it may have sub-sections, after the snippet/content (if any)
