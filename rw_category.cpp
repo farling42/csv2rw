@@ -66,7 +66,7 @@ void RWCategory::writeToContents(QXmlStreamWriter *writer, const QModelIndex &in
 
         // Relevant export tag on every topic
         writer->writeStartElement("tag_assign");
-        writer->writeAttribute("tag_id", "CSVimportTag");
+        writer->writeAttribute("tag_id", "Tag_1");
         writer->writeEndElement();
 
         // No actual TEXT for this element (only children)
