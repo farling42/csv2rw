@@ -77,7 +77,7 @@ void MainWindow::on_loadCsvButton_pressed()
     QFile file(filename);
     if (!file.open(QFile::ReadOnly))
     {
-        qWarning() << "Failed to find file" << file.fileName();
+        qWarning() << tr("Failed to find file") << file.fileName();
         return;
     }
     ui->csvFilename->setText(filename);
@@ -103,7 +103,7 @@ void MainWindow::on_loadStructureButton_pressed()
     QFile file(filename);
     if (!file.open(QFile::ReadOnly))
     {
-        qWarning() << "Failed to find file" << file.fileName();
+        qWarning() << tr("Failed to find file") << file.fileName();
         return;
     }
     ui->structureFilename->setText(filename);
@@ -146,8 +146,8 @@ void MainWindow::on_generateButton_clicked()
     // Check that the topic has been configured correctly.
     if (!category_widget->category()->canBeGenerated())
     {
-        QMessageBox::critical(this, "Incomplete Data",
-                              "The topic/article needs to have a field allocated to the name.");
+        QMessageBox::critical(this, tr("Incomplete Data"),
+                              tr("The topic/article needs to have a field allocated to the name."));
         return;
     }
 
@@ -157,7 +157,7 @@ void MainWindow::on_generateButton_clicked()
     QFile file(filename);
     if (!file.open(QFile::WriteOnly))
     {
-        qWarning() << "Failed to create file" << file.fileName();
+        qWarning() << tr("Failed to create file") << file.fileName();
         return;
     }
     rw_structure.writeExportFile(&file, category_widget->category(), csv_full_model);
@@ -166,13 +166,13 @@ void MainWindow::on_generateButton_clicked()
 
 void MainWindow::on_helpButton_clicked()
 {
-    static QString help_text = "There are various steps to converting your CSV data into a RealmWorks import file\n\n"
+    static QString help_text = tr("There are various steps to converting your CSV data into a RealmWorks import file\n\n"
             "Step 1: Use the 'Load 'CSV' button to choose the file containing your data in CSV file format. The first line in the file should contain the header for each column.\n\n"
             "Step 2: Use the 'Load Structure' to select the RealmWorks structure file containing the structure that you've exported from RealmWorks.\n\n"
             "Step 3: Choose the category/article that you want to have created within RealmWorks from your CSV data.\n\n"
             "(Hint: the bottom panel shows the information that has been loaded from your CSV file, so you can check which fields contain which data.)\n\n"
             "Step 4: Drag each of the field names from the left panel to the appropriate place within the category/article template in the right panel.\n\n"
-            "Step 5: Press the 'Generate' to produce the RealmWorks .rwexport file which you can load into your RealmWorks database."
+            "Step 5: Press the 'Generate' to produce the RealmWorks .rwexport file which you can load into your RealmWorks database.")
             ;
-    QMessageBox::information(this, "Help", help_text);
+    QMessageBox::information(this, tr("Help"), help_text);
 }

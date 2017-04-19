@@ -42,6 +42,8 @@ HEADERS  += mainwindow.h \
 
 FORMS    += mainwindow.ui
 
+TRANSLATIONS += csv2rw_en.ts
+
 COMPANY = com.amusingtime.csv2rw
 
 PKGSRC=Installer
@@ -65,7 +67,8 @@ DISTFILES += \
     Installer/config/config.xml \
     Installer/packages/com.amusingtime.csv2rw/meta/package.xml \
     Installer/packages/com.amusingtime.csv2rw/meta/installscript.qs \
-    Installer/packages/com.amusingtime.csv2rw/meta/LICENSE.txt
+    Installer/packages/com.amusingtime.csv2rw/meta/LICENSE.txt \
+    csv2rw_en.ts
 
 #
 # Create install file
