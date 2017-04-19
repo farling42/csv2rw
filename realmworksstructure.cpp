@@ -154,7 +154,11 @@ RWBaseItem *RealmWorksStructure::read_element(QXmlStreamReader *reader, RWBaseIt
  * @param model
  */
 
-void RealmWorksStructure::writeExportFile(QIODevice *device, RWCategory *category, QAbstractItemModel *model)
+void RealmWorksStructure::writeExportFile(QIODevice *device, RWCategory *category, QAbstractItemModel *model,
+                                          RWCategory *parent_category,
+                                          const QString &parent_title,
+                                          const QString &parent_prefix,
+                                          const QString &parent_suffix)
 {
     QXmlStreamWriter *writer = new QXmlStreamWriter(device);
     // Write out the basics to the file.
@@ -204,10 +208,18 @@ void RealmWorksStructure::writeExportFile(QIODevice *device, RWCategory *categor
         // Process the CSV to write out the entire RWEXPORT file.
         writer->writeStartElement("contents");
         {
+            if (parent_category)
+            {
+                parent_category->writeParentStartToContents(writer, parent_title, parent_prefix, parent_suffix);
+            }
             int maxrow = model->rowCount();
             for (int row = 0 ; row < maxrow ; row++)
             {
                 category->writeToContents(writer, model->index(row, 0));
+            }
+            if (parent_category)
+            {
+                writer->writeEndElement();  // topic
             }
         }
         writer->writeEndElement(); // contents

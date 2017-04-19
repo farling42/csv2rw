@@ -1,3 +1,10 @@
+v1.3
+Provide the option to have all imported topics/articles placed under a single parent category.
+
+v1.2
+The installer now adds the application to the Start Menu.
+Fixed a bug with the layout of elements when there was a blank snippet in the template.
+
 v1.1
 Name of the topic/article is now mandatory.
 In tag snippets, the annotation is correctly placed before the tag_assign.

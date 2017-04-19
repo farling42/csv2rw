@@ -37,7 +37,11 @@ public:
 
 public Q_SLOTS:
     void loadFile(QIODevice*);
-    void writeExportFile(QIODevice*, RWCategory *category, QAbstractItemModel *model);
+    void writeExportFile(QIODevice*, RWCategory *category, QAbstractItemModel *model,
+                         RWCategory *parent_category,
+                         const QString &parent_title,
+                         const QString &parent_prefix,
+                         const QString &parent_suffix);
 
     int format_version;
     int game_system_id;

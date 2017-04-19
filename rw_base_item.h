@@ -98,6 +98,7 @@ public:
     inline QList<T> childItems() const { return findChildren<T>(QString(), Qt::FindDirectChildrenOnly); }
 
     RWBaseItem *childElement(const QString &element_name) const;
+    void writeExportTag(QXmlStreamWriter *writer);
 
 protected:
     virtual void writeChildrenToStructure(QXmlStreamWriter *writer);

@@ -33,7 +33,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    category_widget(0)
+    category_widget(0),
+    parent_choice(0)
 {
     ui->setupUi(this);
 
@@ -42,6 +43,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QAbstractProxyModel *proxy = new QSortFilterProxyModel;
     proxy->setSourceModel(csv_full_model);
     ui->csvContentsTableView->setModel(proxy);
+
+    // Ensure the parent panel visibility matches the check box
+    ui->parentDetails->setVisible(ui->parentGroupBox->isChecked());
 
     // Set up the list of headers
     header_model = new QStringListModel;
@@ -117,8 +121,12 @@ void MainWindow::on_loadStructureButton_pressed()
     }
     cats.sort();
     ui->categoryComboBox->clear();
+    ui->parentCategoryComboBox->clear();
     foreach (const QString &str, cats)
+    {
         ui->categoryComboBox->addItem(str);
+        ui->parentCategoryComboBox->addItem(str);
+    }
 }
 
 void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selection)
@@ -141,6 +149,23 @@ void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selectio
 }
 
 
+void MainWindow::on_parentCategoryComboBox_currentIndexChanged(const QString &selection)
+{
+    parent_choice = 0;
+    foreach (RWCategory *category, rw_structure.categories)
+    {
+        if (category->name() == selection)
+        {
+            parent_choice = category;
+            break;
+        }
+    }
+    if (parent_choice == 0) return;
+
+    qDebug() << "Selected category" << parent_choice->name();
+}
+
+
 void MainWindow::on_generateButton_clicked()
 {
     // Check that the topic has been configured correctly.
@@ -160,7 +185,9 @@ void MainWindow::on_generateButton_clicked()
         qWarning() << tr("Failed to create file") << file.fileName();
         return;
     }
-    rw_structure.writeExportFile(&file, category_widget->category(), csv_full_model);
+    rw_structure.writeExportFile(&file, category_widget->category(), csv_full_model,
+                                 (ui->parentGroupBox->isChecked() && parent_choice) ? parent_choice : 0,
+                                 ui->parentTitle->text(), ui->parentPrefix->text(), ui->parentSuffix->text());
     file.close();
 }
 

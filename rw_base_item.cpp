@@ -106,6 +106,13 @@ void RWBaseItem::writeChildrenToContents(QXmlStreamWriter *writer, const QModelI
     }
 }
 
+void RWBaseItem::writeExportTag(QXmlStreamWriter *writer)
+{
+    writer->writeStartElement("tag_assign");
+    writer->writeAttribute("tag_id", "Tag_1");
+    writer->writeEndElement();
+}
+
 
 void RWBaseItem::setModelColumnForName(int column)
 {

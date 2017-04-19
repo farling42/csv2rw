@@ -19,8 +19,10 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "rw_category.h"
 #include "rw_partition.h"
 #include <QXmlStreamWriter>
+#include <QModelIndex>
 #include <QDebug>
 
+static int topic_id = 1;
 
 RWCategory::RWCategory(QXmlStreamReader *stream, QObject *parent) :
     RWBaseItem(stream, parent)
@@ -52,7 +54,6 @@ bool RWCategory::canBeGenerated() const
 
 void RWCategory::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index)
 {
-    static int topic_id = 1;
     writer->writeStartElement("topic");
     {
         writer->writeAttribute("topic_id", QString("topic_%1").arg(topic_id++));
@@ -65,12 +66,28 @@ void RWCategory::writeToContents(QXmlStreamWriter *writer, const QModelIndex &in
         writeChildrenToContents(writer, index);
 
         // Relevant export tag on every topic
-        writer->writeStartElement("tag_assign");
-        writer->writeAttribute("tag_id", "Tag_1");
-        writer->writeEndElement();
+        writeExportTag(writer);
 
         // No actual TEXT for this element (only children)
         //if (modelValueForText(index) >= 0) writer->writeCharacters(modelValueForText(index));
     }
     writer->writeEndElement();  // </topic>
+}
+
+
+void RWCategory::writeParentStartToContents(QXmlStreamWriter *writer, const QString &title, const QString &prefix, const QString &suffix)
+{
+    writer->writeStartElement("topic");
+    writer->writeAttribute("topic_id", QString("topic_%1").arg(topic_id++));
+    writer->writeAttribute("public_name", title);
+    writer->writeAttribute("category_id", id());
+    if (!prefix.isEmpty()) writer->writeAttribute("prefix", prefix);
+    if (!suffix.isEmpty()) writer->writeAttribute("suffix", suffix);
+    //if (isRevealed()) writer->writeAttribute("is_revealed", "true");
+
+    // Write out the basic structure without any information
+    writeChildrenToContents(writer, QModelIndex());
+
+    // Relevant export tag on every topic
+    writeExportTag(writer);
 }

@@ -47,6 +47,7 @@ public Q_SLOTS:
     void on_loadCsvButton_pressed();
     void on_loadStructureButton_pressed();
     void on_categoryComboBox_currentIndexChanged(const QString&);
+    void on_parentCategoryComboBox_currentIndexChanged(const QString&);
 
 private slots:
     void on_generateButton_clicked();
@@ -59,6 +60,7 @@ private:
     QStringListModel *header_model;
     RealmWorksStructure rw_structure;
     RWCategoryWidget *category_widget;
+    RWCategory *parent_choice;
 };
 
 #endif // MAINWINDOW_H
