@@ -4,7 +4,7 @@ I have been quietly working on a generic CSV import tool which )hopefully) requi
 
 There are several steps to using the tool:
 
-0. Download the installer from https://1drv.ms/u/s!Aoxo2LAeaH9jxxICRTfzACvX06fL
+0. Download the latest installer from https://github.com/farling42/csv2rw/releases
 
 1. Prepare data from RealmWorks
 
