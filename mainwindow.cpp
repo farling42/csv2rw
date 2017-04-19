@@ -176,6 +176,23 @@ void MainWindow::on_generateButton_clicked()
         return;
     }
 
+    // Check that if a parent has been specified, that it has a name
+    if (ui->parentGroupBox->isChecked() && parent_choice)
+    {
+        if (ui->parentTitle->text().isEmpty())
+        {
+            QMessageBox::critical(this, tr("Incomplete Parent"),
+                                  tr("The parent topic/article needs a name."));
+            return;
+        }
+        if (parent_choice == category_widget->category())
+        {
+            QMessageBox::critical(this, tr("Bad Parent Category"),
+                                  tr("The parent should be a different category to the CSV topic."));
+            return;
+        }
+    }
+
     // Prompt for output filename
     QString filename = QFileDialog::getSaveFileName(this, tr("RealmWorks Export File"), /*dir*/ QString(), /*filter*/ tr("RealmWorks Export Files (*.rwexport)"));
     if (filename.isEmpty()) return;

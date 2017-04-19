@@ -224,7 +224,7 @@
                 <item>
                  <widget class="QLabel" name="label">
                   <property name="text">
-                   <string>Category/Article Type:</string>
+                   <string>Category:</string>
                   </property>
                  </widget>
                 </item>
@@ -308,7 +308,7 @@
                       <item>
                        <widget class="QLabel" name="label_2">
                         <property name="text">
-                         <string>Category/Article Type:</string>
+                         <string>Parent Category:</string>
                         </property>
                        </widget>
                       </item>
