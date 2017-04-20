@@ -60,9 +60,9 @@ RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *col
     FieldLineEdit *prefix = new FieldLineEdit;
     FieldLineEdit *suffix = new FieldLineEdit;
 
-    connect(name,   &FieldLineEdit::modelColumnSelected, category, &RWBaseItem::setModelColumnForName);
-    connect(prefix, &FieldLineEdit::modelColumnSelected, category, &RWBaseItem::setModelColumnForPrefix);
-    connect(suffix, &FieldLineEdit::modelColumnSelected, category, &RWBaseItem::setModelColumnForSuffix);
+    connect(name,   &FieldLineEdit::modelColumnSelected, category, &RWCategory::setModelColumnForName);
+    connect(prefix, &FieldLineEdit::modelColumnSelected, category, &RWCategory::setModelColumnForPrefix);
+    connect(suffix, &FieldLineEdit::modelColumnSelected, category, &RWCategory::setModelColumnForSuffix);
 
     name->setPlaceholderText("<name>");
     name->setToolTip(category->name());
@@ -161,7 +161,7 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
         QWidget *box = new QWidget;
         box->setProperty("facet",QVariant::fromValue((void*)child));
 
-        // Every snippet is revealable (or is GM only)
+        // Every snippet is revealable
         reveal = new QRadioButton(QString());
         reveal->setAutoExclusive(false);
         reveal->setToolTip("revealed?");

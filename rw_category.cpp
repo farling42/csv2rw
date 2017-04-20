@@ -25,7 +25,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 static int topic_id = 1;
 
 RWCategory::RWCategory(QXmlStreamReader *stream, QObject *parent) :
-    RWBaseItem(stream, parent)
+    RWBaseItem(stream, parent),
+    p_model_column_for_name(-1), p_model_column_for_prefix(-1),
+    p_model_column_for_suffix(-1)
 {
 }
 
@@ -90,4 +92,54 @@ void RWCategory::writeParentStartToContents(QXmlStreamWriter *writer, const QStr
 
     // Relevant export tag on every topic
     writeExportTag(writer);
+}
+
+
+
+void RWCategory::setModelColumnForName(int column)
+{
+    qDebug() << "setModelColumnForName:" << name() << ":=" << column;
+    p_model_column_for_name = column;
+}
+
+int RWCategory::modelColumnForName() const
+{
+    return p_model_column_for_name;
+}
+
+QString RWCategory::modelValueForName(const QModelIndex &index) const
+{
+    return index.sibling(index.row(), p_model_column_for_name).data().toString();
+}
+
+void RWCategory::setModelColumnForPrefix(int column)
+{
+    qDebug() << "setModelColumnForPrefix:" << name() << ":=" << column;
+    p_model_column_for_prefix = column;
+}
+
+int RWCategory::modelColumnForPrefix() const
+{
+    return p_model_column_for_prefix;
+}
+
+QString RWCategory::modelValueForPrefix(const QModelIndex &index) const
+{
+    return index.sibling(index.row(), p_model_column_for_prefix).data().toString();
+}
+
+void RWCategory::setModelColumnForSuffix(int column)
+{
+    qDebug() << "setModelColumnForSuffix:" << name() << ":=" << column;
+    p_model_column_for_suffix = column;
+}
+
+int RWCategory::modelColumnForSuffix() const
+{
+    return p_model_column_for_suffix;
+}
+
+QString RWCategory::modelValueForSuffix(const QModelIndex &index) const
+{
+    return index.sibling(index.row(), p_model_column_for_suffix).data().toString();
 }

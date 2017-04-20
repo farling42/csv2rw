@@ -25,9 +25,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 RWBaseItem::RWBaseItem(QXmlStreamReader *reader, QObject *parent, bool ignore_for_contents) :
     QObject(parent),
-    p_gm_only(false),
-    p_model_column_for_name(-1), p_model_column_for_prefix(-1),
-    p_model_column_for_suffix(-1), p_model_column_for_text(-1),
+    p_model_column_for_text(-1),
     p_model_column_for_tag(-1),
     p_ignore_for_contents(ignore_for_contents)
 {
@@ -82,7 +80,6 @@ void RWBaseItem::writeToContents(QXmlStreamWriter *writer, const QModelIndex &in
     writer->writeStartElement(p_element_name);
 
     writer->writeAttribute(p_element_name + "_id", id());   // e.g. partition_id, not the same as <element>_id
-    writer->writeAttribute("name", modelColumnForName() >= 0 ? modelValueForName(index) : name());
 
     if (modelColumnForText() >= 0)
     {
@@ -90,8 +87,6 @@ void RWBaseItem::writeToContents(QXmlStreamWriter *writer, const QModelIndex &in
         if (!user_text.isEmpty())
             writer->writeCharacters(modelValueForText(index));
     }
-//    else if (!p_text.isEmpty())
-//        writer->writeCharacters(p_text);
 
     writeChildrenToContents(writer, index);
     writer->writeEndElement();
@@ -113,54 +108,6 @@ void RWBaseItem::writeExportTag(QXmlStreamWriter *writer)
     writer->writeEndElement();
 }
 
-
-void RWBaseItem::setModelColumnForName(int column)
-{
-    qDebug() << "setModelColumnForName:" << name() << ":=" << column;
-    p_model_column_for_name = column;
-}
-
-int RWBaseItem::modelColumnForName() const
-{
-    return p_model_column_for_name;
-}
-
-QString RWBaseItem::modelValueForName(const QModelIndex &index) const
-{
-    return index.sibling(index.row(), p_model_column_for_name).data().toString();
-}
-
-void RWBaseItem::setModelColumnForPrefix(int column)
-{
-    qDebug() << "setModelColumnForPrefix:" << name() << ":=" << column;
-    p_model_column_for_prefix = column;
-}
-
-int RWBaseItem::modelColumnForPrefix() const
-{
-    return p_model_column_for_prefix;
-}
-
-QString RWBaseItem::modelValueForPrefix(const QModelIndex &index) const
-{
-    return index.sibling(index.row(), p_model_column_for_prefix).data().toString();
-}
-
-void RWBaseItem::setModelColumnForSuffix(int column)
-{
-    qDebug() << "setModelColumnForSuffix:" << name() << ":=" << column;
-    p_model_column_for_suffix = column;
-}
-
-int RWBaseItem::modelColumnForSuffix() const
-{
-    return p_model_column_for_suffix;
-}
-
-QString RWBaseItem::modelValueForSuffix(const QModelIndex &index) const
-{
-    return index.sibling(index.row(), p_model_column_for_suffix).data().toString();
-}
 
 void RWBaseItem::setModelColumnForTag(int column)
 {
