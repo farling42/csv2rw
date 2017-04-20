@@ -39,6 +39,7 @@ public Q_SLOTS:
     void loadFile(QIODevice*);
     void writeExportFile(QIODevice*, RWCategory *category, QAbstractItemModel *model,
                          RWCategory *parent_category,
+                         bool parent_revealed,
                          const QString &parent_title,
                          const QString &parent_prefix,
                          const QString &parent_suffix);

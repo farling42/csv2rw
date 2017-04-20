@@ -156,6 +156,7 @@ RWBaseItem *RealmWorksStructure::read_element(QXmlStreamReader *reader, RWBaseIt
 
 void RealmWorksStructure::writeExportFile(QIODevice *device, RWCategory *category, QAbstractItemModel *model,
                                           RWCategory *parent_category,
+                                          bool parent_revealed,
                                           const QString &parent_title,
                                           const QString &parent_prefix,
                                           const QString &parent_suffix)
@@ -210,7 +211,7 @@ void RealmWorksStructure::writeExportFile(QIODevice *device, RWCategory *categor
         {
             if (parent_category)
             {
-                parent_category->writeParentStartToContents(writer, parent_title, parent_prefix, parent_suffix);
+                parent_category->writeParentStartToContents(writer, parent_revealed, parent_title, parent_prefix, parent_suffix);
             }
             int maxrow = model->rowCount();
             for (int row = 0 ; row < maxrow ; row++)

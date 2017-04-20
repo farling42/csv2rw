@@ -23,7 +23,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QMetaEnum>
 #include "rw_domain.h"
 
-static QMetaEnum snip_enum = QMetaEnum::fromType<RWFacet::SnippetType>();
+static QMetaEnum snip_type_enum  = QMetaEnum::fromType<RWFacet::SnippetType>();
+static QMetaEnum snip_style_enum = QMetaEnum::fromType<RWFacet::SnippetStyle>();
 
 RWFacet::RWFacet(QXmlStreamReader *stream, QObject *parent) :
     RWBaseItem(stream, parent),
@@ -43,7 +44,7 @@ RWFacet::RWFacet(QXmlStreamReader *stream, QObject *parent) :
     {
         QString ftype = attributes().value("type").toString();
         bool ok = true;
-        p_snippet_type = (SnippetType) snip_enum.keyToValue(qPrintable(ftype), &ok);
+        p_snippet_type = (SnippetType) snip_type_enum.keyToValue(qPrintable(ftype), &ok);
         if (!ok) qWarning() << "Unknown SNIPPET type" << ftype;
     }
     else
@@ -57,13 +58,24 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
 
     writer->writeStartElement("snippet");
     {
-        writer->writeAttribute("facet_id", id());
+        if (!id().isEmpty()) writer->writeAttribute("facet_id", id());
         if (isRevealed()) writer->writeAttribute("is_revealed", "true");
-        writer->writeAttribute("type", snip_enum.valueToKey(p_snippet_type));
+        writer->writeAttribute("type", snip_type_enum.valueToKey(p_snippet_type));
 
         // Maybe an ANNOTATION or CONTENTS (before TAG_ASSIGN)
         if (modelColumnForText() >= 0)
         {
+#if 0
+            if (id().isEmpty() && p_snippet_type == Labeled_Text && !p_label_text.isEmpty())
+            {
+                // For locally added snippets of the Labeled_Text variety
+                writer->writeAttribute("label", p_label_text);
+            }
+            if (p_snippet_style != Normal)
+            {
+                writer->writeAttribute("style", snip_type_enum.valueToKey(p_snippet_style));
+            }
+#endif
             const QString user_text = modelValueForText(index);
             if (!user_text.isEmpty())
             {

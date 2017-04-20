@@ -29,7 +29,7 @@ RWPartition::RWPartition(QXmlStreamReader *stream, QObject *parent) :
 void RWPartition::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index)
 {
     writer->writeStartElement("section");
-    writer->writeAttribute("partition_id", id());
+    if (!id().isEmpty()) writer->writeAttribute("partition_id", id());
 
     // writeChildren has to be done in 2 passes
     //writeChildrenToContents(writer, index);

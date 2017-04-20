@@ -79,7 +79,7 @@ void RWBaseItem::writeToContents(QXmlStreamWriter *writer, const QModelIndex &in
 
     writer->writeStartElement(p_element_name);
 
-    writer->writeAttribute(p_element_name + "_id", id());   // e.g. partition_id, not the same as <element>_id
+    if (!id().isEmpty()) writer->writeAttribute(p_element_name + "_id", id());   // e.g. partition_id, not the same as <element>_id
 
     if (modelColumnForText() >= 0)
     {

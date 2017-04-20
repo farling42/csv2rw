@@ -59,11 +59,11 @@ void RWCategory::writeToContents(QXmlStreamWriter *writer, const QModelIndex &in
     writer->writeStartElement("topic");
     {
         writer->writeAttribute("topic_id", QString("topic_%1").arg(topic_id++));
-        writer->writeAttribute("category_id", id());
+        if (!id().isEmpty()) writer->writeAttribute("category_id", id());
         writer->writeAttribute("public_name", modelValueForName(index));
         if (modelColumnForPrefix() >= 0) writer->writeAttribute("prefix", modelValueForPrefix(index));
         if (modelColumnForSuffix() >= 0) writer->writeAttribute("suffix", modelValueForSuffix(index));
-        //if (isRevealed()) writer->writeAttribute("is_revealed", "true");
+        if (isRevealed()) writer->writeAttribute("is_revealed", "true");
 
         writeChildrenToContents(writer, index);
 
@@ -77,15 +77,15 @@ void RWCategory::writeToContents(QXmlStreamWriter *writer, const QModelIndex &in
 }
 
 
-void RWCategory::writeParentStartToContents(QXmlStreamWriter *writer, const QString &title, const QString &prefix, const QString &suffix)
+void RWCategory::writeParentStartToContents(QXmlStreamWriter *writer, bool revealed, const QString &title, const QString &prefix, const QString &suffix)
 {
     writer->writeStartElement("topic");
     writer->writeAttribute("topic_id", QString("topic_%1").arg(topic_id++));
     writer->writeAttribute("public_name", title);
-    writer->writeAttribute("category_id", id());
+    if (!id().isEmpty()) writer->writeAttribute("category_id", id());
     if (!prefix.isEmpty()) writer->writeAttribute("prefix", prefix);
     if (!suffix.isEmpty()) writer->writeAttribute("suffix", suffix);
-    //if (isRevealed()) writer->writeAttribute("is_revealed", "true");
+    if (revealed) writer->writeAttribute("is_revealed", "true");
 
     // Write out the basic structure without any information
     writeChildrenToContents(writer, QModelIndex());

@@ -36,9 +36,10 @@ public:
 
     virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index);
     virtual void writeParentStartToContents(QXmlStreamWriter*,
-                                            const QString &title = QString(),
-                                            const QString &prefix = QString(),
-                                            const QString &suffix = QString());
+                                            bool revealed,
+                                            const QString &title,
+                                            const QString &prefix,
+                                            const QString &suffix);
     virtual void postLoad();
 
     virtual bool canBeGenerated() const;

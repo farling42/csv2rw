@@ -56,6 +56,7 @@ RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *col
     layout->setContentsMargins(0,0,0,0);
 
     // Start with the title (+ prefix + suffix)
+    QRadioButton *reveal = new QRadioButton(QString());
     FieldLineEdit *name = new FieldLineEdit;
     FieldLineEdit *prefix = new FieldLineEdit;
     FieldLineEdit *suffix = new FieldLineEdit;
@@ -63,6 +64,11 @@ RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *col
     connect(name,   &FieldLineEdit::modelColumnSelected, category, &RWCategory::setModelColumnForName);
     connect(prefix, &FieldLineEdit::modelColumnSelected, category, &RWCategory::setModelColumnForPrefix);
     connect(suffix, &FieldLineEdit::modelColumnSelected, category, &RWCategory::setModelColumnForSuffix);
+
+    // Should the category be marked as revealed
+    reveal->setAutoExclusive(false);
+    reveal->setToolTip("revealed?");
+    connect(reveal, &QRadioButton::toggled, category, &RWCategory::setIsRevealed);
 
     name->setPlaceholderText("<name>");
     name->setToolTip(category->name());
@@ -80,6 +86,7 @@ RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *col
         suffix->setText(column_name(columns, category->modelColumnForSuffix()));
 
     QBoxLayout *title = new QHBoxLayout;
+    title->addWidget(reveal, 0);
     title->addWidget(name, 2);
     title->addWidget(prefix, 1);
     title->addWidget(suffix, 1);

@@ -26,6 +26,8 @@ class QXmlStreamWriter;
 class RWFacet : public RWBaseItem
 {
     Q_OBJECT
+    Q_PROPERTY(QString labelText READ labelText WRITE setLabelText)
+
 public:
     // SnippetType values are taken from the XSD v2
     enum SnippetType { Multi_Line, Labeled_Text, Numeric, Date_Game, Date_Range,
@@ -42,10 +44,15 @@ public:
 
     SnippetType  snippetType()  const { return p_snippet_type;  }
     SnippetStyle snippetStyle() const { return p_snippet_style; }
+    QString labelText() const { return p_label_text; }
+
+public Q_SLOTS:
+    void setLabelText(const QString &label) { p_label_text = label; }
 
 private:
     SnippetType p_snippet_type;
     SnippetStyle p_snippet_style;
+    QString p_label_text;
 };
 
 #endif // RWFACET_H

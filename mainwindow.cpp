@@ -204,6 +204,7 @@ void MainWindow::on_generateButton_clicked()
     }
     rw_structure.writeExportFile(&file, category_widget->category(), csv_full_model,
                                  (ui->parentGroupBox->isChecked() && parent_choice) ? parent_choice : 0,
+                                 ui->parentRevealed->isChecked(),
                                  ui->parentTitle->text(), ui->parentPrefix->text(), ui->parentSuffix->text());
     file.close();
 }
