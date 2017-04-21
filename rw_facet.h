@@ -45,11 +45,13 @@ public:
     SnippetType  snippetType()  const { return p_snippet_type;  }
     SnippetStyle snippetStyle() const { return p_snippet_style; }
     QString labelText() const { return p_label_text; }
+    DataField &tags() { return p_tags; }
 
 public Q_SLOTS:
     void setLabelText(const QString &label) { p_label_text = label; }
 
 private:
+    DataField p_tags;
     SnippetType p_snippet_type;
     SnippetStyle p_snippet_style;
     QString p_label_text;

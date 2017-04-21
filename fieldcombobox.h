@@ -20,22 +20,28 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <QComboBox>
+#include "datafield.h"
+class RWDomain;
 
 class FieldComboBox : public QComboBox
 {
     Q_OBJECT
 public:
-    FieldComboBox(QWidget *parent = 0);
-signals:
-    void modelColumnSelected(int row);
+    FieldComboBox(DataField &datafield, RWDomain *domain, QWidget *parent = 0);
 
 public Q_SLOTS:
-    void setValue(const QString&);
+    void setIndexString(const QString&);
 
 protected:
     virtual void dragEnterEvent(QDragEnterEvent *);
     virtual void dropEvent(QDropEvent *e);
     virtual void mousePressEvent(QMouseEvent *event);
+private slots:
+    void text_changed(const QString &value);
+private:
+    RWDomain *p_domain;
+    DataField &p_data;
+    void set_domain_list();
 };
 
 

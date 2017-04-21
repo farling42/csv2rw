@@ -20,16 +20,13 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <QLineEdit>
+#include "datafield.h"
 
 class FieldLineEdit : public QLineEdit
 {
     Q_OBJECT
 public:
-    FieldLineEdit(QWidget *parent = 0);
-
-signals:
-    void modelColumnSelected(int row);
-    void fixedTextChanged(const QString&);
+    FieldLineEdit(DataField &datafield, QWidget *parent = 0);
 
 protected:
     virtual void dragEnterEvent(QDragEnterEvent *);
@@ -41,7 +38,8 @@ private slots:
 
 private:
     enum DataMode { Mode_Empty, Mode_Index, Mode_Fixed };
-    DataMode p_mode;
+    DataMode   p_mode;
+    DataField &p_data;
     void setMode(DataMode);
 };
 

@@ -27,9 +27,6 @@ class RWPartition;
 class RWCategory : public RWBaseItem
 {
     Q_OBJECT
-    Q_PROPERTY(int nameColumn   READ modelColumnForName   WRITE setModelColumnForName)
-    Q_PROPERTY(int prefixColumn READ modelColumnForPrefix WRITE setModelColumnForPrefix)
-    Q_PROPERTY(int suffixColumn READ modelColumnForSuffix WRITE setModelColumnForSuffix)
 
 public:
     RWCategory(QXmlStreamReader *stream, QObject *parent = 0);
@@ -44,31 +41,15 @@ public:
 
     virtual bool canBeGenerated() const;
 
-public Q_SLOTS:
-    void setModelColumnForName(int column);
-    void setModelColumnForPrefix(int column);
-    void setModelColumnForSuffix(int column);
-    void setNameFixedText(const QString &text) { p_fixed_name = text; }
-    void setPrefixFixedText(const QString &text) { p_fixed_prefix = text; }
-    void setSuffixFixedText(const QString &text) { p_fixed_suffix = text; }
-
 public:
-    int  modelColumnForName() const;
-    QString modelValueForName(const QModelIndex &index) const;
-
-    int  modelColumnForPrefix() const;
-    QString modelValueForPrefix(const QModelIndex &index) const;
-
-    int  modelColumnForSuffix() const;
-    QString modelValueForSuffix(const QModelIndex &index) const;
+    DataField &namefield()   { return p_name; }
+    DataField &prefix() { return p_prefix; }
+    DataField &suffix() { return p_suffix; }
 
 private:
-    int p_model_column_for_name;
-    int p_model_column_for_prefix;
-    int p_model_column_for_suffix;
-    QString p_fixed_name;
-    QString p_fixed_prefix;
-    QString p_fixed_suffix;
+    DataField p_name;
+    DataField p_prefix;
+    DataField p_suffix;
 };
 
 #endif // RWCATEGORY_H

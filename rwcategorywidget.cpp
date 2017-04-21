@@ -57,17 +57,9 @@ RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *col
 
     // Start with the title (+ prefix + suffix)
     QRadioButton *reveal = new QRadioButton(QString());
-    FieldLineEdit *name = new FieldLineEdit;
-    FieldLineEdit *prefix = new FieldLineEdit;
-    FieldLineEdit *suffix = new FieldLineEdit;
-
-    connect(name,   &FieldLineEdit::modelColumnSelected, category, &RWCategory::setModelColumnForName);
-    connect(prefix, &FieldLineEdit::modelColumnSelected, category, &RWCategory::setModelColumnForPrefix);
-    connect(suffix, &FieldLineEdit::modelColumnSelected, category, &RWCategory::setModelColumnForSuffix);
-
-    connect(name,   &FieldLineEdit::fixedTextChanged, category, &RWCategory::setNameFixedText);
-    connect(prefix, &FieldLineEdit::fixedTextChanged, category, &RWCategory::setPrefixFixedText);
-    connect(suffix, &FieldLineEdit::fixedTextChanged, category, &RWCategory::setSuffixFixedText);
+    FieldLineEdit *name = new FieldLineEdit(category->namefield());
+    FieldLineEdit *prefix = new FieldLineEdit(category->prefix());
+    FieldLineEdit *suffix = new FieldLineEdit(category->suffix());
 
     // Should the category be marked as revealed
     reveal->setAutoExclusive(false);
@@ -76,18 +68,18 @@ RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *col
 
     name->setPlaceholderText("<name>");
     name->setToolTip(category->name());
-    if (category->modelColumnForName() >= 0)
-        name->setText(column_name(columns, category->modelColumnForName()));
+    if (category->namefield().modelColumn() >= 0)
+        name->setText(column_name(columns, category->namefield().modelColumn()));
 
     prefix->setPlaceholderText("<prefix>");
     prefix->setToolTip("prefix");
-    if (category->modelColumnForPrefix() >= 0)
-        prefix->setText(column_name(columns, category->modelColumnForPrefix()));
+    if (category->prefix().modelColumn() >= 0)
+        prefix->setText(column_name(columns, category->prefix().modelColumn()));
 
     suffix->setPlaceholderText("<suffix>");
     suffix->setToolTip("suffix");
-    if (category->modelColumnForSuffix() >= 0)
-        suffix->setText(column_name(columns, category->modelColumnForSuffix()));
+    if (category->suffix().modelColumn() >= 0)
+        suffix->setText(column_name(columns, category->suffix().modelColumn()));
 
     QBoxLayout *title = new QHBoxLayout;
     title->addWidget(reveal, 0);
@@ -118,9 +110,7 @@ void RWCategoryWidget::do_insert()
     if (layout == 0) return;
 
     // Add an additional contents field
-    FieldLineEdit *edit = new FieldLineEdit;
-    connect(edit, &FieldLineEdit::modelColumnSelected, p_category, &RWBaseItem::setModelColumnForText);
-    connect(edit, &FieldLineEdit::fixedTextChanged,    p_category, &RWCategory::setFixedText);
+    FieldLineEdit *edit = new FieldLineEdit(p_category->text());
     edit->setToolTip("contents");
     edit->setPlaceholderText("<generic>");
     //edit->setText(column_name(columns, p_category->modelColumnForText()));
@@ -191,22 +181,12 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
         // Maybe a tag selector
         if (child->snippetType() == RWFacet::Hybrid_Tag)
         {
-            combo = new FieldComboBox;
-            connect (combo, &FieldComboBox::modelColumnSelected, child, &RWBaseItem::setModelColumnForTag);
-            QString domain_id = child->attributes().value("domain_id").toString();
-            combo->setToolTip("Domain");
-            if (!domain_id.isEmpty())
-            {
-                RWDomain *domain = RWDomain::getDomainById(domain_id);
-                if (domain) combo->setToolTip(domain->name());
-            }
-            if (child->modelColumnForTag() >= 0)
-                combo->setValue(column_name(columns, child->modelColumnForTag()));
+            combo = new FieldComboBox(child->tags(), RWDomain::getDomainById(child->attributes().value("domain_id").toString()));
+            if (child->tags().modelColumn() >= 0)
+                combo->setIndexString(column_name(columns, child->tags().modelColumn()));
         }
 
-        edit = new FieldLineEdit;
-        connect(edit, &FieldLineEdit::modelColumnSelected, child, &RWBaseItem::setModelColumnForText);
-        connect(edit, &FieldLineEdit::fixedTextChanged,    child, &RWCategory::setFixedText);
+        edit = new FieldLineEdit(child->text());
         edit->setToolTip(child->uuid());
         //edit->setClearButtonEnabled(true);    // TODO - enable this whilst the field is read-only
         if (child->snippetType() == RWFacet::Hybrid_Tag)
@@ -217,8 +197,8 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
         {
             edit->setPlaceholderText(child->name());
         }
-        if (child->modelColumnForText() >= 0)
-            edit->setText(column_name(columns, child->modelColumnForText()));
+        if (child->text().modelColumn() >= 0)
+            edit->setText(column_name(columns, child->text().modelColumn()));
 
         // Create a row containing all these widgets
         QHBoxLayout *boxl = new QHBoxLayout;
@@ -239,14 +219,12 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
     reveal->setChecked(partition->isRevealed());
     connect(reveal, &QRadioButton::toggled, partition, &RWFacet::setIsRevealed);
 
-    FieldLineEdit *edit = new FieldLineEdit;
-    connect(edit, &FieldLineEdit::modelColumnSelected, partition, &RWBaseItem::setModelColumnForText);
-    connect(edit, &FieldLineEdit::fixedTextChanged,    partition, &RWCategory::setFixedText);
+    FieldLineEdit *edit = new FieldLineEdit(partition->text());
     edit->setToolTip("contents");
     RWBaseItem *purpose = partition->childElement("purpose");
-    edit->setPlaceholderText(purpose ? purpose->fixedText() : "<purpose>");
-    if (partition->modelColumnForText() >= 0)
-        edit->setText(column_name(columns, partition->modelColumnForText()));
+    edit->setPlaceholderText(purpose ? purpose->text().fixedText() : "<purpose>");
+    if (partition->text().modelColumn() >= 0)
+        edit->setText(column_name(columns, partition->text().modelColumn()));
 
     QHBoxLayout *textlayout = new QHBoxLayout;
     textlayout->addWidget(reveal);

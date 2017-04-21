@@ -24,14 +24,15 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QMimeData>
 #include <QMouseEvent>
 
-FieldLineEdit::FieldLineEdit(QWidget *parent) :
+FieldLineEdit::FieldLineEdit(DataField &datafield, QWidget *parent) :
     QLineEdit(parent),
-    p_mode(Mode_Index)  // we are going to call setMode
+    p_mode(Mode_Index),  // we are going to call setMode
+    p_data(datafield)
 {
     setAcceptDrops(true);
     setContextMenuPolicy(Qt::NoContextMenu);
     setMode(Mode_Empty);
-    connect (this, &QLineEdit::textEdited, this, &FieldLineEdit::text_changed);
+    connect(this, &QLineEdit::textEdited, this, &FieldLineEdit::text_changed);
 }
 
 void FieldLineEdit::dragEnterEvent(QDragEnterEvent *event)
@@ -60,11 +61,11 @@ void FieldLineEdit::dropEvent(QDropEvent *event)
         stream >> row >> col >> map;
         if (map.contains(Qt::DisplayRole))
         {
+            p_data.setModelColumn(row);
             setText(map.value(Qt::DisplayRole).toString());
             setMode(Mode_Index);
             //qDebug() << "dropEvent for row" << row << ", col" << col << ":=" << text();
             // Drag from list of column names, so transpose row number to equate to column number
-            emit modelColumnSelected(row);
         }
     }
 }
@@ -73,27 +74,12 @@ void FieldLineEdit::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::RightButton)
     {
+        p_data.setModelColumn(-1);
         setText(QString());
         setMode(Mode_Empty);
-        emit modelColumnSelected(-1);
     }
-#if 0
-    qDebug() << "FieldLineEdit::mousePressEvent:" << event;
-    Q_UNUSED(event)
-    if (text().isEmpty()) return;
-
-    QMimeData *data = new QMimeData;
-    data->setText(text());
-
-    QDrag *drag = new QDrag(this);
-    drag->setMimeData(data);
-    Qt::DropAction drop_action = drag->exec(Qt::MoveAction);
-    qDebug() << "FieldLineEdit::mousePressEvent: drag result =" << drop_action;
-    if (drop_action == Qt::MoveAction)
-    {
-        setText("");
-    }
-#endif
+    else
+        QLineEdit::mousePressEvent(event);
 }
 
 void FieldLineEdit::setMode(FieldLineEdit::DataMode mode)
@@ -107,6 +93,7 @@ void FieldLineEdit::setMode(FieldLineEdit::DataMode mode)
 
 void FieldLineEdit::text_changed(const QString &value)
 {
+    qDebug() << "FieldLineEdit::text_changed:" << value;
     switch (p_mode)
     {
     case Mode_Index:
@@ -118,5 +105,5 @@ void FieldLineEdit::text_changed(const QString &value)
         if (value.isEmpty()) setMode(Mode_Empty);
         break;
     }
-    emit fixedTextChanged(value);
+    p_data.setFixedText(value);
 }

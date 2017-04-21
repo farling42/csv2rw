@@ -42,7 +42,7 @@ void RWPartition::writeToContents(QXmlStreamWriter *writer, const QModelIndex &i
     }
 
     // It may have some text directly on it, not stored in a facet
-    const QString user_text = modelValueForText(index);
+    const QString user_text = text().valueString(index);
     if (!user_text.isEmpty())
     {
         bool bold = false;

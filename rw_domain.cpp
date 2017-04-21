@@ -33,6 +33,7 @@ RWDomain::RWDomain(QXmlStreamReader *stream, QObject *parent) :
 
 RWDomain *RWDomain::getDomainById(const QString &domain_id)
 {
+    if (domain_id.isEmpty()) return 0;
     return all_domains_by_id.value(domain_id);
 }
 
@@ -49,7 +50,7 @@ QStringList RWDomain::tagNames() const
     QList<RWBaseItem*> tags = childItems<RWBaseItem*>();
     foreach (RWBaseItem *tag, tags)
     {
-        if (tag->elementName().startsWith("tag"))
+        if (tag->structureElement().startsWith("tag"))
         {
             result.append(tag->name());
         }
@@ -62,7 +63,8 @@ QString RWDomain::tagId(const QString &tag_name) const
     QList<RWBaseItem*> tags = childItems<RWBaseItem*>();
     foreach (RWBaseItem *tag, tags)
     {
-        if (tag->elementName().startsWith("tag") && tag->name().compare(tag_name, Qt::CaseInsensitive) == 0)
+        if (tag->structureElement().startsWith("tag") &&
+                tag->name().compare(tag_name, Qt::CaseInsensitive) == 0)
         {
             return tag->id();
         }

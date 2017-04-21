@@ -20,16 +20,36 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <QDebug>
 #include <QDragEnterEvent>
+#include <QLineEdit>
 #include <QMimeData>
+#include "rw_domain.h"
 
-FieldComboBox::FieldComboBox(QWidget *parent) : QComboBox(parent)
+FieldComboBox::FieldComboBox(DataField &datafield, RWDomain *domain, QWidget *parent) :
+    QComboBox(parent),
+    p_domain(domain),
+    p_data(datafield)
 {
     setAcceptDrops(true);
-    setEditable(false);
     setContextMenuPolicy(Qt::NoContextMenu);
+    setToolTip(domain ? domain->name() : "Domain");
+    setInsertPolicy(NoInsert);
+    set_domain_list();
+    connect(this, &currentTextChanged, this, &text_changed);
 }
 
-void FieldComboBox::setValue(const QString &value)
+
+void FieldComboBox::set_domain_list()
+{
+    QStringList items;
+    if (p_domain) items = p_domain->tagNames();
+    items.prepend(QString());
+
+    clear();
+    addItems(items);
+    setCurrentIndex(0);
+}
+
+void FieldComboBox::setIndexString(const QString &value)
 {
     clear();
     addItem(value);
@@ -38,7 +58,10 @@ void FieldComboBox::setValue(const QString &value)
 
 void FieldComboBox::dragEnterEvent(QDragEnterEvent *event)
 {
-    event->acceptProposedAction();
+    if (event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist"))
+    {
+        event->acceptProposedAction();
+    }
 }
 
 void FieldComboBox::dropEvent(QDropEvent *event)
@@ -52,10 +75,10 @@ void FieldComboBox::dropEvent(QDropEvent *event)
         stream >> row >> col >> map;
         if (map.contains(Qt::DisplayRole))
         {
-            setValue(map.value(Qt::DisplayRole).toString());
-            //qDebug() << "dropEvent for row" << row << ", col" << col << ":=" << text();
+            p_data.setModelColumn(row);
+            setIndexString(map.value(Qt::DisplayRole).toString());
+            //qDebug() << "dropEvent for row" << row << ", col" << col << ":=" << currentText();
             // Drag from list of column names, so transpose row number to equate to column number
-            emit modelColumnSelected(row);
         }
     }
 }
@@ -64,7 +87,22 @@ void FieldComboBox::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::RightButton)
     {
-        setValue(QString());
-        emit modelColumnSelected(-1);
+        if (p_data.modelColumn() >= 0)
+        {
+            p_data.setModelColumn(-1);
+            clearEditText();
+            set_domain_list();
+        }
+    }
+    else
+        QComboBox::mousePressEvent(event);
+}
+
+
+void FieldComboBox::text_changed(const QString &value)
+{
+    if (p_data.modelColumn() < 0)
+    {
+        p_data.setFixedText(value);
     }
 }

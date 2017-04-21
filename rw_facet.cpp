@@ -63,7 +63,7 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
         writer->writeAttribute("type", snip_type_enum.valueToKey(p_snippet_type));
 
         // Maybe an ANNOTATION or CONTENTS (before TAG_ASSIGN)
-        const QString user_text = modelValueForText(index);
+        const QString user_text = text().valueString(index);
         if (!user_text.isEmpty())
         {
 #if 0
@@ -104,33 +104,28 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
         }
 
         // Maybe one or more TAG_ASSIGN (to be entered AFTER the contents/annotation)
-        if (modelColumnForTag() >= 0)
+        QString tag_names = p_tags.valueString(index);
+        if (!tag_names.isEmpty())
         {
             // Find the domain to use
             QString domain_id = attributes().value("domain_id").toString();
             RWDomain *domain = RWDomain::getDomainById(domain_id);
             if (domain)
             {
-                QString tag_names = modelValueForTag(index);
-                if (!tag_names.isEmpty())
+                foreach (QString tag_name, tag_names.split(","))
                 {
-                    foreach (QString tag_name, tag_names.split(","))
+                    QString tag_id = domain->tagId(tag_name.trimmed());
+                    if (!tag_id.isEmpty())
                     {
-                        QString tag_id = domain->tagId(tag_name.trimmed());
-                        if (!tag_id.isEmpty())
-                        {
-                            writer->writeStartElement("tag_assign");
-                            writer->writeAttribute("tag_id", tag_id);
-                            writer->writeAttribute("type","Indirect");
-                            writer->writeAttribute("is_auto_assign", "true");
-                            writer->writeEndElement();
-                        }
-                        else
-                            qWarning() << "No TAG defined for" << tag_name.trimmed() << "in DOMAIN" << domain->name();
+                        writer->writeStartElement("tag_assign");
+                        writer->writeAttribute("tag_id", tag_id);
+                        writer->writeAttribute("type","Indirect");
+                        writer->writeAttribute("is_auto_assign", "true");
+                        writer->writeEndElement();
                     }
+                    else
+                        qWarning() << "No TAG defined for" << tag_name.trimmed() << "in DOMAIN" << domain->name();
                 }
-                else
-                    qWarning() << "CSV has no value for row" << index.row() << "on FACET" << id();
             }
             else if (!domain_id.isEmpty())
                 qWarning() << "DOMAIN not found for" << domain_id << "on FACET" << id();

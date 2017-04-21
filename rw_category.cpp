@@ -25,9 +25,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 static int topic_id = 1;
 
 RWCategory::RWCategory(QXmlStreamReader *stream, QObject *parent) :
-    RWBaseItem(stream, parent),
-    p_model_column_for_name(-1), p_model_column_for_prefix(-1),
-    p_model_column_for_suffix(-1)
+    RWBaseItem(stream, parent)
 {
 }
 
@@ -37,7 +35,7 @@ void RWCategory::postLoad()
     QList<RWBaseItem*> child_items = childItems<RWBaseItem*>();
     foreach (RWBaseItem *child, child_items)
     {
-        if (child->elementName() == "description" || child->elementName() == "summary")
+        if (child->structureElement() == "description" || child->structureElement() == "summary")
         {
             child->setIgnoreForContents(true);
         }
@@ -50,7 +48,7 @@ void RWCategory::postLoad()
  */
 bool RWCategory::canBeGenerated() const
 {
-    return modelColumnForName() >= 0 &&
+    return p_name.modelColumn() >= 0 &&
             RWBaseItem::canBeGenerated();
 }
 
@@ -60,9 +58,11 @@ void RWCategory::writeToContents(QXmlStreamWriter *writer, const QModelIndex &in
     {
         writer->writeAttribute("topic_id", QString("topic_%1").arg(topic_id++));
         if (!id().isEmpty()) writer->writeAttribute("category_id", id());
-        writer->writeAttribute("public_name", modelValueForName(index));
-        if (!modelValueForPrefix(index).isEmpty()) writer->writeAttribute("prefix", modelValueForPrefix(index));
-        if (!modelValueForSuffix(index).isEmpty()) writer->writeAttribute("suffix", modelValueForSuffix(index));
+        writer->writeAttribute("public_name", p_name.valueString(index));
+        QString prefix = p_prefix.valueString(index);
+        if (!prefix.isEmpty()) writer->writeAttribute("prefix", prefix);
+        QString suffix = p_suffix.valueString(index);
+        if (!suffix.isEmpty()) writer->writeAttribute("suffix", suffix);
         if (isRevealed()) writer->writeAttribute("is_revealed", "true");
 
         writeChildrenToContents(writer, index);
@@ -71,7 +71,7 @@ void RWCategory::writeToContents(QXmlStreamWriter *writer, const QModelIndex &in
         writeExportTag(writer);
 
         // No actual TEXT for this element (only children)
-        //if (modelValueForText(index) >= 0) writer->writeCharacters(modelValueForText(index));
+        //if (!text().valueString(index).isEmpty()) writer->writeCharacters(text().valueString(index));
     }
     writer->writeEndElement();  // </topic>
 }
@@ -92,63 +92,4 @@ void RWCategory::writeParentStartToContents(QXmlStreamWriter *writer, bool revea
 
     // Relevant export tag on every topic
     writeExportTag(writer);
-}
-
-
-
-void RWCategory::setModelColumnForName(int column)
-{
-    //qDebug() << "setModelColumnForName:" << name() << ":=" << column;
-    p_model_column_for_name = column;
-}
-
-int RWCategory::modelColumnForName() const
-{
-    return p_model_column_for_name;
-}
-
-QString RWCategory::modelValueForName(const QModelIndex &index) const
-{
-    if (p_model_column_for_name >= 0)
-        return index.sibling(index.row(), p_model_column_for_name).data().toString();
-    else
-        return p_fixed_name;
-}
-
-void RWCategory::setModelColumnForPrefix(int column)
-{
-    //qDebug() << "setModelColumnForPrefix:" << name() << ":=" << column;
-    p_model_column_for_prefix = column;
-}
-
-int RWCategory::modelColumnForPrefix() const
-{
-    return p_model_column_for_prefix;
-}
-
-QString RWCategory::modelValueForPrefix(const QModelIndex &index) const
-{
-    if (p_model_column_for_prefix >= 0)
-        return index.sibling(index.row(), p_model_column_for_prefix).data().toString();
-    else
-        return p_fixed_prefix;
-}
-
-void RWCategory::setModelColumnForSuffix(int column)
-{
-    //qDebug() << "setModelColumnForSuffix:" << name() << ":=" << column;
-    p_model_column_for_suffix = column;
-}
-
-int RWCategory::modelColumnForSuffix() const
-{
-    return p_model_column_for_suffix;
-}
-
-QString RWCategory::modelValueForSuffix(const QModelIndex &index) const
-{
-    if (p_model_column_for_suffix >= 0)
-        return index.sibling(index.row(), p_model_column_for_suffix).data().toString();
-    else
-        return p_fixed_suffix;
 }

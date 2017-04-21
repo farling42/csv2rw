@@ -38,7 +38,8 @@ HEADERS  += mainwindow.h \
     rwcategorywidget.h \
     fieldlineedit.h \
     rw_structure.h \
-    fieldcombobox.h
+    fieldcombobox.h \
+    datafield.h
 
 FORMS    += mainwindow.ui
 
