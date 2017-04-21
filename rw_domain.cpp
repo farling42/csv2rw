@@ -26,6 +26,7 @@ static QMap<QString,RWDomain*> all_domains_by_name;
 RWDomain::RWDomain(QXmlStreamReader *stream, QObject *parent) :
     RWBaseItem(stream, parent)
 {
+    setTextVisibleInStructure(false);
     all_domains_by_id.insert(id(), this);
     all_domains_by_name.insert(name(), this);
 }

@@ -78,6 +78,7 @@ public:
 protected:
     virtual void writeChildrenToStructure(QXmlStreamWriter *writer);
     virtual void writeChildrenToContents(QXmlStreamWriter *writer, const QModelIndex &index);
+    void setTextVisibleInStructure(bool flag) { p_text_in_structure = flag; }
 
 private:
     QXmlStreamAttributes p_attributes;
@@ -91,6 +92,7 @@ private:
     QString p_uuid;       // global_uuid or original_uuid
     QString p_signature;  // only when global == false
     bool p_ignore_for_contents;
+    bool p_text_in_structure;
     friend QDebug operator<<(QDebug stream, const RWBaseItem&);
 };
 

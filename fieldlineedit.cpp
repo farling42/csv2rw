@@ -93,7 +93,7 @@ void FieldLineEdit::setMode(FieldLineEdit::DataMode mode)
 
 void FieldLineEdit::text_changed(const QString &value)
 {
-    qDebug() << "FieldLineEdit::text_changed:" << value;
+    //qDebug() << "FieldLineEdit::text_changed:" << value;
     switch (p_mode)
     {
     case Mode_Index:

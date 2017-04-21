@@ -25,7 +25,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 RWBaseItem::RWBaseItem(QXmlStreamReader *reader, QObject *parent, bool ignore_for_contents) :
     QObject(parent),
-    p_ignore_for_contents(ignore_for_contents)
+    p_ignore_for_contents(ignore_for_contents),
+    p_text_in_structure(true)
 {
     // Extract common data from this XML element
     p_structure_element = reader->name().toString();
@@ -57,8 +58,11 @@ void RWBaseItem::writeToStructure(QXmlStreamWriter *writer)
     writer->writeStartElement(p_global ? p_structure_element + "_global" : p_structure_element);
     writer->writeAttributes(p_attributes);
     writeChildrenToStructure(writer);
-    QString user_text = p_text.valueString();
-    if (!user_text.isEmpty()) writer->writeCharacters(user_text);
+    if (p_text_in_structure)
+    {
+        QString user_text = p_text.valueString();
+        if (!user_text.isEmpty()) writer->writeCharacters(user_text);
+    }
     writer->writeEndElement();
 }
 
@@ -80,8 +84,8 @@ void RWBaseItem::writeToContents(QXmlStreamWriter *writer, const QModelIndex &in
 
     if (!id().isEmpty()) writer->writeAttribute(p_structure_element + "_id", id());   // e.g. partition_id, not the same as <element>_id
 
-    QString user_text = p_text.valueString(index);
-    if (!user_text.isEmpty()) writer->writeCharacters(user_text);
+    //QString user_text = p_text.valueString(index);
+    //if (!user_text.isEmpty()) writer->writeCharacters(user_text);
     writeChildrenToContents(writer, index);
     writer->writeEndElement();
 }

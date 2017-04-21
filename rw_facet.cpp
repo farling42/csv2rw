@@ -39,6 +39,8 @@ RWFacet::RWFacet(QXmlStreamReader *stream, QObject *parent) :
     }
     const QXmlStreamAttributes attr = attributes();
 
+    setTextVisibleInStructure(false);
+
     // Decode the 'type' attribute (if present)
     if (attr.hasAttribute("type"))
     {

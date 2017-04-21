@@ -23,7 +23,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 RWPartition::RWPartition(QXmlStreamReader *stream, QObject *parent) :
     RWBaseItem(stream, parent)
 {
-
+    setTextVisibleInStructure(false);
 }
 
 void RWPartition::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index)
