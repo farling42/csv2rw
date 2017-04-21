@@ -29,11 +29,20 @@ public:
 
 signals:
     void modelColumnSelected(int row);
+    void fixedTextChanged(const QString&);
 
 protected:
     virtual void dragEnterEvent(QDragEnterEvent *);
     virtual void dropEvent(QDropEvent *e);
     virtual void mousePressEvent(QMouseEvent *event);
+
+private slots:
+    void text_changed(const QString &value);
+
+private:
+    enum DataMode { Mode_Empty, Mode_Index, Mode_Fixed };
+    DataMode p_mode;
+    void setMode(DataMode);
 };
 
 #endif // FIELDLINEEDIT_H

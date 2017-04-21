@@ -41,6 +41,7 @@ public Q_SLOTS:
     void setModelColumnForText(int column);
     void setModelColumnForTag(int column);
     void setIsRevealed(bool is_revealed) { p_revealed = is_revealed; }
+    void setFixedText(const QString &text);
 
 public:
     QString name() const { return p_name; }
@@ -56,6 +57,7 @@ public:
 
     int  modelColumnForText() const;
     QString modelValueForText(const QModelIndex &index) const;
+    QString fixedText() const { return p_fixed_text; }
 
     int  modelColumnForTag() const;
     QString modelValueForTag(const QModelIndex &index) const;
@@ -64,8 +66,6 @@ public:
     QString isRevealedString() const { return p_revealed ? "true" : "false"; }
 
     QString elementName() const { return p_element_name; }
-
-    QString p_text;
 
     QString namespaceUri() const { return p_namespace_uri; }
     const QXmlStreamAttributes &attributes() const { return p_attributes; }
@@ -99,6 +99,7 @@ private:
     int p_model_column_for_text;
     int p_model_column_for_tag;
     bool p_ignore_for_contents;
+    QString p_fixed_text;
     friend QDebug operator<<(QDebug stream, const RWBaseItem&);
 };
 

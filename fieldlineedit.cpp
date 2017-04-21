@@ -24,16 +24,29 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QMimeData>
 #include <QMouseEvent>
 
-FieldLineEdit::FieldLineEdit(QWidget *parent) : QLineEdit(parent)
+FieldLineEdit::FieldLineEdit(QWidget *parent) :
+    QLineEdit(parent),
+    p_mode(Mode_Index)  // we are going to call setMode
 {
     setAcceptDrops(true);
-    setReadOnly(true);
     setContextMenuPolicy(Qt::NoContextMenu);
+    setMode(Mode_Empty);
+    connect (this, &QLineEdit::textEdited, this, &FieldLineEdit::text_changed);
 }
 
 void FieldLineEdit::dragEnterEvent(QDragEnterEvent *event)
 {
-    event->acceptProposedAction();
+    switch (p_mode)
+    {
+    case Mode_Fixed:
+        QLineEdit::dragEnterEvent(event);
+        break;
+
+    case Mode_Empty:
+    case Mode_Index:
+        event->acceptProposedAction();
+        break;
+    }
 }
 
 void FieldLineEdit::dropEvent(QDropEvent *event)
@@ -48,6 +61,7 @@ void FieldLineEdit::dropEvent(QDropEvent *event)
         if (map.contains(Qt::DisplayRole))
         {
             setText(map.value(Qt::DisplayRole).toString());
+            setMode(Mode_Index);
             //qDebug() << "dropEvent for row" << row << ", col" << col << ":=" << text();
             // Drag from list of column names, so transpose row number to equate to column number
             emit modelColumnSelected(row);
@@ -60,6 +74,7 @@ void FieldLineEdit::mousePressEvent(QMouseEvent *event)
     if (event->button() == Qt::RightButton)
     {
         setText(QString());
+        setMode(Mode_Empty);
         emit modelColumnSelected(-1);
     }
 #if 0
@@ -79,4 +94,29 @@ void FieldLineEdit::mousePressEvent(QMouseEvent *event)
         setText("");
     }
 #endif
+}
+
+void FieldLineEdit::setMode(FieldLineEdit::DataMode mode)
+{
+    if (p_mode == mode) return;
+    p_mode = mode;
+    setReadOnly(p_mode == Mode_Index);
+    setClearButtonEnabled(p_mode == Mode_Fixed);
+}
+
+
+void FieldLineEdit::text_changed(const QString &value)
+{
+    switch (p_mode)
+    {
+    case Mode_Index:
+        return;
+    case Mode_Empty:
+        if (!value.isEmpty()) setMode(Mode_Fixed);
+        break;
+    case Mode_Fixed:
+        if (value.isEmpty()) setMode(Mode_Empty);
+        break;
+    }
+    emit fixedTextChanged(value);
 }

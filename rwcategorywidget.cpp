@@ -65,6 +65,10 @@ RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *col
     connect(prefix, &FieldLineEdit::modelColumnSelected, category, &RWCategory::setModelColumnForPrefix);
     connect(suffix, &FieldLineEdit::modelColumnSelected, category, &RWCategory::setModelColumnForSuffix);
 
+    connect(name,   &FieldLineEdit::fixedTextChanged, category, &RWCategory::setNameFixedText);
+    connect(prefix, &FieldLineEdit::fixedTextChanged, category, &RWCategory::setPrefixFixedText);
+    connect(suffix, &FieldLineEdit::fixedTextChanged, category, &RWCategory::setSuffixFixedText);
+
     // Should the category be marked as revealed
     reveal->setAutoExclusive(false);
     reveal->setToolTip("revealed?");
@@ -115,7 +119,8 @@ void RWCategoryWidget::do_insert()
 
     // Add an additional contents field
     FieldLineEdit *edit = new FieldLineEdit;
-    connect (edit, &FieldLineEdit::modelColumnSelected, p_category, &RWBaseItem::setModelColumnForText);
+    connect(edit, &FieldLineEdit::modelColumnSelected, p_category, &RWBaseItem::setModelColumnForText);
+    connect(edit, &FieldLineEdit::fixedTextChanged,    p_category, &RWCategory::setFixedText);
     edit->setToolTip("contents");
     edit->setPlaceholderText("<generic>");
     //edit->setText(column_name(columns, p_category->modelColumnForText()));
@@ -200,8 +205,10 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
         }
 
         edit = new FieldLineEdit;
-        connect (edit, &FieldLineEdit::modelColumnSelected, child, &RWBaseItem::setModelColumnForText);
+        connect(edit, &FieldLineEdit::modelColumnSelected, child, &RWBaseItem::setModelColumnForText);
+        connect(edit, &FieldLineEdit::fixedTextChanged,    child, &RWCategory::setFixedText);
         edit->setToolTip(child->uuid());
+        //edit->setClearButtonEnabled(true);    // TODO - enable this whilst the field is read-only
         if (child->snippetType() == RWFacet::Hybrid_Tag)
         {
             edit->setPlaceholderText("Enter annotation here");
@@ -233,10 +240,11 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
     connect(reveal, &QRadioButton::toggled, partition, &RWFacet::setIsRevealed);
 
     FieldLineEdit *edit = new FieldLineEdit;
-    connect (edit, &FieldLineEdit::modelColumnSelected, partition, &RWBaseItem::setModelColumnForText);
+    connect(edit, &FieldLineEdit::modelColumnSelected, partition, &RWBaseItem::setModelColumnForText);
+    connect(edit, &FieldLineEdit::fixedTextChanged,    partition, &RWCategory::setFixedText);
     edit->setToolTip("contents");
     RWBaseItem *purpose = partition->childElement("purpose");
-    edit->setPlaceholderText(purpose ? purpose->p_text : "<purpose>");
+    edit->setPlaceholderText(purpose ? purpose->fixedText() : "<purpose>");
     if (partition->modelColumnForText() >= 0)
         edit->setText(column_name(columns, partition->modelColumnForText()));
 

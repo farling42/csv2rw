@@ -61,8 +61,8 @@ void RWCategory::writeToContents(QXmlStreamWriter *writer, const QModelIndex &in
         writer->writeAttribute("topic_id", QString("topic_%1").arg(topic_id++));
         if (!id().isEmpty()) writer->writeAttribute("category_id", id());
         writer->writeAttribute("public_name", modelValueForName(index));
-        if (modelColumnForPrefix() >= 0) writer->writeAttribute("prefix", modelValueForPrefix(index));
-        if (modelColumnForSuffix() >= 0) writer->writeAttribute("suffix", modelValueForSuffix(index));
+        if (!modelValueForPrefix(index).isEmpty()) writer->writeAttribute("prefix", modelValueForPrefix(index));
+        if (!modelValueForSuffix(index).isEmpty()) writer->writeAttribute("suffix", modelValueForSuffix(index));
         if (isRevealed()) writer->writeAttribute("is_revealed", "true");
 
         writeChildrenToContents(writer, index);
@@ -98,7 +98,7 @@ void RWCategory::writeParentStartToContents(QXmlStreamWriter *writer, bool revea
 
 void RWCategory::setModelColumnForName(int column)
 {
-    qDebug() << "setModelColumnForName:" << name() << ":=" << column;
+    //qDebug() << "setModelColumnForName:" << name() << ":=" << column;
     p_model_column_for_name = column;
 }
 
@@ -109,12 +109,15 @@ int RWCategory::modelColumnForName() const
 
 QString RWCategory::modelValueForName(const QModelIndex &index) const
 {
-    return index.sibling(index.row(), p_model_column_for_name).data().toString();
+    if (p_model_column_for_name >= 0)
+        return index.sibling(index.row(), p_model_column_for_name).data().toString();
+    else
+        return p_fixed_name;
 }
 
 void RWCategory::setModelColumnForPrefix(int column)
 {
-    qDebug() << "setModelColumnForPrefix:" << name() << ":=" << column;
+    //qDebug() << "setModelColumnForPrefix:" << name() << ":=" << column;
     p_model_column_for_prefix = column;
 }
 
@@ -125,12 +128,15 @@ int RWCategory::modelColumnForPrefix() const
 
 QString RWCategory::modelValueForPrefix(const QModelIndex &index) const
 {
-    return index.sibling(index.row(), p_model_column_for_prefix).data().toString();
+    if (p_model_column_for_prefix >= 0)
+        return index.sibling(index.row(), p_model_column_for_prefix).data().toString();
+    else
+        return p_fixed_prefix;
 }
 
 void RWCategory::setModelColumnForSuffix(int column)
 {
-    qDebug() << "setModelColumnForSuffix:" << name() << ":=" << column;
+    //qDebug() << "setModelColumnForSuffix:" << name() << ":=" << column;
     p_model_column_for_suffix = column;
 }
 
@@ -141,5 +147,8 @@ int RWCategory::modelColumnForSuffix() const
 
 QString RWCategory::modelValueForSuffix(const QModelIndex &index) const
 {
-    return index.sibling(index.row(), p_model_column_for_suffix).data().toString();
+    if (p_model_column_for_suffix >= 0)
+        return index.sibling(index.row(), p_model_column_for_suffix).data().toString();
+    else
+        return p_fixed_suffix;
 }

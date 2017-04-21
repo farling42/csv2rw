@@ -63,7 +63,8 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
         writer->writeAttribute("type", snip_type_enum.valueToKey(p_snippet_type));
 
         // Maybe an ANNOTATION or CONTENTS (before TAG_ASSIGN)
-        if (modelColumnForText() >= 0)
+        const QString user_text = modelValueForText(index);
+        if (!user_text.isEmpty())
         {
 #if 0
             if (id().isEmpty() && p_snippet_type == Labeled_Text && !p_label_text.isEmpty())
@@ -76,34 +77,30 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
                 writer->writeAttribute("style", snip_type_enum.valueToKey(p_snippet_style));
             }
 #endif
-            const QString user_text = modelValueForText(index);
-            if (!user_text.isEmpty())
+            QString sub_element;
+            switch (p_snippet_type)
             {
-                QString sub_element;
-                switch (p_snippet_type)
-                {
-                case Multi_Line:
-                    sub_element = "contents";
-                    break;
-                case Labeled_Text:
-                    sub_element = "contents";
-                    break;
-                case Tag_Standard:
-                    sub_element = "annotation";
-                    break;
-                case Hybrid_Tag:
-                    sub_element = "annotation";
-                    break;
-                default:
-                    qFatal("RWFacet::writeToContents: invalid snippet type: %d", p_snippet_type);
-                    break;
-                }
-
-                // Maybe the snippet has some contents
-                writer->writeStartElement(sub_element);
-                writer->writeCharacters(xmlParagraph(xmlSpan(user_text, bold)));
-                writer->writeEndElement();  // for contents or annotation
+            case Multi_Line:
+                sub_element = "contents";
+                break;
+            case Labeled_Text:
+                sub_element = "contents";
+                break;
+            case Tag_Standard:
+                sub_element = "annotation";
+                break;
+            case Hybrid_Tag:
+                sub_element = "annotation";
+                break;
+            default:
+                qFatal("RWFacet::writeToContents: invalid snippet type: %d", p_snippet_type);
+                break;
             }
+
+            // Maybe the snippet has some contents
+            writer->writeStartElement(sub_element);
+            writer->writeCharacters(xmlParagraph(xmlSpan(user_text, bold)));
+            writer->writeEndElement();  // for contents or annotation
         }
 
         // Maybe one or more TAG_ASSIGN (to be entered AFTER the contents/annotation)

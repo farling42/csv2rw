@@ -59,7 +59,7 @@ void RWBaseItem::writeToStructure(QXmlStreamWriter *writer)
     writer->writeStartElement(p_global ? p_element_name + "_global" : p_element_name);
     writer->writeAttributes(p_attributes);
     writeChildrenToStructure(writer);
-    if (!p_text.isEmpty()) writer->writeCharacters(p_text);
+    if (!p_fixed_text.isEmpty()) writer->writeCharacters(p_fixed_text);
     writer->writeEndElement();
 }
 
@@ -81,11 +81,10 @@ void RWBaseItem::writeToContents(QXmlStreamWriter *writer, const QModelIndex &in
 
     if (!id().isEmpty()) writer->writeAttribute(p_element_name + "_id", id());   // e.g. partition_id, not the same as <element>_id
 
-    if (modelColumnForText() >= 0)
+    const QString user_text = modelValueForText(index);
+    if (!user_text.isEmpty())
     {
-        const QString user_text = modelValueForText(index);
-        if (!user_text.isEmpty())
-            writer->writeCharacters(modelValueForText(index));
+        writer->writeCharacters(user_text);
     }
 
     writeChildrenToContents(writer, index);
@@ -111,8 +110,14 @@ void RWBaseItem::writeExportTag(QXmlStreamWriter *writer)
 
 void RWBaseItem::setModelColumnForTag(int column)
 {
-    qDebug() << "setModelColumnForTag:" << name() << ":=" << column;
+    //qDebug() << "setModelColumnForTag:" << name() << ":=" << column;
     p_model_column_for_tag = column;
+}
+
+void RWBaseItem::setFixedText(const QString &text)
+{
+    qDebug() << "RWBaseItem::setFixedText:" << text;
+    p_fixed_text = text;
 }
 
 /**
@@ -141,7 +146,7 @@ QString RWBaseItem::modelValueForTag(const QModelIndex &index) const
 
 void RWBaseItem::setModelColumnForText(int column)
 {
-    qDebug() << "setModelColumnForText:" << name() << ":=" << column;
+    //qDebug() << "setModelColumnForText:" << name() << ":=" << column;
     p_model_column_for_text = column;
 }
 
@@ -152,7 +157,10 @@ int RWBaseItem::modelColumnForText() const
 
 QString RWBaseItem::modelValueForText(const QModelIndex &index) const
 {
-    return index.sibling(index.row(), p_model_column_for_text).data().toString();
+    if (p_model_column_for_text != -1)
+        return index.sibling(index.row(), p_model_column_for_text).data().toString();
+    else
+        return p_fixed_text;
 }
 
 QDebug operator<<(QDebug stream, const RWBaseItem &item)
@@ -164,7 +172,7 @@ QDebug operator<<(QDebug stream, const RWBaseItem &item)
     if (!item.p_id.isEmpty()) stream.noquote().nospace() << ", id=" + item.p_id;
     if (!item.p_uuid.isEmpty()) stream.noquote().nospace() << ", uuid=" + item.p_uuid;
     if (!item.p_signature.isEmpty()) stream.noquote().nospace() << ", signature=" + item.p_signature;
-    if (!item.p_text.isEmpty()) stream.noquote().nospace() << ":: value=\"" + item.p_text + "\"";
+    if (!item.p_fixed_text.isEmpty()) stream.noquote().nospace() << ":: value=\"" + item.p_fixed_text + "\"";
     stream.nospace() << ")";
 
     return stream;

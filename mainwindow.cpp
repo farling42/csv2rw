@@ -95,7 +95,7 @@ void MainWindow::on_loadCsvButton_pressed()
         headers.append(csv_full_model->headerData(row, Qt::Horizontal).toString());
     }
     header_model->setStringList(headers);
-    qDebug() << "Model size: " << csv_full_model->rowCount() << "rows and" << csv_full_model->columnCount() << "columns";
+    //qDebug() << "Model size: " << csv_full_model->rowCount() << "rows and" << csv_full_model->columnCount() << "columns";
 }
 
 void MainWindow::on_loadStructureButton_pressed()
@@ -142,7 +142,7 @@ void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selectio
     }
     if (choice == 0) return;
 
-    qDebug() << "Selected category" << choice->name();
+    //qDebug() << "Selected category" << choice->name();
 
     category_widget = new RWCategoryWidget(choice, header_model);
     ui->categoryScrollArea->setWidget(category_widget);
@@ -162,7 +162,7 @@ void MainWindow::on_parentCategoryComboBox_currentIndexChanged(const QString &se
     }
     if (parent_choice == 0) return;
 
-    qDebug() << "Selected category" << parent_choice->name();
+    //qDebug() << "Selected category" << parent_choice->name();
 }
 
 

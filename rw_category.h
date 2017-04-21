@@ -48,6 +48,9 @@ public Q_SLOTS:
     void setModelColumnForName(int column);
     void setModelColumnForPrefix(int column);
     void setModelColumnForSuffix(int column);
+    void setNameFixedText(const QString &text) { p_fixed_name = text; }
+    void setPrefixFixedText(const QString &text) { p_fixed_prefix = text; }
+    void setSuffixFixedText(const QString &text) { p_fixed_suffix = text; }
 
 public:
     int  modelColumnForName() const;
@@ -63,6 +66,9 @@ private:
     int p_model_column_for_name;
     int p_model_column_for_prefix;
     int p_model_column_for_suffix;
+    QString p_fixed_name;
+    QString p_fixed_prefix;
+    QString p_fixed_suffix;
 };
 
 #endif // RWCATEGORY_H

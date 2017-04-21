@@ -348,6 +348,9 @@
                         <property name="placeholderText">
                          <string>parent Title</string>
                         </property>
+                        <property name="clearButtonEnabled">
+                         <bool>true</bool>
+                        </property>
                        </widget>
                       </item>
                       <item>
@@ -361,6 +364,9 @@
                         <property name="placeholderText">
                          <string>parent Prefix</string>
                         </property>
+                        <property name="clearButtonEnabled">
+                         <bool>true</bool>
+                        </property>
                        </widget>
                       </item>
                       <item>
@@ -373,6 +379,9 @@
                         </property>
                         <property name="placeholderText">
                          <string>parent Suffix</string>
+                        </property>
+                        <property name="clearButtonEnabled">
+                         <bool>true</bool>
                         </property>
                        </widget>
                       </item>

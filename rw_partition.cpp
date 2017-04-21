@@ -42,30 +42,27 @@ void RWPartition::writeToContents(QXmlStreamWriter *writer, const QModelIndex &i
     }
 
     // It may have some text directly on it, not stored in a facet
-    if (modelColumnForText() >= 0)
+    const QString user_text = modelValueForText(index);
+    if (!user_text.isEmpty())
     {
-        const QString user_text = modelValueForText(index);
-        if (!user_text.isEmpty())
+        bool bold = false;
+
+        writer->writeStartElement("snippet");
         {
-            bool bold = false;
+            writer->writeAttribute("type", "Multi_Line");
+            // no facet_id
+            if (isRevealed()) writer->writeAttribute("is_revealed", "true");
 
-            writer->writeStartElement("snippet");
+            writer->writeStartElement("contents");
             {
-                writer->writeAttribute("type", "Multi_Line");
-                // no facet_id
-                if (isRevealed()) writer->writeAttribute("is_revealed", "true");
-
-                writer->writeStartElement("contents");
-                {
-                    // Maybe the snippet has some contents
-                    writer->writeCharacters(xmlParagraph(xmlSpan(user_text, bold)));
-                }
-                writer->writeEndElement(); // contents
-
-                // </snippet>
+                // Maybe the snippet has some contents
+                writer->writeCharacters(xmlParagraph(xmlSpan(user_text, bold)));
             }
-            writer->writeEndElement(); // snippet
+            writer->writeEndElement(); // contents
+
+            // </snippet>
         }
+        writer->writeEndElement(); // snippet
     }
 
     // And it may have sub-sections, after the snippet/content (if any)

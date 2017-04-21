@@ -70,7 +70,7 @@ void RealmWorksStructure::loadFile(QIODevice *device)
     RWBaseItem *main_structure = export_element->findChild<RWStructure*>(QString(), Qt::FindDirectChildrenOnly);
     categories = main_structure->childItems<RWCategory*>();
     domains = main_structure->childItems<RWDomain*>();
-    qDebug() << "File has" << categories.count() << "categories and" << domains.count() << "domains";
+    //qDebug() << "File has" << categories.count() << "categories and" << domains.count() << "domains";
 }
 
 RWBaseItem *RealmWorksStructure::read_element(QXmlStreamReader *reader, RWBaseItem *parent)
@@ -118,14 +118,14 @@ RWBaseItem *RealmWorksStructure::read_element(QXmlStreamReader *reader, RWBaseIt
             break;
 
         case QXmlStreamReader::EndElement:
-            element->p_text = element->p_text.trimmed();
+            element->setFixedText(element->fixedText().trimmed());
             // Maybe some post-processing?
             element->postLoad();
             return element;
 
         case QXmlStreamReader::Characters:
             // Add the characters to the end of the text for this element.
-            element->p_text.append(reader->text());
+            element->setFixedText(element->fixedText().append(reader->text()));
             break;
 
         case QXmlStreamReader::Comment:
