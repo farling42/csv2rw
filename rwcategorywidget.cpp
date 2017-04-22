@@ -51,6 +51,7 @@ RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *col
     QFrame(parent),
     p_category(category)
 {
+    RWBaseItem *description;
     setFrameStyle(QFrame::Panel | QFrame::Sunken);
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setContentsMargins(0,0,0,0);
@@ -67,7 +68,8 @@ RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *col
     connect(reveal, &QRadioButton::toggled, category, &RWCategory::setIsRevealed);
 
     name->setPlaceholderText("<name>");
-    name->setToolTip(category->name());
+    description = category->childElement("description");
+    name->setToolTip(description ? description->structureText() : category->name());
     if (category->namefield().modelColumn() >= 0)
         name->setText(column_name(columns, category->namefield().modelColumn()));
 
@@ -137,79 +139,23 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setContentsMargins(0,/*top*/9,0,0);
 
-    QFont bold_font;
-
     QLabel *title = new QLabel;
     title->setFrameStyle(QFrame::Panel | QFrame::Raised);
     title->setLineWidth(2);
     title->setMargin(3);
     title->setText(QString("%1  %2").arg(section_string(sections)).arg(partition->name()));
-    title->setToolTip(partition->id());
+    RWBaseItem *description = partition->childElement("description");
+    title->setToolTip(description ? description->structureText() : partition->id());
     layout->addWidget(title);
 
-    bold_font = title->font();
+    QFont bold_font = title->font();
     bold_font.setBold(true);
     title->setFont(bold_font);
 
     QList<RWFacet*> child_facets = partition->childItems<RWFacet*>();
-    foreach (RWFacet *child, child_facets)
+    foreach (RWFacet *facet, child_facets)
     {
-        QRadioButton *reveal = 0;
-        QLabel *label = 0;
-        FieldComboBox *combo = 0;
-        FieldLineEdit *edit = 0;
-
-        //add_facet (facet, this);
-        QWidget *box = new QWidget;
-        box->setProperty("facet",QVariant::fromValue((void*)child));
-
-        // Every snippet is revealable
-        reveal = new QRadioButton(QString());
-        reveal->setAutoExclusive(false);
-        reveal->setToolTip("revealed?");
-        connect(reveal, &QRadioButton::toggled, child, &RWFacet::setIsRevealed);
-
-        if (child->snippetType() == RWFacet::Labeled_Text || child->snippetType() == RWFacet::Hybrid_Tag)
-        {
-            label = new QLabel;
-            label->setText(child->name() + ":");
-            label->setFont(bold_font);
-            label->setToolTip(child->id());
-        }
- //Multi_Line, Hybrid_Tag, Labeled_Text, Tag_Standard, Picture
-
-        // Maybe a tag selector
-        if (child->snippetType() == RWFacet::Hybrid_Tag)
-        {
-            combo = new FieldComboBox(child->tags(), RWDomain::getDomainById(child->attributes().value("domain_id").toString()));
-            if (child->tags().modelColumn() >= 0)
-                combo->setIndexString(column_name(columns, child->tags().modelColumn()));
-        }
-
-        edit = new FieldLineEdit(child->contentsText());
-        edit->setToolTip(child->uuid());
-        //edit->setClearButtonEnabled(true);    // TODO - enable this whilst the field is read-only
-        if (child->snippetType() == RWFacet::Hybrid_Tag)
-        {
-            edit->setPlaceholderText("Enter annotation here");
-        }
-        else
-        {
-            edit->setPlaceholderText(child->name());
-        }
-        if (child->contentsText().modelColumn() >= 0)
-            edit->setText(column_name(columns, child->contentsText().modelColumn()));
-
-        // Create a row containing all these widgets
-        QHBoxLayout *boxl = new QHBoxLayout;
-        boxl->setContentsMargins(0,0,0,0);
-        if (reveal) boxl->addWidget(reveal);
-        if (label) boxl->addWidget(label);
-        if (combo) boxl->addWidget(combo);
-        if (edit) boxl->addWidget(edit);
-        box->setLayout(boxl);
-
-        layout->addWidget(box);
+        layout->addWidget(add_facet(columns, facet));
     }
 
     // Finally a generic text box (the contents + reveal)
@@ -222,7 +168,7 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
     FieldLineEdit *edit = new FieldLineEdit(partition->contentsText());
     edit->setToolTip("contents");
     RWBaseItem *purpose = partition->childElement("purpose");
-    edit->setPlaceholderText(purpose ? purpose->contentsText().fixedText() : "<purpose>");
+    edit->setPlaceholderText(purpose ? purpose->structureText() : "<purpose>");
     if (partition->contentsText().modelColumn() >= 0)
         edit->setText(column_name(columns, partition->contentsText().modelColumn()));
 
@@ -255,4 +201,68 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
     QFrame *frame = new QFrame;
     frame->setLayout(layout);
     return frame;
+}
+
+QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet)
+{
+    QRadioButton *reveal = 0;
+    QLabel *label = 0;
+    FieldComboBox *combo = 0;
+    FieldLineEdit *edit = 0;
+
+    // Every snippet is revealable
+    reveal = new QRadioButton(QString());
+    reveal->setAutoExclusive(false);
+    reveal->setToolTip("revealed?");
+    connect(reveal, &QRadioButton::toggled, facet, &RWFacet::setIsRevealed);
+
+    if (facet->snippetType() == RWFacet::Labeled_Text || facet->snippetType() == RWFacet::Hybrid_Tag)
+    {
+        label = new QLabel;
+        label->setText(facet->name() + ":");
+        QFont bold_font = label->font();
+        bold_font.setBold(true);
+        label->setFont(bold_font);
+        label->setToolTip(facet->id());
+    }
+//Multi_Line, Hybrid_Tag, Labeled_Text, Tag_Standard, Picture
+
+    // Maybe a tag selector
+    if (facet->snippetType() == RWFacet::Hybrid_Tag)
+    {
+        combo = new FieldComboBox(facet->tags(), RWDomain::getDomainById(facet->attributes().value("domain_id").toString()));
+        if (facet->tags().modelColumn() >= 0)
+            combo->setIndexString(column_name(columns, facet->tags().modelColumn()));
+    }
+
+    edit = new FieldLineEdit(facet->contentsText());
+    // Use the <description> child as a tool tip, if available
+    RWBaseItem *description = facet->childElement("description");
+    edit->setToolTip(description ? description->structureText() : facet->uuid());
+    if (facet->snippetType() == RWFacet::Hybrid_Tag)
+    {
+        edit->setPlaceholderText("Enter annotation here");
+    }
+    else
+    {
+        edit->setPlaceholderText(facet->name());
+    }
+    if (facet->contentsText().modelColumn() >= 0)
+    {
+        edit->setText(column_name(columns, facet->contentsText().modelColumn()));
+    }
+
+    // Create a row containing all these widgets
+    QHBoxLayout *boxl = new QHBoxLayout;
+    boxl->setContentsMargins(0,0,0,0);
+    if (reveal) boxl->addWidget(reveal);
+    if (label) boxl->addWidget(label);
+    if (combo) boxl->addWidget(combo);
+    if (edit) boxl->addWidget(edit);
+
+    QWidget *box = new QWidget;
+    box->setProperty("facet",QVariant::fromValue((void*)facet));
+    box->setLayout(boxl);
+
+    return box;
 }

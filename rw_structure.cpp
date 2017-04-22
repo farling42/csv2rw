@@ -18,6 +18,16 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include "rw_structure.h"
 
+/**
+ * @brief RWStructure::RWStructure
+ * @param stream
+ * @param parent
+ *
+ * Whilst this class might look empty, it is a separate sub-class so that
+ * findChild and findChildren can quickly locate it amongst all the other
+ * RWBaseItems in a child hierarchy.
+ */
+
 RWStructure::RWStructure(QXmlStreamReader *stream, QObject *parent) :
     RWBaseItem(stream, parent)
 {

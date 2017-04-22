@@ -67,16 +67,17 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
         if (!user_text.isEmpty())
         {
 #if 0
-            if (id().isEmpty() && p_snippet_type == Labeled_Text && !p_label_text.isEmpty())
+            QString label_text = p_label_text.valueString(index);
+            if (id().isEmpty() && p_snippet_type == Labeled_Text && !label_text.isEmpty())
             {
                 // For locally added snippets of the Labeled_Text variety
-                writer->writeAttribute("label", p_label_text);
+                writer->writeAttribute("label", label_text);
             }
+#endif
             if (p_snippet_style != Normal)
             {
                 writer->writeAttribute("style", snip_type_enum.valueToKey(p_snippet_style));
             }
-#endif
             QString sub_element;
             switch (p_snippet_type)
             {

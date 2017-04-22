@@ -22,6 +22,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QFrame>
 
 class RWCategory;
+class RWFacet;
 class RWPartition;
 class QAbstractItemModel;
 
@@ -29,6 +30,8 @@ class RWCategoryWidget : public QFrame
 {
     Q_OBJECT
     QWidget *add_partition(QList<int> sections, QAbstractItemModel *columns, RWPartition *partition);
+    QWidget *add_facet(QAbstractItemModel *columns, RWFacet *facet);
+
 public:
     explicit RWCategoryWidget(RWCategory *category, QAbstractItemModel *columns, QWidget *parent = 0);
     RWCategory *category() const { return p_category; }

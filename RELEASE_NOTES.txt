@@ -1,3 +1,18 @@
+v1.6
+Ensure "Realm Works" is displayed with the registered trademark symbol in all places.
+
+v1.5
+This release allows you to type in some free text into a snippet, or choose a tag for a choice field, instead of having CSV data appear in the field.
+You can't mix CSV data and free text in the same snippet (yet) though.
+It also fixes a bug where sometimes a partition in the structure part of the XML file would wrongly get text attached to it.
+
+v1.4
+The entire topic, as well as the optional containing topic, can now be marked as REVEALED to players (using the circular button to the left of topic name).
+This updates the existing functionality where individual snippets could be marked as revealed.
+
+v1.3.1
+A minor update to add validation to the new optional parent. You must enter a name, and you must choose a different category for the parent to the one chosen for the CSV data.
+
 v1.3
 Provide the option to have all imported topics/articles placed under a single parent category.
 
