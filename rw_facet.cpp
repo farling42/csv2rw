@@ -58,26 +58,31 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
 
     writer->writeStartElement("snippet");
     {
-        if (!id().isEmpty()) writer->writeAttribute("facet_id", id());
-        if (isRevealed()) writer->writeAttribute("is_revealed", "true");
-        writer->writeAttribute("type", snip_type_enum.valueToKey(p_snippet_type));
-
-        // Maybe an ANNOTATION or CONTENTS (before TAG_ASSIGN)
         const QString user_text = contentsText().valueString(index);
+        const QString gm_dir    = gmDirections().valueString(index);
+
+        if (!id().isEmpty()) writer->writeAttribute("facet_id", id());
+        writer->writeAttribute("type", snip_type_enum.valueToKey(p_snippet_type));
+        if (p_snippet_style != Normal) writer->writeAttribute("style", snip_type_enum.valueToKey(p_snippet_style));
+        if (isRevealed()) writer->writeAttribute("is_revealed", "true");
+        if (!gm_dir.isEmpty()) writer->writeAttribute("purpose", user_text.isEmpty() ? "Directions_Only" : "Both");
+
+#if 0
+        QString label_text = p_label_text.valueString(index);
+        if (id().isEmpty() && p_snippet_type == Labeled_Text && !label_text.isEmpty())
+        {
+            // For locally added snippets of the Labeled_Text variety
+            writer->writeAttribute("label", label_text);
+        }
+#endif
+
+        //
+        // CHILDREN have to be in a specific order
+        //
+
+        // Maybe an ANNOTATION or CONTENTS
         if (!user_text.isEmpty())
         {
-#if 0
-            QString label_text = p_label_text.valueString(index);
-            if (id().isEmpty() && p_snippet_type == Labeled_Text && !label_text.isEmpty())
-            {
-                // For locally added snippets of the Labeled_Text variety
-                writer->writeAttribute("label", label_text);
-            }
-#endif
-            if (p_snippet_style != Normal)
-            {
-                writer->writeAttribute("style", snip_type_enum.valueToKey(p_snippet_style));
-            }
             QString sub_element;
             switch (p_snippet_type)
             {
@@ -99,9 +104,13 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
             }
 
             // Maybe the snippet has some contents
-            writer->writeStartElement(sub_element);
-            writer->writeCharacters(xmlParagraph(xmlSpan(user_text, bold)));
-            writer->writeEndElement();  // for contents or annotation
+            writer->writeTextElement(sub_element, xmlParagraph(xmlSpan(user_text, bold)));
+        }
+
+        // Maybe some GM directions
+        if (!gm_dir.isEmpty())
+        {
+            writer->writeTextElement("gm_directions", xmlParagraph(xmlSpan(user_text, /*bold*/ false)));
         }
 
         // Maybe one or more TAG_ASSIGN (to be entered AFTER the contents/annotation)

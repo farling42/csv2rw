@@ -46,6 +46,7 @@ public:
     SnippetType  snippetType()  const { return p_snippet_type;  }
     SnippetStyle snippetStyle() const { return p_snippet_style; }
     DataField &tags()      { return p_tags; }
+    DataField &gmDirections() { return p_gm_directions; }
     DataField &labelText() { return p_label_text; }
 
 public slots:
@@ -53,6 +54,7 @@ public slots:
 
 private:
     DataField p_tags;
+    DataField p_gm_directions;
     SnippetType p_snippet_type;
     SnippetStyle p_snippet_style;
     DataField p_label_text;   // for Labeled_Text fields

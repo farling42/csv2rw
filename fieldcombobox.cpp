@@ -31,7 +31,7 @@ FieldComboBox::FieldComboBox(DataField &datafield, RWDomain *domain, QWidget *pa
 {
     setAcceptDrops(true);
     setContextMenuPolicy(Qt::NoContextMenu);
-    setToolTip(domain ? domain->name() : "Domain");
+    setToolTip(domain ? "Tag Domain: " + domain->name() : "Domain");
     setInsertPolicy(NoInsert);
     set_domain_list();
     connect(this, &currentTextChanged, this, &text_changed);

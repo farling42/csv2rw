@@ -51,15 +51,7 @@ void RWPartition::writeToContents(QXmlStreamWriter *writer, const QModelIndex &i
             writer->writeAttribute("type", "Multi_Line");
             // no facet_id
             if (isRevealed()) writer->writeAttribute("is_revealed", "true");
-
-            writer->writeStartElement("contents");
-            {
-                // Maybe the snippet has some contents
-                writer->writeCharacters(xmlParagraph(xmlSpan(user_text, bold)));
-            }
-            writer->writeEndElement(); // contents
-
-            // </snippet>
+            writer->writeTextElement("contents", xmlParagraph(xmlSpan(user_text, bold)));
         }
         writer->writeEndElement(); // snippet
     }
