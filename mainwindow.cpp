@@ -101,7 +101,7 @@ void MainWindow::on_loadCsvButton_pressed()
 void MainWindow::on_loadStructureButton_pressed()
 {
     // Prompt use to select a CSV file
-    QString filename = QFileDialog::getOpenFileName(this, tr("Structure File"), /*dir*/ QString(), /*template*/ tr("RealmWorks Structure Files (*.rwstructure)"));
+    QString filename = QFileDialog::getOpenFileName(this, tr("Structure File"), /*dir*/ QString(), /*template*/ tr("Realm Works® Structure Files (*.rwstructure)"));
     if (filename.isEmpty()) return;
 
     QFile file(filename);
@@ -194,7 +194,7 @@ void MainWindow::on_generateButton_clicked()
     }
 
     // Prompt for output filename
-    QString filename = QFileDialog::getSaveFileName(this, tr("RealmWorks Export File"), /*dir*/ QString(), /*filter*/ tr("RealmWorks Export Files (*.rwexport)"));
+    QString filename = QFileDialog::getSaveFileName(this, tr("Realm Works® Export File"), /*dir*/ QString(), /*filter*/ tr("Realm Works® Export Files (*.rwexport)"));
     if (filename.isEmpty()) return;
     QFile file(filename);
     if (!file.open(QFile::WriteOnly))
@@ -211,13 +211,13 @@ void MainWindow::on_generateButton_clicked()
 
 void MainWindow::on_helpButton_clicked()
 {
-    static QString help_text = tr("There are various steps to converting your CSV data into a RealmWorks import file\n\n"
+    static QString help_text = tr("There are various steps to converting your CSV data into a Realm Works® import file\n\n"
             "Step 1: Use the 'Load 'CSV' button to choose the file containing your data in CSV file format. The first line in the file should contain the header for each column.\n\n"
-            "Step 2: Use the 'Load Structure' to select the RealmWorks structure file containing the structure that you've exported from RealmWorks.\n\n"
-            "Step 3: Choose the category/article that you want to have created within RealmWorks from your CSV data.\n\n"
+            "Step 2: Use the 'Load Structure' to select the Realm Works structure file containing the structure that you've exported from Realm Works.\n\n"
+            "Step 3: Choose the category/article that you want to have created within Realm Works from your CSV data.\n\n"
             "(Hint: the bottom panel shows the information that has been loaded from your CSV file, so you can check which fields contain which data.)\n\n"
             "Step 4: Drag each of the field names from the left panel to the appropriate place within the category/article template in the right panel.\n\n"
-            "Step 5: Press the 'Generate' to produce the RealmWorks .rwexport file which you can load into your RealmWorks database.")
+            "Step 5: Press the 'Generate' to produce the Realm Works® .rwexport file which you can load into your Realm Works database.")
             ;
     QMessageBox::information(this, tr("Help"), help_text);
 }

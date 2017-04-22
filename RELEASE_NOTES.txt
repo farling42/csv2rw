@@ -11,7 +11,7 @@ In tag snippets, the annotation is correctly placed before the tag_assign.
 Installer files are now part of the software sources on github.
 Empty cells in the CSV now don't provide the corresponding snippet (previously it put an empty string into the snippet).
 Prevent crash if the CSV had less entries in a data row than was in the header row.
-Remove the "gm_only" button since it isn't the way that Realm Works does thing.
+Remove the "gm_only" button since it isn't the way that Realm Works® does thing.
 
 v1.0.0
 The top drop-down menu does nothing.

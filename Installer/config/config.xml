@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Installer>
-    <Name>CSV to Realm Works Translator</Name>
+    <Name>CSV to Realm Works® Translator</Name>
     <Version>1.5</Version>
-    <Title>CSV to Realm Works Translator Setup</Title>
+    <Title>CSV to Realm Works® Translator</Title>
     <Publisher>Martin Smith</Publisher>
     <ProductUrl>https://github.com/farling42/csv2rw</ProductUrl>
     <StartMenuDir>Amusing Time</StartMenuDir>
