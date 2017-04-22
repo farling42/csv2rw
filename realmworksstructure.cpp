@@ -118,14 +118,14 @@ RWBaseItem *RealmWorksStructure::read_element(QXmlStreamReader *reader, RWBaseIt
             break;
 
         case QXmlStreamReader::EndElement:
-            element->text().setFixedText(element->text().fixedText().trimmed());
+            element->setStructureText(element->structureText().trimmed());
             // Maybe some post-processing?
             element->postLoad();
             return element;
 
         case QXmlStreamReader::Characters:
             // Add the characters to the end of the text for this element.
-            element->text().setFixedText(element->text().fixedText().append(reader->text()));
+            element->setStructureText(element->structureText().append(reader->text()));
             break;
 
         case QXmlStreamReader::Comment:

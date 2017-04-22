@@ -110,7 +110,7 @@ void RWCategoryWidget::do_insert()
     if (layout == 0) return;
 
     // Add an additional contents field
-    FieldLineEdit *edit = new FieldLineEdit(p_category->text());
+    FieldLineEdit *edit = new FieldLineEdit(p_category->contentsText());
     edit->setToolTip("contents");
     edit->setPlaceholderText("<generic>");
     //edit->setText(column_name(columns, p_category->modelColumnForText()));
@@ -186,7 +186,7 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
                 combo->setIndexString(column_name(columns, child->tags().modelColumn()));
         }
 
-        edit = new FieldLineEdit(child->text());
+        edit = new FieldLineEdit(child->contentsText());
         edit->setToolTip(child->uuid());
         //edit->setClearButtonEnabled(true);    // TODO - enable this whilst the field is read-only
         if (child->snippetType() == RWFacet::Hybrid_Tag)
@@ -197,8 +197,8 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
         {
             edit->setPlaceholderText(child->name());
         }
-        if (child->text().modelColumn() >= 0)
-            edit->setText(column_name(columns, child->text().modelColumn()));
+        if (child->contentsText().modelColumn() >= 0)
+            edit->setText(column_name(columns, child->contentsText().modelColumn()));
 
         // Create a row containing all these widgets
         QHBoxLayout *boxl = new QHBoxLayout;
@@ -219,12 +219,12 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
     reveal->setChecked(partition->isRevealed());
     connect(reveal, &QRadioButton::toggled, partition, &RWFacet::setIsRevealed);
 
-    FieldLineEdit *edit = new FieldLineEdit(partition->text());
+    FieldLineEdit *edit = new FieldLineEdit(partition->contentsText());
     edit->setToolTip("contents");
     RWBaseItem *purpose = partition->childElement("purpose");
-    edit->setPlaceholderText(purpose ? purpose->text().fixedText() : "<purpose>");
-    if (partition->text().modelColumn() >= 0)
-        edit->setText(column_name(columns, partition->text().modelColumn()));
+    edit->setPlaceholderText(purpose ? purpose->contentsText().fixedText() : "<purpose>");
+    if (partition->contentsText().modelColumn() >= 0)
+        edit->setText(column_name(columns, partition->contentsText().modelColumn()));
 
     QHBoxLayout *textlayout = new QHBoxLayout;
     textlayout->addWidget(reveal);

@@ -23,7 +23,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 RWPartition::RWPartition(QXmlStreamReader *stream, QObject *parent) :
     RWBaseItem(stream, parent)
 {
-    setTextVisibleInStructure(false);
 }
 
 void RWPartition::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index)
@@ -42,7 +41,7 @@ void RWPartition::writeToContents(QXmlStreamWriter *writer, const QModelIndex &i
     }
 
     // It may have some text directly on it, not stored in a facet
-    const QString user_text = text().valueString(index);
+    const QString user_text = contentsText().valueString(index);
     if (!user_text.isEmpty())
     {
         bool bold = false;

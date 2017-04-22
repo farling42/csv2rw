@@ -27,7 +27,6 @@ static int topic_id = 1;
 RWCategory::RWCategory(QXmlStreamReader *stream, QObject *parent) :
     RWBaseItem(stream, parent)
 {
-    setTextVisibleInStructure(false);
 }
 
 void RWCategory::postLoad()

@@ -25,8 +25,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 RWBaseItem::RWBaseItem(QXmlStreamReader *reader, QObject *parent, bool ignore_for_contents) :
     QObject(parent),
-    p_ignore_for_contents(ignore_for_contents),
-    p_text_in_structure(true)
+    p_ignore_for_contents(ignore_for_contents)
 {
     // Extract common data from this XML element
     p_structure_element = reader->name().toString();
@@ -58,11 +57,7 @@ void RWBaseItem::writeToStructure(QXmlStreamWriter *writer)
     writer->writeStartElement(p_global ? p_structure_element + "_global" : p_structure_element);
     writer->writeAttributes(p_attributes);
     writeChildrenToStructure(writer);
-    if (p_text_in_structure)
-    {
-        QString user_text = p_text.valueString();
-        if (!user_text.isEmpty()) writer->writeCharacters(user_text);
-    }
+    if (!p_structure_text.isEmpty()) writer->writeCharacters(p_structure_text);
     writer->writeEndElement();
 }
 
@@ -129,14 +124,12 @@ QDebug operator<<(QDebug stream, const RWBaseItem &item)
     if (!item.p_id.isEmpty()) stream.noquote().nospace() << ", id=" + item.p_id;
     if (!item.p_uuid.isEmpty()) stream.noquote().nospace() << ", uuid=" + item.p_uuid;
     if (!item.p_signature.isEmpty()) stream.noquote().nospace() << ", signature=" + item.p_signature;
-    QString text = item.p_text.valueString();
+    QString text = item.p_contents_text.valueString();
     if (!text.isEmpty()) stream.noquote().nospace() << ":: value=\"" + text + "\"";
     stream.nospace() << ")";
 
     return stream;
 }
-
-
 
 
 QString RWBaseItem::xmlParagraph(const QString &text)

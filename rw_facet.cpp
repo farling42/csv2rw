@@ -39,8 +39,6 @@ RWFacet::RWFacet(QXmlStreamReader *stream, QObject *parent) :
     }
     const QXmlStreamAttributes attr = attributes();
 
-    setTextVisibleInStructure(false);
-
     // Decode the 'type' attribute (if present)
     if (attr.hasAttribute("type"))
     {
@@ -65,7 +63,7 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
         writer->writeAttribute("type", snip_type_enum.valueToKey(p_snippet_type));
 
         // Maybe an ANNOTATION or CONTENTS (before TAG_ASSIGN)
-        const QString user_text = text().valueString(index);
+        const QString user_text = contentsText().valueString(index);
         if (!user_text.isEmpty())
         {
 #if 0

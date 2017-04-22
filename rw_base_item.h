@@ -49,7 +49,9 @@ public:
 
     // More information
     virtual bool canBeGenerated() const;
-    DataField &text() { return p_text; }
+    DataField &contentsText() { return p_contents_text; }
+    QString structureText() { return p_structure_text; }
+    void setStructureText(const QString &text) { p_structure_text = text; }
 
     virtual void writeToStructure(QXmlStreamWriter*);
     virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index);
@@ -63,8 +65,8 @@ public:
     QString namespaceUri() const { return p_namespace_uri; }
     const QXmlStreamAttributes &attributes() const { return p_attributes; }
 
-    static QString xmlParagraph(const QString &text);
-    static QString xmlSpan(const QString &text, bool bold = false);
+    static QString xmlParagraph(const QString &contentsText);
+    static QString xmlSpan(const QString &contentsText, bool bold = false);
 
     void setIgnoreForContents(bool flag) { p_ignore_for_contents = flag; }
     bool ignoreForContents() const { return p_ignore_for_contents; }
@@ -78,21 +80,20 @@ public:
 protected:
     virtual void writeChildrenToStructure(QXmlStreamWriter *writer);
     virtual void writeChildrenToContents(QXmlStreamWriter *writer, const QModelIndex &index);
-    void setTextVisibleInStructure(bool flag) { p_text_in_structure = flag; }
 
 private:
     QXmlStreamAttributes p_attributes;
-    DataField p_text;
+    DataField p_contents_text;
     bool p_revealed;
     QString p_namespace_uri;
     QString p_structure_element;
+    QString p_structure_text;
     QString p_name;
     QString p_id;
     bool p_global;
     QString p_uuid;       // global_uuid or original_uuid
     QString p_signature;  // only when global == false
     bool p_ignore_for_contents;
-    bool p_text_in_structure;
     friend QDebug operator<<(QDebug stream, const RWBaseItem&);
 };
 
