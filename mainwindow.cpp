@@ -26,6 +26,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QFileDialog>
 #include <QSortFilterProxyModel>
 #include <QStringListModel>
+#include <QSettings>
 #include <rwcategorywidget.h>
 
 #include "realmworksstructure.h"
@@ -74,8 +75,11 @@ void MainWindow::fileQuit()
 
 void MainWindow::on_loadCsvButton_pressed()
 {
+    QSettings settings;
+    const QString CSV_DIRECTORY_PARAM("csvDirectory");
+
     // Prompt use to select a CSV file
-    QString filename = QFileDialog::getOpenFileName(this, tr("CSV File"), /*dir*/ QString(), /*template*/ tr("CSV Files (*.csv)"));
+    QString filename = QFileDialog::getOpenFileName(this, tr("CSV File"), /*dir*/ settings.value(CSV_DIRECTORY_PARAM).toString(), /*template*/ tr("CSV Files (*.csv)"));
     if (filename.isEmpty()) return;
 
     QFile file(filename);
@@ -87,6 +91,9 @@ void MainWindow::on_loadCsvButton_pressed()
     ui->csvFilename->setText(filename);
     QTextStream stream(&file);
     csv_full_model->readCSV(stream);
+
+    // Remember the CSV directory
+    settings.setValue(CSV_DIRECTORY_PARAM, QFileInfo(file).absolutePath());
 
     // Put headers into the header model
     QStringList headers;
@@ -100,8 +107,11 @@ void MainWindow::on_loadCsvButton_pressed()
 
 void MainWindow::on_loadStructureButton_pressed()
 {
+    QSettings settings;
+    const QString STRUCTURE_DIRECTORY_PARAM("structureDirectory");
+
     // Prompt use to select a CSV file
-    QString filename = QFileDialog::getOpenFileName(this, tr("Structure File"), /*dir*/ QString(), /*template*/ tr("Realm Works® Structure Files (*.rwstructure)"));
+    QString filename = QFileDialog::getOpenFileName(this, tr("Structure File"), /*dir*/ settings.value(STRUCTURE_DIRECTORY_PARAM).toString(), /*template*/ tr("Realm Works® Structure Files (*.rwstructure)"));
     if (filename.isEmpty()) return;
 
     QFile file(filename);
@@ -112,6 +122,9 @@ void MainWindow::on_loadStructureButton_pressed()
     }
     ui->structureFilename->setText(filename);
     rw_structure.loadFile(&file);
+
+    // Remember the Structure directory
+    settings.setValue(STRUCTURE_DIRECTORY_PARAM, QFileInfo(file).absolutePath());
 
     // Get the list of category names into a sorted list
     QStringList cats;
@@ -168,6 +181,9 @@ void MainWindow::on_parentCategoryComboBox_currentIndexChanged(const QString &se
 
 void MainWindow::on_generateButton_clicked()
 {
+    QSettings settings;
+    const QString OUTPUT_DIRECTORY_PARAM("outputDirectory");
+
     // Check that the topic has been configured correctly.
     if (!category_widget->category()->canBeGenerated())
     {
@@ -194,7 +210,7 @@ void MainWindow::on_generateButton_clicked()
     }
 
     // Prompt for output filename
-    QString filename = QFileDialog::getSaveFileName(this, tr("Realm Works® Export File"), /*dir*/ QString(), /*filter*/ tr("Realm Works® Export Files (*.rwexport)"));
+    QString filename = QFileDialog::getSaveFileName(this, tr("Realm Works® Export File"), /*dir*/ settings.value(OUTPUT_DIRECTORY_PARAM).toString(), /*filter*/ tr("Realm Works® Export Files (*.rwexport)"));
     if (filename.isEmpty()) return;
     QFile file(filename);
     if (!file.open(QFile::WriteOnly))
@@ -202,6 +218,9 @@ void MainWindow::on_generateButton_clicked()
         qWarning() << tr("Failed to create file") << file.fileName();
         return;
     }
+
+    settings.setValue(OUTPUT_DIRECTORY_PARAM, QFileInfo(file).absolutePath());
+
     rw_structure.writeExportFile(&file, category_widget->category(), csv_full_model,
                                  (ui->parentGroupBox->isChecked() && parent_choice) ? parent_choice : 0,
                                  ui->parentRevealed->isChecked(),
