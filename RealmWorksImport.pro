@@ -25,7 +25,8 @@ SOURCES += main.cpp\
     rwcategorywidget.cpp \
     fieldlineedit.cpp \
     rw_structure.cpp \
-    fieldcombobox.cpp
+    fieldcombobox.cpp \
+    fieldmultilineedit.cpp
 
 HEADERS  += mainwindow.h \
     csvmodel.h \
@@ -39,7 +40,8 @@ HEADERS  += mainwindow.h \
     fieldlineedit.h \
     rw_structure.h \
     fieldcombobox.h \
-    datafield.h
+    datafield.h \
+    fieldmultilineedit.h
 
 FORMS    += mainwindow.ui
 
