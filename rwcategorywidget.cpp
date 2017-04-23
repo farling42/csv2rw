@@ -28,6 +28,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QTextStream>
 #include "fieldcombobox.h"
 #include "fieldlineedit.h"
+#include "fieldmultilineedit.h"
 
 #include "rw_category.h"
 #include "rw_domain.h"
@@ -57,8 +58,8 @@ RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *col
     layout->setContentsMargins(0,0,0,0);
 
     // Start with the title (+ prefix + suffix)
-    QRadioButton *reveal = new QRadioButton(QString());
-    FieldLineEdit *name = new FieldLineEdit(category->namefield());
+    QRadioButton  *reveal = new QRadioButton(QString());
+    FieldLineEdit *name   = new FieldLineEdit(category->namefield());
     FieldLineEdit *prefix = new FieldLineEdit(category->prefix());
     FieldLineEdit *suffix = new FieldLineEdit(category->suffix());
 
@@ -100,7 +101,7 @@ RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *col
         sections.last()++;
     }
 
-    layout->addStretch();
+    layout->addStretch(2);
     setLayout(layout);
 }
 
@@ -165,7 +166,7 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
     reveal->setChecked(partition->isRevealed());
     connect(reveal, &QRadioButton::toggled, partition, &RWFacet::setIsRevealed);
 
-    FieldLineEdit *edit = new FieldLineEdit(partition->contentsText());
+    FieldMultiLineEdit *edit = new FieldMultiLineEdit(partition->contentsText());
     edit->setToolTip("contents");
     RWBaseItem *purpose = partition->childElement("purpose");
     edit->setPlaceholderText(purpose ? purpose->structureText() : "<purpose>");
@@ -208,7 +209,6 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
     QRadioButton *reveal = 0;
     QLabel *label = 0;
     FieldComboBox *combo = 0;
-    FieldLineEdit *edit = 0;
 
     // Every snippet is revealable
     reveal = new QRadioButton(QString());
@@ -220,9 +220,12 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
     {
         label = new QLabel;
         label->setText(facet->name() + ":");
-        QFont bold_font = label->font();
-        bold_font.setBold(true);
-        label->setFont(bold_font);
+        if (facet->attributes().value("label_style").toString() == "Bold")
+        {
+            QFont bold_font = label->font();
+            bold_font.setBold(true);
+            label->setFont(bold_font);
+        }
         label->setToolTip(facet->id());
     }
 //Multi_Line, Hybrid_Tag, Labeled_Text, Tag_Standard, Picture
@@ -234,22 +237,49 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
         if (facet->tags().modelColumn() >= 0)
             combo->setIndexString(column_name(columns, facet->tags().modelColumn()));
     }
+    QWidget *edit_widget;
 
-    edit = new FieldLineEdit(facet->contentsText());
-    // Use the <description> child as a tool tip, if available
-    RWBaseItem *description = facet->childElement("description");
-    edit->setToolTip(description ? description->structureText() : facet->uuid());
-    if (facet->snippetType() == RWFacet::Hybrid_Tag)
+    if (facet->snippetType() == RWFacet::Multi_Line)
     {
-        edit->setPlaceholderText("Enter annotation here");
+        FieldMultiLineEdit *edit = new FieldMultiLineEdit(facet->contentsText());
+        edit_widget = edit;
+
+        // Use the <description> child as a tool tip, if available
+        RWBaseItem *description = facet->childElement("description");
+        edit->setToolTip(description ? description->structureText() : facet->uuid());
+        if (facet->snippetType() == RWFacet::Hybrid_Tag)
+        {
+            edit->setPlaceholderText("Enter annotation here");
+        }
+        else
+        {
+            edit->setPlaceholderText(facet->name());
+        }
+        if (facet->contentsText().modelColumn() >= 0)
+        {
+            edit->setText(column_name(columns, facet->contentsText().modelColumn()));
+        }
     }
     else
     {
-        edit->setPlaceholderText(facet->name());
-    }
-    if (facet->contentsText().modelColumn() >= 0)
-    {
-        edit->setText(column_name(columns, facet->contentsText().modelColumn()));
+        FieldLineEdit *edit = new FieldLineEdit(facet->contentsText());
+        edit_widget = edit;
+
+        // Use the <description> child as a tool tip, if available
+        RWBaseItem *description = facet->childElement("description");
+        edit->setToolTip(description ? description->structureText() : facet->uuid());
+        if (facet->snippetType() == RWFacet::Hybrid_Tag)
+        {
+            edit->setPlaceholderText("Enter annotation here");
+        }
+        else
+        {
+            edit->setPlaceholderText(facet->name());
+        }
+        if (facet->contentsText().modelColumn() >= 0)
+        {
+            edit->setText(column_name(columns, facet->contentsText().modelColumn()));
+        }
     }
 
     // Create a row containing all these widgets
@@ -258,7 +288,7 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
     if (reveal) boxl->addWidget(reveal);
     if (label) boxl->addWidget(label);
     if (combo) boxl->addWidget(combo);
-    if (edit) boxl->addWidget(edit);
+    if (edit_widget) boxl->addWidget(edit_widget);
 
     QWidget *box = new QWidget;
     box->setProperty("facet",QVariant::fromValue((void*)facet));

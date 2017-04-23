@@ -65,6 +65,12 @@ void RWCategory::writeToContents(QXmlStreamWriter *writer, const QModelIndex &in
         if (!suffix.isEmpty()) writer->writeAttribute("suffix", suffix);
         if (isRevealed()) writer->writeAttribute("is_revealed", "true");
 
+        // Children in the following order:
+        //   X x 'alias'
+        //   X x 'section'
+        //   X x 'tag_assign'
+        //   X x connection / dconnection
+        //   X x 'topic'
         writeChildrenToContents(writer, index);
 
         // Relevant export tag on every topic

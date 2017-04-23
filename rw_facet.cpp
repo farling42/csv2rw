@@ -77,8 +77,12 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
 #endif
 
         //
-        // CHILDREN have to be in a specific order
-        //
+        // CHILDREN have to be in a specific order:
+        //  contents | smart_image | ext_object | game_date | date_range
+        //  annotation
+        //  gm_directions
+        //  X x (link | dlink)
+        //  X x tag_assign
 
         // Maybe an ANNOTATION or CONTENTS
         if (!user_text.isEmpty())
@@ -102,8 +106,6 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
                 qFatal("RWFacet::writeToContents: invalid snippet type: %d", p_snippet_type);
                 break;
             }
-
-            // Maybe the snippet has some contents
             writer->writeTextElement(sub_element, xmlParagraph(xmlSpan(user_text, bold)));
         }
 

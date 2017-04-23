@@ -65,8 +65,11 @@ public:
     QString namespaceUri() const { return p_namespace_uri; }
     const QXmlStreamAttributes &attributes() const { return p_attributes; }
 
-    static QString xmlParagraph(const QString &contentsText);
-    static QString xmlSpan(const QString &contentsText, bool bold = false);
+    enum TextClass { RWDefault, RWSnippet, RWEnumerated };
+    static QString xmlParagraph(const QString &contentsText, TextClass text_class = RWDefault, int margin = 0);
+    static QString xmlSpan(const QString &contentsText,
+                           bool bold = false, bool italic = false,
+                           bool line_through = false, bool underline = false);
 
     void setIgnoreForContents(bool flag) { p_ignore_for_contents = flag; }
     bool ignoreForContents() const { return p_ignore_for_contents; }

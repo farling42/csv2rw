@@ -132,15 +132,40 @@ QDebug operator<<(QDebug stream, const RWBaseItem &item)
 }
 
 
-QString RWBaseItem::xmlParagraph(const QString &text)
+QString RWBaseItem::xmlParagraph(const QString &text, TextClass text_class, int margin)
 {
-    return "<p class=\"RWDefault\">" + text + "</p>";
+    switch (text_class)
+    {
+    case RWDefault:
+        return "<p class=\"RWDefault\">" + text + "</p>";
+    case RWEnumerated:
+        return "<p class=\"RWEnumerated\">" + text + "</p>";
+    case RWSnippet:
+        return "<p class=\"RWSnippet\" style=\"margin:" + QString::number(margin) + "pt 0pt 0pt 0pt;text-align:left;text-indent:0pt\">" + text + "</p>";
+    }
+    return QString();
 }
 
-QString RWBaseItem::xmlSpan(const QString &text, bool bold)
+QString RWBaseItem::xmlSpan(const QString &text, bool bold, bool italic, bool line_through, bool underline)
 {
+    // text-decoration - space separated list
+    QStringList decorations;
+    if (underline) decorations.append("underline");
+    if (line_through) decorations.append("line-through");
+    // Styles - semi-colon separated list
+    QStringList styles;
+    if (!decorations.isEmpty()) styles.append("text-decoration:" + decorations.join(' '));
+    if (bold) styles.append("font-weight:bold");
+    if (italic) styles.append("font-style:italic");
+
     QString style;
-    if (bold) style = " style=\"font-weight:bold\">";
+    if (!styles.isEmpty())
+    {
+        style = " style=\"" + styles.join(';') + "\"";
+    }
+
+    // Subscript   uses <sub> ... </sub>
+    // Superscript uses <sup> ... </sup>
     return "<span class=\"RWSnippet\"" + style + ">" + text + "</span>";
 }
 
