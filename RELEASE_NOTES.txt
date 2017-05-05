@@ -1,5 +1,9 @@
 v1.6
 Ensure "Realm Works" is displayed with the registered trademark symbol in all places.
+Improve the tool-tips.
+Remember the last used directory for each of the file selector dialogs.
+Allow multi-line text in snippets which are supposed to allow multiple lines.
+
 
 v1.5
 This release allows you to type in some free text into a snippet, or choose a tag for a choice field, instead of having CSV data appear in the field.

@@ -2,8 +2,8 @@
 <Package>
     <DisplayName>Realm Works® CSV Converter</DisplayName>
     <Description>This application converts the contents of a CSV into a Realm Works® import file.</Description>
-    <Version>1.5</Version>
-    <ReleaseDate>2017-04-21</ReleaseDate>
+    <Version>1.6</Version>
+    <ReleaseDate>2017-04-23</ReleaseDate>
     <Licenses>
         <License name="GNU General Public License, version 3.0" file="LICENSE.txt" />
     </Licenses>

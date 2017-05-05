@@ -1,6 +1,5 @@
 Save the configuration of CSV field to category field mapping.
 Provide support for Labelled_Text fields.
-Allow predefined text to be placed into certain text snippet types.
 Allow predefined text and CSV field names to be mixed together within certain text snippet types.
 Improve the CSV value => Domain mapping so that partial matches are possible.
 Allow the addition of additional text (and other) snippets to an imported category.
