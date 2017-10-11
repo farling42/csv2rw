@@ -1,3 +1,6 @@
+v1.7
+Small update that ignores blank lines in the CSV file so that a valid XML file is always generated.
+
 v1.6
 Ensure "Realm Works" is displayed with the registered trademark symbol in all places.
 Improve the tool-tips.
