@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.2.1, 2017-05-05T23:09:00. -->
+<!-- Written by QtCreator 4.2.1, 2017-10-11T23:08:17. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -257,7 +257,7 @@
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.1">
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
       <value type="QString" key="ProjectExplorer.ProcessStep.Arguments">--offline-only -c %{sourceDir}\Installer\config\config.xml -p packages CSV2RW.exe</value>
-      <value type="QString" key="ProjectExplorer.ProcessStep.Command">D:/Qt58/QtIFW2.0.5/bin/binarycreator.exe</value>
+      <value type="QString" key="ProjectExplorer.ProcessStep.Command">D:/Qt58/Tools/QtInstallerFramework/2.0/bin/binarycreator.exe</value>
       <value type="QString" key="ProjectExplorer.ProcessStep.WorkingDirectory">%{buildDir}</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">Custom Process Step</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>

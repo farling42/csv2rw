@@ -96,10 +96,13 @@ void CsvModel::readCSV(QTextStream &stream)
         headers = parseCSV(line);
         while (stream.readLineInto(&line))
         {
-            QStringList fields = parseCSV(line);
-            // Ensure this row of the table is the same length as the header row
-            while (fields.size() < headers.size()) fields.append(QString());
-            lines.append(fields);
+            if (!line.trimmed().isEmpty())
+            {
+                QStringList fields = parseCSV(line);
+                // Ensure this row of the table is the same length as the header row
+                while (fields.size() < headers.size()) fields.append(QString());
+                lines.append(fields);
+            }
         }
     }
     else
