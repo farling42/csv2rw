@@ -207,6 +207,14 @@ void MainWindow::on_generateButton_clicked()
                                   tr("The parent should be a different category to the CSV topic."));
             return;
         }
+#if 0
+        if (!parent_choice->canBeGenerated())
+        {
+            QMessageBox::critical(this, tr("Incomplete Parent"),
+                                  tr("The selected parent cannot be used for some unknown reason."));
+            return;
+        }
+#endif
     }
 
     // Prompt for output filename

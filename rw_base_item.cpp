@@ -20,6 +20,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QXmlStreamWriter>
 #include <QModelIndex>
 #include <QDebug>
+#include "rw_category.h"    // to stop iteration into lower RWCategory
 
 #undef DEBUG_XML
 
@@ -90,7 +91,9 @@ void RWBaseItem::writeChildrenToContents(QXmlStreamWriter *writer, const QModelI
     QList<RWBaseItem*> child_items = childItems<RWBaseItem*>();
     foreach (RWBaseItem *child, child_items)
     {
-        child->writeToContents(writer, index);
+        // Don't write children which are of type RWCategory
+        if (qobject_cast<RWCategory*>(child) == 0)
+            child->writeToContents(writer, index);
     }
 }
 

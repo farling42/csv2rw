@@ -48,8 +48,9 @@ void RWCategory::postLoad()
  */
 bool RWCategory::canBeGenerated() const
 {
-    return p_name.modelColumn() >= 0 &&
-            RWBaseItem::canBeGenerated();
+    // Don't check children, since only the name is needed in a topic.
+    return p_name.modelColumn() >= 0;
+    //return p_name.modelColumn() >= 0 && RWBaseItem::canBeGenerated();
 }
 
 void RWCategory::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index)
