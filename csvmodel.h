@@ -21,6 +21,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <QAbstractItemModel>
 
+class QFile;
 class QTextStream;
 
 class CsvModel : public QAbstractItemModel
@@ -43,10 +44,10 @@ public:
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
-    void readCSV(QTextStream &);
+    void readCSV(QFile &);
 
 private:
-    QStringList parseCSV(const QString &string);
+    QStringList parseCSV(QTextStream &);
     QStringList headers;
     QList<QStringList> lines;
 };

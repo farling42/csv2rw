@@ -89,8 +89,7 @@ void MainWindow::on_loadCsvButton_pressed()
         return;
     }
     ui->csvFilename->setText(filename);
-    QTextStream stream(&file);
-    csv_full_model->readCSV(stream);
+    csv_full_model->readCSV(file);
 
     // Remember the CSV directory
     settings.setValue(CSV_DIRECTORY_PARAM, QFileInfo(file).absolutePath());

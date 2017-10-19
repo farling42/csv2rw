@@ -18,7 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include "csvmodel.h"
 #include <QtCore/QDebug>
-#include <QtCore/QTextStream>
+#include <QtCore/QFile>
 
 CsvModel::CsvModel(QObject *parent)
     : QAbstractItemModel(parent)
@@ -71,7 +71,7 @@ QVariant CsvModel::data(const QModelIndex &index, int role) const
         return QVariant();
 
     // FIXME: Implement me!
-    if ((role == Qt::DisplayRole || role == Qt::EditRole) &&
+    if ((role == Qt::DisplayRole || role == Qt::EditRole || role == Qt::ToolTipRole) &&
             hasIndex(index.row(), index.column()))
     {
         // Reading in the CSV ensures that the row will have
@@ -81,8 +81,10 @@ QVariant CsvModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-void CsvModel::readCSV(QTextStream &stream)
+void CsvModel::readCSV(QFile &file)
 {
+    QTextStream stream(&file);
+
     QString line;
     beginResetModel();
 
@@ -91,22 +93,24 @@ void CsvModel::readCSV(QTextStream &stream)
     lines.clear();
 
     // Get headers
-    if (stream.readLineInto(&line))
+    headers = parseCSV(stream);
+    if (headers.size() == 0)
     {
-        headers = parseCSV(line);
-        while (stream.readLineInto(&line))
+        qWarning("No lines in source file");
+    }
+    else
+    {
+        while (!stream.atEnd())
         {
-            if (!line.trimmed().isEmpty())
+            QStringList fields = parseCSV(stream);
+            // Ensure this row of the table is the same length as the header row
+            if (fields.size() > 0)
             {
-                QStringList fields = parseCSV(line);
-                // Ensure this row of the table is the same length as the header row
                 while (fields.size() < headers.size()) fields.append(QString());
                 lines.append(fields);
             }
         }
     }
-    else
-        qWarning("No lines in source file");
     endResetModel();
 }
 
@@ -118,16 +122,58 @@ void CsvModel::readCSV(QTextStream &stream)
  * @param string the contents of a full row from the CSV file
  * @return a list of strings for each field on the row
  */
-QStringList CsvModel::parseCSV(const QString &string)
+QStringList CsvModel::parseCSV(QTextStream &stream)
 {
     // from http://stackoverflow.com/questions/27318631/parsing-through-a-csv-file-in-qt
-    enum State {Normal, Quote} state = Normal;
+    enum State {Normal, Quote, MaybeQuote} state = Normal;
     QStringList fields;
     QString value;
+    QString buffer;
+    bool done=false;
 
-    for (int i = 0; i < string.size(); i++)
+    qDebug("parseCSV");
+    int pos = 0;
+    if (!stream.readLineInto(&buffer)) return QStringList();
+
+    while (!done)
     {
-        QChar current = string.at(i);
+        // Maybe read another line into the buffer (handle blank lines inside quotes)
+        while (pos == buffer.size())
+        {
+            if (state == Normal || stream.atEnd())
+            {
+                done = true;
+                break;
+            }
+
+            // If we've already read some fields, then add a line-feed to the output
+            value += QChar::LineFeed;
+            if (!stream.readLineInto(&buffer))
+            {
+                done = true;
+                break;
+            }
+            pos = 0;
+        }
+        if (done) break;
+
+        QChar current = buffer[pos++];
+
+        // MaybeQuote means previous character was a '"', so see if we have two '"'
+        // which means inserting a single '" into the current value.
+        if (state == MaybeQuote)
+        {
+            if (current == '"')
+            {
+                // Two consecutive double-quotes, so replace by one double-quote.
+                value += '"';
+                state = Quote;
+            }
+            else
+                // Not a second double quote, so we are exiting quote mode.
+                // and interpret the character normally.
+                state = Normal;
+        }
 
         // Normal state
         if (state == Normal)
@@ -137,6 +183,7 @@ QStringList CsvModel::parseCSV(const QString &string)
             {
                 // Save field
                 fields.append(value);
+                qDebug() << "\tfield:" << value;
                 value.clear();
             }
 
@@ -152,31 +199,19 @@ QStringList CsvModel::parseCSV(const QString &string)
         // In-quote state
         else if (state == Quote)
         {
-            // Another double-quote
             if (current == '"')
-            {
-                if (i+1 < string.size())
-                {
-                    QChar next = string.at(i+1);
-
-                    // A double double-quote?
-                    if (next == '"')
-                    {
-                        value += '"';
-                        i++;
-                    }
-                    else
-                        state = Normal;
-                }
-            }
-
-            // Other character
+                // A double-quote inside a string - check next character to see if two sequential double-quotes.
+                state = MaybeQuote;
             else
+                // Other character
                 value += current;
         }
     }
     if (!value.isEmpty())
+    {
         fields.append(value);
+        qDebug() << "\tfield:" << value;
+    }
 
     return fields;
 }
