@@ -87,26 +87,25 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
         // Maybe an ANNOTATION or CONTENTS
         if (!user_text.isEmpty())
         {
-            QString sub_element;
             switch (p_snippet_type)
             {
             case Multi_Line:
-                sub_element = "contents";
-                break;
             case Labeled_Text:
-                sub_element = "contents";
+            {
+                QString text;
+                foreach (const QString &para, user_text.split("\n\n"))
+                    text.append(xmlParagraph(xmlSpan(para, bold)));
+                writer->writeTextElement("contents", text);
                 break;
+            }
             case Tag_Standard:
-                sub_element = "annotation";
-                break;
             case Hybrid_Tag:
-                sub_element = "annotation";
+                writer->writeTextElement("annotation", xmlParagraph(xmlSpan(user_text, bold)));
                 break;
             default:
                 qFatal("RWFacet::writeToContents: invalid snippet type: %d", p_snippet_type);
                 break;
             }
-            writer->writeTextElement(sub_element, xmlParagraph(xmlSpan(user_text, bold)));
         }
 
         // Maybe some GM directions

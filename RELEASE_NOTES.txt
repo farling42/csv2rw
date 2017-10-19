@@ -1,3 +1,10 @@
+v1.9
+When importing CSV files, line breaks inside quoted cell values are now supported.
+Blank lines in quoted blocks are treated as paragraph breaks for Label_Text and Multi_Line fields.
+
+v1.8
+This release fixes an issue where the RWEXPORT file would contain one or more blank topics if the original Realm Works structure file contains a category defined as a child of another category. (E.g. Location in the basic Pathfinder category structure).
+
 v1.7
 Small update that ignores blank lines in the CSV file so that a valid XML file is always generated.
 

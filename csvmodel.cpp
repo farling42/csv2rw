@@ -124,22 +124,22 @@ void CsvModel::readCSV(QFile &file)
  */
 QStringList CsvModel::parseCSV(QTextStream &stream)
 {
-    // from http://stackoverflow.com/questions/27318631/parsing-through-a-csv-file-in-qt
-    enum State {Normal, Quote, MaybeQuote} state = Normal;
+    enum State {Normal, Quote} state = Normal;
     QStringList fields;
     QString value;
     QString buffer;
     bool done=false;
 
-    qDebug("parseCSV");
     int pos = 0;
     if (!stream.readLineInto(&buffer)) return QStringList();
 
+    //qDebug() << "parseCSV";
     while (!done)
     {
         // Maybe read another line into the buffer (handle blank lines inside quotes)
         while (pos == buffer.size())
         {
+            // We were at end-of-line, so if in Normal mode then stop reading the current record.
             if (state == Normal || stream.atEnd())
             {
                 done = true;
@@ -159,22 +159,6 @@ QStringList CsvModel::parseCSV(QTextStream &stream)
 
         QChar current = buffer[pos++];
 
-        // MaybeQuote means previous character was a '"', so see if we have two '"'
-        // which means inserting a single '" into the current value.
-        if (state == MaybeQuote)
-        {
-            if (current == '"')
-            {
-                // Two consecutive double-quotes, so replace by one double-quote.
-                value += '"';
-                state = Quote;
-            }
-            else
-                // Not a second double quote, so we are exiting quote mode.
-                // and interpret the character normally.
-                state = Normal;
-        }
-
         // Normal state
         if (state == Normal)
         {
@@ -183,7 +167,7 @@ QStringList CsvModel::parseCSV(QTextStream &stream)
             {
                 // Save field
                 fields.append(value);
-                qDebug() << "\tfield:" << value;
+                //qDebug() << "\tfield:" << value;
                 value.clear();
             }
 
@@ -200,8 +184,19 @@ QStringList CsvModel::parseCSV(QTextStream &stream)
         else if (state == Quote)
         {
             if (current == '"')
-                // A double-quote inside a string - check next character to see if two sequential double-quotes.
-                state = MaybeQuote;
+            {
+                if (pos < buffer.size())
+                {
+                    // A double double-quote?
+                    if (buffer.at(pos) == '"')
+                    {
+                        value += '"';
+                        pos++;
+                    }
+                    else
+                        state = Normal;
+                }
+            }
             else
                 // Other character
                 value += current;
@@ -210,7 +205,7 @@ QStringList CsvModel::parseCSV(QTextStream &stream)
     if (!value.isEmpty())
     {
         fields.append(value);
-        qDebug() << "\tfield:" << value;
+        //qDebug() << "\tfield:" << value;
     }
 
     return fields;
