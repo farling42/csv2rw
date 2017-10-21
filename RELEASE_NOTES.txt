@@ -1,3 +1,7 @@
+v1.10
+Picture and Smart Images can have their picture loaded based on the filename being in a cell of the CSV.
+The named file is loaded during the GENERATE process.
+
 v1.9
 When importing CSV files, line breaks inside quoted cell values are now supported.
 Blank lines in quoted blocks are treated as paragraph breaks for Label_Text and Multi_Line fields.

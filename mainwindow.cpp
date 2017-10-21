@@ -94,6 +94,9 @@ void MainWindow::on_loadCsvButton_pressed()
     // Remember the CSV directory
     settings.setValue(CSV_DIRECTORY_PARAM, QFileInfo(file).absolutePath());
 
+    // Switch to the CSV directory, in case we need to load images.
+    QDir::setCurrent(QFileInfo(file).absolutePath());
+
     // Put headers into the header model
     QStringList headers;
     for (int row = 0; row < csv_full_model->columnCount(); row++)

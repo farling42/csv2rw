@@ -52,8 +52,6 @@ COMPANY = com.amusingtime.csv2rw
 PKGSRC=Installer
 PKGDIR=packages
 
-#DISTFILES += $${PWD}/$${PKGDIR}/
-
 INST_DIR_DATA = $${PKGDIR}/$${COMPANY}/data
 INST_DIR_META = $${PKGDIR}/$${COMPANY}/meta
 
@@ -72,16 +70,3 @@ DISTFILES += \
     Installer/packages/com.amusingtime.csv2rw/meta/installscript.qs \
     Installer/packages/com.amusingtime.csv2rw/meta/LICENSE.txt \
     csv2rw_en.ts
-
-#
-# Create install file
-#
-#INSTALLER = CSV2RW.exe
-#INPUT = $$PWD/$${PKGSRC}/config/config.xml
-#qtinstall.input = INPUT
-#qtinstall.name = Generates the Windows Install Program
-#qtinstall.output = $$INSTALLER
-#qtinstall.depends = $${INST_DIR_DATA}/$$TARGET
-#qtinstall.commands = D:/Qt58/QtIFW2.0.5/bin/binarycreator --offline-only -c $$PWD/$${PKGSRC}/config/config.xml -p $$OUT_PWD/$${PKGDIR} ${QMAKE_FILE_OUT}
-#qtinstall.CONFIG += no_link combine explicit_dependencies
-#QMAKE_EXTRA_COMPILERS += qtinstall

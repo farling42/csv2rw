@@ -21,10 +21,15 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QDebug>
 #include <QModelIndex>
 #include <QMetaEnum>
+#include <QFile>
+#include <QFileInfo>
+#include <QMessageBox>
 #include "rw_domain.h"
 
 static QMetaEnum snip_type_enum  = QMetaEnum::fromType<RWFacet::SnippetType>();
 static QMetaEnum snip_style_enum = QMetaEnum::fromType<RWFacet::SnippetStyle>();
+
+const int NAME_TYPE_LENGTH = 50;
 
 RWFacet::RWFacet(QXmlStreamReader *stream, QObject *parent) :
     RWBaseItem(stream, parent),
@@ -60,6 +65,7 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
     {
         const QString user_text = contentsText().valueString(index);
         const QString gm_dir    = gmDirections().valueString(index);
+        const QString asset     = filename().valueString(index);
 
         if (!id().isEmpty()) writer->writeAttribute("facet_id", id());
         writer->writeAttribute("type", snip_type_enum.valueToKey(p_snippet_type));
@@ -85,7 +91,7 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
         //  X x tag_assign
 
         // Maybe an ANNOTATION or CONTENTS
-        if (!user_text.isEmpty())
+        if (!user_text.isEmpty() || !asset.isEmpty())
         {
             switch (p_snippet_type)
             {
@@ -101,6 +107,12 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
             case Tag_Standard:
             case Hybrid_Tag:
                 writer->writeTextElement("annotation", xmlParagraph(xmlSpan(user_text, bold)));
+                break;
+            case Picture:
+                write_ext_object(writer, asset);
+                break;
+            case Smart_Image:
+                write_smart_image(writer, asset);
                 break;
             default:
                 qFatal("RWFacet::writeToContents: invalid snippet type: %d", p_snippet_type);
@@ -146,4 +158,61 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
 
     }
     writer->writeEndElement();  // snippet
+}
+
+void RWFacet::write_asset(QXmlStreamWriter *writer, const QString &filename)
+{
+    QFile file(filename);
+    if (file.open(QFile::ReadOnly))
+    {
+        QFileInfo info(file);
+
+        const int FILENAME_TYPE_LENGTH = 200;
+        writer->writeStartElement("asset");
+        writer->writeAttribute("filename", filename.right(FILENAME_TYPE_LENGTH));
+        //writer->writeAttribute("thumbnail_size", info.fileName());
+
+        QByteArray contents = file.readAll();
+        writer->writeTextElement("contents", contents.toBase64());
+
+        //writer->writeTextElement("thumbnail", thumbnail.toBase64());
+        //writer->writeTextElement("summary", thing.toBase64());
+        //writer->writeTextElement("url", filename);
+
+        writer->writeEndElement();   // asset
+    }
+    else
+    {
+        QString message = "File does not exist: " + filename;
+
+        static QMessageBox *warning = 0;
+        if (warning == 0)
+        {
+            warning = new QMessageBox;
+            warning->setText("Issues encountered during GENERATE:\n");
+        }
+        warning->setText(warning->text() + '\n' + message);
+        warning->show();
+    }
+}
+
+void RWFacet::write_ext_object(QXmlStreamWriter *writer, const QString &filename)
+{
+    writer->writeStartElement("ext_object");
+    writer->writeAttribute("name", QFileInfo(filename).fileName().right(NAME_TYPE_LENGTH));
+    writer->writeAttribute("type", "Picture");
+    write_asset(writer, filename);
+    writer->writeEndElement();
+}
+
+void RWFacet::write_smart_image(QXmlStreamWriter *writer, const QString &filename)
+{
+    writer->writeStartElement("smart_image");
+    writer->writeAttribute("name", QFileInfo(filename).fileName().right(NAME_TYPE_LENGTH));
+    write_asset(writer, filename);
+    // write_overlay (0-1)
+    // write_subset_mask (0-1)
+    // write_superset_mask (0-1)
+    // write_map_pan (0+)
+    writer->writeEndElement();
 }

@@ -48,16 +48,21 @@ public:
     DataField &tags()      { return p_tags; }
     DataField &gmDirections() { return p_gm_directions; }
     DataField &labelText() { return p_label_text; }
+    DataField &filename() { return p_filename; }
 
 public slots:
     void setSnippetStyle(SnippetStyle style) { p_snippet_style = style; }
 
 private:
+    void write_asset(QXmlStreamWriter *writer, const QString &filename);
+    void write_ext_object(QXmlStreamWriter *writer, const QString &filename);
+    void write_smart_image(QXmlStreamWriter *writer, const QString &filename);
     DataField p_tags;
     DataField p_gm_directions;
     SnippetType p_snippet_type;
     SnippetStyle p_snippet_style;
     DataField p_label_text;   // for Labeled_Text fields
+    DataField p_filename;
 };
 
 #endif // RWFACET_H

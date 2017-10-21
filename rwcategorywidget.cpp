@@ -208,7 +208,9 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
 {
     QRadioButton *reveal = 0;
     QLabel *label = 0;
+    FieldLineEdit *filename = 0;
     FieldComboBox *combo = 0;
+    QWidget *edit_widget = 0;
 
     // Every snippet is revealable
     reveal = new QRadioButton(QString());
@@ -237,7 +239,25 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
         if (facet->tags().modelColumn() >= 0)
             combo->setIndexString(column_name(columns, facet->tags().modelColumn()));
     }
-    QWidget *edit_widget;
+
+    if (facet->snippetType() == RWFacet::Picture ||
+        facet->snippetType() == RWFacet::Smart_Image)
+    {
+        // A field in which to choose the field for the IMAGE file to be loaded
+        filename = new FieldLineEdit(facet->filename());
+        filename->setPlaceholderText(facet->name());
+        filename->setToolTip(tr("File containing asset"));
+        // Change the background colour
+        QPalette p = filename->palette();
+        p.setBrush(QPalette::Base, p.button());
+        filename->setPalette(p);
+        filename->setBackgroundRole(QPalette::Button);
+        filename->setMaximumWidth(100);
+        if (facet->contentsText().modelColumn() >= 0)
+        {
+            filename->setText(column_name(columns, facet->filename().modelColumn()));
+        }
+    }
 
     if (facet->snippetType() == RWFacet::Multi_Line)
     {
@@ -268,7 +288,9 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
         // Use the <description> child as a tool tip, if available
         RWBaseItem *description = facet->childElement("description");
         edit->setToolTip(description ? description->structureText() : facet->uuid());
-        if (facet->snippetType() == RWFacet::Hybrid_Tag)
+        if (facet->snippetType() == RWFacet::Hybrid_Tag ||
+                facet->snippetType() == RWFacet::Picture ||
+                facet->snippetType() == RWFacet::Smart_Image)
         {
             edit->setPlaceholderText("Enter annotation here");
         }
@@ -287,6 +309,7 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
     boxl->setContentsMargins(0,0,0,0);
     if (reveal) boxl->addWidget(reveal);
     if (label) boxl->addWidget(label);
+    if (filename) boxl->addWidget(filename);
     if (combo) boxl->addWidget(combo);
     if (edit_widget) boxl->addWidget(edit_widget);
 
