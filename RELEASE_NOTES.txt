@@ -1,3 +1,7 @@
+v1.11
+Need to load HeroLab portfolio files for all your favourite NPCs?
+Extend the file loading to include the following snippet types: Portfolio, Statblock, Rich_Text, PDF, Audio, Video, HTML, Foreign.
+
 v1.10
 Picture and Smart Images can have their picture loaded based on the filename being in a cell of the CSV.
 The named file is loaded during the GENERATE process.
@@ -17,7 +21,6 @@ Ensure "Realm Works" is displayed with the registered trademark symbol in all pl
 Improve the tool-tips.
 Remember the last used directory for each of the file selector dialogs.
 Allow multi-line text in snippets which are supposed to allow multiple lines.
-
 
 v1.5
 This release allows you to type in some free text into a snippet, or choose a tag for a choice field, instead of having CSV data appear in the field.

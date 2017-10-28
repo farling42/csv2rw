@@ -108,13 +108,45 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
             case Hybrid_Tag:
                 writer->writeTextElement("annotation", xmlParagraph(xmlSpan(user_text, bold)));
                 break;
-            case Picture:
-                write_ext_object(writer, asset);
+
+                // There are a lot of snippet types which have an ext_object child (which has an asset child)
+            case Foreign:
+                write_ext_object(writer, "Foreign", asset);
                 break;
+            case Statblock: // this might require an .rtf file?
+                write_ext_object(writer, "Statblock", asset);
+                break;
+            case Portfolio: // requires a HeroLab portfolio
+                write_ext_object(writer, "Portfolio", asset);
+                break;
+            case Picture:
+                write_ext_object(writer, "Picture", asset);
+                break;
+            case Rich_Text:
+                write_ext_object(writer, "Rich_Text", asset);
+                break;
+            case PDF:
+                write_ext_object(writer, "PDF", asset);
+                break;
+            case Audio:
+                write_ext_object(writer, "Audio", asset);
+                break;
+            case Video:
+                write_ext_object(writer, "Video", asset);
+                break;
+            case HTML:
+                write_ext_object(writer, "HTML", asset);
+                break;
+
             case Smart_Image:
+                // Slightly different format since it has a smart_image child (which has an asset child)
                 write_smart_image(writer, asset);
                 break;
-            default:
+
+            case Numeric:
+            case Date_Game:
+            case Date_Range:
+            case Tag_Multi_Domain:
                 qFatal("RWFacet::writeToContents: invalid snippet type: %d", p_snippet_type);
                 break;
             }
@@ -196,11 +228,17 @@ void RWFacet::write_asset(QXmlStreamWriter *writer, const QString &filename)
     }
 }
 
-void RWFacet::write_ext_object(QXmlStreamWriter *writer, const QString &filename)
+/**
+ * @brief RWFacet::write_ext_object
+ * @param writer
+ * @param exttype one of Foreign, Statblock, Portfolio, Picture, Rich_Text, PDF, Audio, Video, HTML
+ * @param filename
+ */
+void RWFacet::write_ext_object(QXmlStreamWriter *writer, const QString &exttype, const QString &filename)
 {
     writer->writeStartElement("ext_object");
     writer->writeAttribute("name", QFileInfo(filename).fileName().right(NAME_TYPE_LENGTH));
-    writer->writeAttribute("type", "Picture");
+    writer->writeAttribute("type", exttype);
     write_asset(writer, filename);
     writer->writeEndElement();
 }

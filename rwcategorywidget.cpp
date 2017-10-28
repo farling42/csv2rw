@@ -218,6 +218,7 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
     reveal->setToolTip("revealed?");
     connect(reveal, &QRadioButton::toggled, facet, &RWFacet::setIsRevealed);
 
+    // Maybe a field-name to start the line
     if (facet->snippetType() == RWFacet::Labeled_Text || facet->snippetType() == RWFacet::Hybrid_Tag)
     {
         label = new QLabel;
@@ -240,10 +241,19 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
             combo->setIndexString(column_name(columns, facet->tags().modelColumn()));
     }
 
+    // Maybe a FILENAME entry field
     if (facet->snippetType() == RWFacet::Picture ||
-        facet->snippetType() == RWFacet::Smart_Image)
+            facet->snippetType() == RWFacet::Smart_Image ||
+            facet->snippetType() == RWFacet::Statblock ||
+            facet->snippetType() == RWFacet::Portfolio ||
+            facet->snippetType() == RWFacet::Rich_Text ||
+            facet->snippetType() == RWFacet::PDF ||
+            facet->snippetType() == RWFacet::Audio ||
+            facet->snippetType() == RWFacet::Video ||
+            facet->snippetType() == RWFacet::HTML ||
+            facet->snippetType() == RWFacet::Foreign)
     {
-        // A field in which to choose the field for the IMAGE file to be loaded
+        // A field in which to choose the field for the data (e.g. image) file to be loaded
         filename = new FieldLineEdit(facet->filename());
         filename->setPlaceholderText(facet->name());
         filename->setToolTip(tr("File containing asset"));
@@ -259,6 +269,7 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
         }
     }
 
+    // Now the text entry field
     if (facet->snippetType() == RWFacet::Multi_Line)
     {
         FieldMultiLineEdit *edit = new FieldMultiLineEdit(facet->contentsText());
@@ -290,7 +301,15 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
         edit->setToolTip(description ? description->structureText() : facet->uuid());
         if (facet->snippetType() == RWFacet::Hybrid_Tag ||
                 facet->snippetType() == RWFacet::Picture ||
-                facet->snippetType() == RWFacet::Smart_Image)
+                facet->snippetType() == RWFacet::Smart_Image ||
+                facet->snippetType() == RWFacet::Statblock ||
+                facet->snippetType() == RWFacet::Portfolio ||
+                facet->snippetType() == RWFacet::Picture ||
+                facet->snippetType() == RWFacet::Rich_Text ||
+                facet->snippetType() == RWFacet::PDF ||
+                facet->snippetType() == RWFacet::Audio ||
+                facet->snippetType() == RWFacet::Video ||
+                facet->snippetType() == RWFacet::HTML)
         {
             edit->setPlaceholderText("Enter annotation here");
         }
@@ -314,7 +333,7 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
     if (edit_widget) boxl->addWidget(edit_widget);
 
     QWidget *box = new QWidget;
-    box->setProperty("facet",QVariant::fromValue((void*)facet));
+    box->setProperty("facet", QVariant::fromValue((void*)facet));
     box->setLayout(boxl);
 
     return box;

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Installer>
-    <Name>CSV to Realm Works® Translator</Name>
-    <Version>1.10</Version>
-    <Title>CSV to Realm Works® Translator</Title>
+    <Name>CSV to Realm Works Importer</Name>
+    <Version>1.11</Version>
+    <Title>CSV to Realm Works Importer</Title>
     <Publisher>Martin Smith</Publisher>
     <ProductUrl>https://github.com/farling42/csv2rw</ProductUrl>
     <StartMenuDir>Amusing Time</StartMenuDir>
-    <TargetDir>@ApplicationsDir@/RW2CSV</TargetDir>
+    <TargetDir>@ApplicationsDir@/CSV2RW</TargetDir>
     <RunProgram>@TargetDir@/RealmWorksImport.exe</RunProgram>
 </Installer>
