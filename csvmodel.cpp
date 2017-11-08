@@ -185,17 +185,14 @@ QStringList CsvModel::parseCSV(QTextStream &stream)
         {
             if (current == '"')
             {
-                if (pos < buffer.size())
+                // A double double-quote?
+                if (pos < buffer.size() && buffer.at(pos) == '"')
                 {
-                    // A double double-quote?
-                    if (buffer.at(pos) == '"')
-                    {
-                        value += '"';
-                        pos++;
-                    }
-                    else
-                        state = Normal;
+                    value += '"';
+                    pos++;
                 }
+                else
+                    state = Normal;
             }
             else
                 // Other character

@@ -1,3 +1,6 @@
+v1.12
+Fix a small bug in the CSV reader so that a " at the end of a line is handled properly.
+
 v1.11
 Need to load HeroLab portfolio files for all your favourite NPCs?
 Extend the file loading to include the following snippet types: Portfolio, Statblock, Rich_Text, PDF, Audio, Video, HTML, Foreign.
