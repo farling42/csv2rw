@@ -41,7 +41,8 @@ HEADERS  += mainwindow.h \
     rw_structure.h \
     fieldcombobox.h \
     datafield.h \
-    fieldmultilineedit.h
+    fieldmultilineedit.h \
+    regexp.h
 
 FORMS    += mainwindow.ui
 

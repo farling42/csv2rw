@@ -1,3 +1,6 @@
+v1.13
+Detect URLs in the middle of blocks of text being imported and encode them so that they appear as links inside RealmWorks.
+
 v1.12
 Fix a small bug in the CSV reader so that a " at the end of a line is handled properly.
 

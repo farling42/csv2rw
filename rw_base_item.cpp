@@ -21,6 +21,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QModelIndex>
 #include <QDebug>
 #include "rw_category.h"    // to stop iteration into lower RWCategory
+#include "regexp.h"
 
 #undef DEBUG_XML
 
@@ -167,9 +168,14 @@ QString RWBaseItem::xmlSpan(const QString &text, bool bold, bool italic, bool li
         style = " style=\"" + styles.join(';') + "\"";
     }
 
+    // Parse for possible URLs, remembering style for future text
+    const QString start_rwsnippet(QString("<span class=\"RWSnippet\"%1>").arg(style));
+    const QString url_replacement("<a class=\"RWLink\" style=\"color:#000000;text-decoration:none\" href=\"\\1\" title=\"\\1\"><span class=\"RWLink\">\\1</span></a></span>" + start_rwsnippet);
+
     // Subscript   uses <sub> ... </sub>
     // Superscript uses <sup> ... </sup>
-    return "<span class=\"RWSnippet\"" + style + ">" + text + "</span>";
+    QString buffer = text;
+    return start_rwsnippet + buffer.replace(url_regexp, url_replacement) + "</span>";
 }
 
 RWBaseItem *RWBaseItem::childElement(const QString &element_name) const
