@@ -24,6 +24,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QFile>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QCoreApplication>
 #include "rw_domain.h"
 
 static QMetaEnum snip_type_enum  = QMetaEnum::fromType<RWFacet::SnippetType>();
@@ -195,11 +198,12 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
 void RWFacet::write_asset(QXmlStreamWriter *writer, const QString &filename)
 {
     QFile file(filename);
+    QUrl url(filename);
+    const int FILENAME_TYPE_LENGTH = 200;
     if (file.open(QFile::ReadOnly))
     {
         QFileInfo info(file);
 
-        const int FILENAME_TYPE_LENGTH = 200;
         writer->writeStartElement("asset");
         writer->writeAttribute("filename", filename.right(FILENAME_TYPE_LENGTH));
         //writer->writeAttribute("thumbnail_size", info.fileName());
@@ -213,9 +217,40 @@ void RWFacet::write_asset(QXmlStreamWriter *writer, const QString &filename)
 
         writer->writeEndElement();   // asset
     }
+    else if (url.isValid())
+    {
+        static QNetworkAccessManager *nam = 0;
+        if (nam == 0) nam = new QNetworkAccessManager;
+        QNetworkReply *reply = nam->get(QNetworkRequest(url));
+        while (!reply->isFinished())
+        {
+            qApp->processEvents(QEventLoop::WaitForMoreEvents);
+        }
+        if (reply->error() != QNetworkReply::NoError)
+        {
+            qWarning() << "Failed to locate URL:" << filename;
+        }
+        else if(reply->header(QNetworkRequest::ContentTypeHeader).toString().startsWith("image/"))
+        {
+            QString tempname = QFileInfo(url.path()).baseName() + '.' + reply->header(QNetworkRequest::ContentTypeHeader).toString().split("/").last();
+            writer->writeStartElement("asset");
+            writer->writeAttribute("filename", tempname.right(FILENAME_TYPE_LENGTH));
+
+            QByteArray contents = reply->readAll();
+            writer->writeTextElement("contents", contents.toBase64());
+            //writer->writeTextElement("url", filename);
+
+            writer->writeEndElement();   // asset
+        }
+        else
+        {
+            qWarning() << "Only URLs to images are supported! Check source at" << filename;
+        }
+        reply->deleteLater();
+    }
     else
     {
-        QString message = "File does not exist: " + filename;
+        QString message = "File/URL does not exist: " + filename;
 
         static QMessageBox *warning = 0;
         if (warning == 0)

@@ -186,11 +186,14 @@ void MainWindow::on_generateButton_clicked()
     QSettings settings;
     const QString OUTPUT_DIRECTORY_PARAM("outputDirectory");
 
+    ui->generateButton->setEnabled(false);
+
     // Check that the topic has been configured correctly.
     if (!category_widget->category()->canBeGenerated())
     {
         QMessageBox::critical(this, tr("Incomplete Data"),
                               tr("The topic/article needs to have a field allocated to the name."));
+        ui->generateButton->setEnabled(true);
         return;
     }
 
@@ -201,12 +204,14 @@ void MainWindow::on_generateButton_clicked()
         {
             QMessageBox::critical(this, tr("Incomplete Parent"),
                                   tr("The parent topic/article needs a name."));
+            ui->generateButton->setEnabled(true);
             return;
         }
         if (parent_choice == category_widget->category())
         {
             QMessageBox::critical(this, tr("Bad Parent Category"),
                                   tr("The parent should be a different category to the CSV topic."));
+            ui->generateButton->setEnabled(true);
             return;
         }
 #if 0
@@ -214,6 +219,7 @@ void MainWindow::on_generateButton_clicked()
         {
             QMessageBox::critical(this, tr("Incomplete Parent"),
                                   tr("The selected parent cannot be used for some unknown reason."));
+            ui->generateButton->setEnabled(true);
             return;
         }
 #endif
@@ -221,11 +227,16 @@ void MainWindow::on_generateButton_clicked()
 
     // Prompt for output filename
     QString filename = QFileDialog::getSaveFileName(this, tr("Realm Works® Export File"), /*dir*/ settings.value(OUTPUT_DIRECTORY_PARAM).toString(), /*filter*/ tr("Realm Works® Export Files (*.rwexport)"));
-    if (filename.isEmpty()) return;
+    if (filename.isEmpty())
+    {
+        ui->generateButton->setEnabled(true);
+        return;
+    }
     QFile file(filename);
     if (!file.open(QFile::WriteOnly))
     {
         qWarning() << tr("Failed to create file") << file.fileName();
+        ui->generateButton->setEnabled(true);
         return;
     }
 
@@ -236,6 +247,9 @@ void MainWindow::on_generateButton_clicked()
                                  ui->parentRevealed->isChecked(),
                                  ui->parentTitle->text(), ui->parentPrefix->text(), ui->parentSuffix->text());
     file.close();
+
+    // Enable button again (so that we know it is finished
+    ui->generateButton->setEnabled(true);
 }
 
 void MainWindow::on_helpButton_clicked()
