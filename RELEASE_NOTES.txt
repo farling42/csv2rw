@@ -1,8 +1,8 @@
-v1.14
+v1.16
 Allow a URL to be used as an alternative to a local file for the external object loading introduced in v1.11
 Disable GENERATE button while the export is being generated.
 
-v1.13
+v1.14
 Detect URLs in the middle of blocks of text being imported and encode them so that they appear as links inside RealmWorks.
 
 v1.12
