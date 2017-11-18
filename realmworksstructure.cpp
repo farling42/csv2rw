@@ -20,6 +20,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QXmlStreamReader>
 #include <QDebug>
 #include <QAbstractItemModel>
+#include <QProgressBar>
+#include <QProgressDialog>
+#include <QCoreApplication>
 
 #define SHOW_XML
 
@@ -161,6 +164,21 @@ void RealmWorksStructure::writeExportFile(QIODevice *device, RWCategory *categor
                                           const QString &parent_prefix,
                                           const QString &parent_suffix)
 {
+    QProgressDialog progress;
+    progress.setModal(true);
+    progress.setWindowTitle("Progress");
+    progress.setLabelText("Generating topics/articles...");
+    progress.setCancelButton(0);  // hide cancel button
+#if 0
+    // All I want is "%v of %m", but the bar displays differently!
+    QProgressBar *bar = new QProgressBar;
+    bar->setFormat("%v of %m");
+    bar->setAlignment(Qt::AlignCenter);
+    bar->setMinimumWidth(100);
+    progress.setBar(bar);
+#endif
+    progress.show();
+
     QXmlStreamWriter *writer = new QXmlStreamWriter(device);
     // Write out the basics to the file.
     writer->setAutoFormatting(true);
@@ -214,8 +232,11 @@ void RealmWorksStructure::writeExportFile(QIODevice *device, RWCategory *categor
                 parent_category->writeParentStartToContents(writer, parent_revealed, parent_title, parent_prefix, parent_suffix);
             }
             int maxrow = model->rowCount();
+            progress.setMaximum(maxrow);
             for (int row = 0 ; row < maxrow ; row++)
             {
+                progress.setValue(row);
+                qApp->processEvents();  // for progress dialog
                 category->writeToContents(writer, model->index(row, 0));
             }
             if (parent_category)
