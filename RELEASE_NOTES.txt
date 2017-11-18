@@ -1,3 +1,6 @@
+v1.17
+When reading an image from a network URL, attempt to handle HTTP redirect requests properly.
+
 v1.16
 Allow a URL to be used as an alternative to a local file for the external object loading introduced in v1.11
 Disable GENERATE button while the export is being generated.
