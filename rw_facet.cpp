@@ -220,8 +220,13 @@ void RWFacet::write_asset(QXmlStreamWriter *writer, const QString &filename)
     else if (url.isValid())
     {
         static QNetworkAccessManager *nam = 0;
-        if (nam == 0) nam = new QNetworkAccessManager;
-        QNetworkReply *reply = nam->get(QNetworkRequest(url));
+        if (nam == 0)
+        {
+            nam = new QNetworkAccessManager;
+            nam->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
+        }
+        QNetworkRequest request(url);
+        QNetworkReply *reply = nam->get(request);
         while (!reply->isFinished())
         {
             qApp->processEvents(QEventLoop::WaitForMoreEvents);
@@ -230,7 +235,10 @@ void RWFacet::write_asset(QXmlStreamWriter *writer, const QString &filename)
         {
             qWarning() << "Failed to locate URL:" << filename;
         }
-        else if(reply->header(QNetworkRequest::ContentTypeHeader).toString().startsWith("image/"))
+        // A redirect has ContentType of "text/html; charset=UTF-8, image/png"
+        // which is an ordered comma-separated list of types.
+        // So we need to check the LAST type which will be for readAll()
+        else if(reply->header(QNetworkRequest::ContentTypeHeader).toString().split(',').last().trimmed().startsWith("image/"))
         {
             QString tempname = QFileInfo(url.path()).baseName() + '.' + reply->header(QNetworkRequest::ContentTypeHeader).toString().split("/").last();
             writer->writeStartElement("asset");
@@ -244,7 +252,15 @@ void RWFacet::write_asset(QXmlStreamWriter *writer, const QString &filename)
         }
         else
         {
-            qWarning() << "Only URLs to images are supported! Check source at" << filename;
+            // A redirect has QPair("Content-Type","text/html; charset=UTF-8, image/png")
+            // note the comma-separated list of content types (legal?)
+            // the body of the message is actually PNG binary data.
+            // QPair("Server","Microsoft-IIS/8.5, Microsoft-IIS/8.5") so maybe ISS sent wrong content type
+
+            qWarning() << "Only URLs to images are supported (not" << reply->header(QNetworkRequest::ContentTypeHeader) << ")! Check source at" << filename;
+            //if (reply->header(QNetworkRequest::ContentTypeHeader).toString().startsWith("text/"))
+            //    qWarning() << "Body =" << reply->readAll();
+            //qWarning() << "Raw Header List =" << reply->rawHeaderPairs();
         }
         reply->deleteLater();
     }
