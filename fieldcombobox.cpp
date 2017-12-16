@@ -34,7 +34,7 @@ FieldComboBox::FieldComboBox(DataField &datafield, RWDomain *domain, QWidget *pa
     setToolTip(domain ? "Tag Domain: " + domain->name() : "Domain");
     setInsertPolicy(NoInsert);
     set_domain_list();
-    connect(this, &currentTextChanged, this, &text_changed);
+    connect(this, &FieldComboBox::currentTextChanged, this, &FieldComboBox::text_changed);
 }
 
 

@@ -11,8 +11,6 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = RealmWorksImport
 TEMPLATE = app
 
-CONFIG += windeployqt
-
 SOURCES += main.cpp\
         mainwindow.cpp \
     csvmodel.cpp \
@@ -48,6 +46,15 @@ FORMS    += mainwindow.ui
 
 TRANSLATIONS += csv2rw_en.ts
 
+macx {
+MACDEPLOYQT_OPTIONS = -verbose 3 -dmg
+CONFIG += macdeployqt
+}
+
+win32 {
+WINDEPLOYQT_OPTIONS = -verbose 3
+CONFIG += windeployqt
+
 COMPANY = com.amusingtime.csv2rw
 
 PKGSRC=Installer
@@ -56,11 +63,9 @@ PKGDIR=packages
 INST_DIR_DATA = $${PKGDIR}/$${COMPANY}/data
 INST_DIR_META = $${PKGDIR}/$${COMPANY}/meta
 
-WINDEPLOYQT_OPTIONS = -verbose 3
-
 DESTDIR = $${INST_DIR_DATA}
 
-QMAKE_POST_LINK += $$quote(\$(COPY_DIR) ..\\RealmWorksImport\\Installer\\packages packages$$escape_expand(\\n\\t))
+QMAKE_POST_LINK += $$quote(\$(COPY_DIR) ../RealmWorksImport/Installer/packages packages$$escape_expand(\\n\\t))
 
 DISTFILES += \
     LICENSE.txt \
@@ -71,3 +76,4 @@ DISTFILES += \
     Installer/packages/com.amusingtime.csv2rw/meta/installscript.qs \
     Installer/packages/com.amusingtime.csv2rw/meta/LICENSE.txt \
     csv2rw_en.ts
+}
