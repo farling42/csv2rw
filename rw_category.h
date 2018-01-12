@@ -22,6 +22,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "rw_base_item.h"
 
 class QXmlStreamWriter;
+class RWAlias;
 class RWPartition;
 
 class RWCategory : public RWBaseItem
@@ -40,6 +41,8 @@ public:
     virtual void postLoad();
 
     virtual bool canBeGenerated() const;
+
+    QList<RWAlias*> aliases;
 
 public:
     DataField &namefield()   { return p_name; }

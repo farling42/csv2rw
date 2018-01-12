@@ -533,6 +533,7 @@
     <addaction name="actionSave"/>
     <addaction name="actionSave_AS"/>
     <addaction name="actionQuit"/>
+    <addaction name="convertOP"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -554,6 +555,14 @@
   <action name="actionSave_AS">
    <property name="text">
     <string>Save As</string>
+   </property>
+  </action>
+  <action name="convertOP">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>Convert OP</string>
    </property>
   </action>
  </widget>

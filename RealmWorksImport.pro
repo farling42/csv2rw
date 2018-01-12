@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui network
+QT       += core gui network xmlpatterns
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -24,7 +24,9 @@ SOURCES += main.cpp\
     fieldlineedit.cpp \
     rw_structure.cpp \
     fieldcombobox.cpp \
-    fieldmultilineedit.cpp
+    fieldmultilineedit.cpp \
+    performxsltranslation.cpp \
+    rw_alias.cpp
 
 HEADERS  += mainwindow.h \
     csvmodel.h \
@@ -40,9 +42,12 @@ HEADERS  += mainwindow.h \
     fieldcombobox.h \
     datafield.h \
     fieldmultilineedit.h \
-    regexp.h
+    regexp.h \
+    performxsltranslation.h \
+    rw_alias.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    Installer/packages/com.amusingtime.csv2rw/meta/page.ui
 
 TRANSLATIONS += csv2rw_en.ts
 
@@ -57,23 +62,44 @@ CONFIG += windeployqt
 
 COMPANY = com.amusingtime.csv2rw
 
-PKGSRC=Installer
-PKGDIR=packages
+DESTDIR = packages/$${COMPANY}/data
 
-INST_DIR_DATA = $${PKGDIR}/$${COMPANY}/data
-INST_DIR_META = $${PKGDIR}/$${COMPANY}/meta
+# The DISTFILE appears in the "Other files" section of Qt Creator
+DISTFILES += \
+    Installer/config/config.xml \
+    Installer/packages/com.amusingtime.csv2rw/meta/package.xml \
+    Installer/packages/com.amusingtime.csv2rw/meta/installscript.qs \
+    Installer/packages/com.amusingtime.csv2rw/meta/LICENSE.txt
 
-DESTDIR = $${INST_DIR_DATA}
+# Put binarycreator packages files in the correct place
+bincre.path=$${OUT_PWD}
+bincre.files=Installer/packages
+INSTALLS += bincre
 
-QMAKE_POST_LINK += $$quote(\$(COPY_DIR) ../RealmWorksImport/Installer/packages packages$$escape_expand(\\n\\t))
+# Add new rule that will run the binarycreator (needs adding in Projects/Build Steps)
+#QMAKE_EXTRA_TARGETS += binarycreator
+#binarycreator.target = binarycreator
+#binarycreator.depends = $${PWD}/Installer/config/config.xml packages install
+#binarycreator.commands = D:\Qt\QtIFW-3.0.1\bin\binarycreator.exe --offline-only \
+#    -c $$shell_path($${PWD}/Installer/config/config.xml) \
+#    -p packages CSV2RW.exe
+
+INSTALLERS = Installer/config/config.xml
+
+binarycreator.input = INSTALLERS
+binarycreator.name = binarycreator
+binarycreator.depends = $$INSTALLERS install install_bincre
+binarycreator.output = CSV2RW.exe
+binarycreator.variable_out = HEADERS
+binarycreator.commands = D:\Qt\QtIFW-3.0.1\bin\binarycreator.exe --offline-only \
+    -c ${QMAKE_FILE_IN} -p packages ${QMAKE_FILE_OUT}
+
+QMAKE_EXTRA_COMPILERS += binarycreator
+}
 
 DISTFILES += \
     LICENSE.txt \
     RELEASE_NOTES.txt \
     TODO.txt \
-    Installer/config/config.xml \
-    Installer/packages/com.amusingtime.csv2rw/meta/package.xml \
-    Installer/packages/com.amusingtime.csv2rw/meta/installscript.qs \
-    Installer/packages/com.amusingtime.csv2rw/meta/LICENSE.txt \
-    csv2rw_en.ts
-}
+    csv2rw_en.ts \
+    ob2rw-xsl1.xslt

@@ -21,6 +21,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <QFrame>
 
+class RWAlias;
 class RWCategory;
 class RWFacet;
 class RWPartition;
@@ -41,9 +42,14 @@ public slots:
 
 private slots:
     void do_insert();
+    void add_name();
 
+    void remove_name();
 private:
+    QAbstractItemModel *p_columns;
     RWCategory *p_category;
+    QWidget *p_first_section;
+    void add_rwalias(RWAlias *alias);
 };
 
 #endif // RWCATEGORYWIDGET_H

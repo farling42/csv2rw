@@ -30,6 +30,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <rwcategorywidget.h>
 
 #include "realmworksstructure.h"
+#include "performxsltranslation.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -263,4 +264,9 @@ void MainWindow::on_helpButton_clicked()
             "Step 5: Press the 'Generate' to produce the Realm Works® .rwexport file which you can load into your Realm Works database.")
             ;
     QMessageBox::information(this, tr("Help"), help_text);
+}
+
+void MainWindow::on_convertOP_triggered()
+{
+    translate_obsidian_portal();
 }

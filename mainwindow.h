@@ -51,8 +51,8 @@ public Q_SLOTS:
 
 private slots:
     void on_generateButton_clicked();
-
     void on_helpButton_clicked();
+    void on_convertOP_triggered();
 
 private:
     Ui::MainWindow *ui;

@@ -19,21 +19,30 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "rwcategorywidget.h"
 
 #include <QAbstractItemModel>
+#include <QCheckBox>
 #include <QDebug>
 #include <QLabel>
 #include <QFrame>
 #include <QBoxLayout>
+#include <QMetaEnum>
 #include <QRadioButton>
 #include <QPushButton>
 #include <QTextStream>
+#include <QSignalMapper>
+
 #include "fieldcombobox.h"
 #include "fieldlineedit.h"
 #include "fieldmultilineedit.h"
 
+#include "rw_alias.h"
 #include "rw_category.h"
 #include "rw_domain.h"
 #include "rw_facet.h"
 #include "rw_partition.h"
+
+static QMetaEnum case_matching_enum   = QMetaEnum::fromType<RWAlias::CaseMatching>();
+static QMetaEnum match_priority_enum  = QMetaEnum::fromType<RWAlias::MatchPriority>();
+
 
 static inline QString column_name(QAbstractItemModel *model, int column)
 {
@@ -50,6 +59,7 @@ static inline QString column_name(QAbstractItemModel *model, int column)
  */
 RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *columns, QWidget *parent) :
     QFrame(parent),
+    p_columns(columns),
     p_category(category)
 {
     RWBaseItem *description;
@@ -62,6 +72,11 @@ RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *col
     FieldLineEdit *name   = new FieldLineEdit(category->namefield());
     FieldLineEdit *prefix = new FieldLineEdit(category->prefix());
     FieldLineEdit *suffix = new FieldLineEdit(category->suffix());
+    QPushButton   *addName = new QPushButton("+Name");
+
+    addName->setToolTip("Adds a True Name/Other Name\n"
+                        "Any name whose CSV cell is empty will not be created in RealmWorks.\n"
+                        "This allows different sets of attributes to set for different alternative names.");
 
     // Should the category be marked as revealed
     reveal->setAutoExclusive(false);
@@ -84,26 +99,153 @@ RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *col
     if (category->suffix().modelColumn() >= 0)
         suffix->setText(column_name(columns, category->suffix().modelColumn()));
 
+    connect(addName, &QPushButton::clicked, this, &RWCategoryWidget::add_name);
+
     QBoxLayout *title = new QHBoxLayout;
-    title->addWidget(reveal, 0);
-    title->addWidget(name, 2);
-    title->addWidget(prefix, 1);
-    title->addWidget(suffix, 1);
+    title->addWidget(reveal,  0);
+    title->addWidget(name,    2);
+    title->addWidget(prefix,  1);
+    title->addWidget(suffix,  1);
+    title->addWidget(addName, 0);
     layout->addLayout(title);
 
     // Now deal with the sections
     QList<int> sections;
     sections.append(1);
     QList<RWPartition*> child_items = category->childItems<RWPartition*>();
+    p_first_section = 0;
     foreach (RWPartition *child, child_items)
     {
-        layout->addWidget(add_partition(sections, columns, child));
+        QWidget *sec = add_partition(sections, columns, child);
+        if (p_first_section == 0) p_first_section = sec;
+        layout->addWidget(sec);
         sections.last()++;
     }
 
     layout->addStretch(2);
     setLayout(layout);
+
+    // Maybe they've switched to a category with some name entries already present.
+    foreach (RWAlias *alias, p_category->aliases)
+        add_rwalias(alias);
 }
+
+
+void RWCategoryWidget::add_rwalias(RWAlias *alias)
+{
+    bool is_true_name = (p_category->aliases.first() == alias);
+
+    alias->setIsTrueName(is_true_name);
+
+    QLabel        *label          = new QLabel(is_true_name ? "True Name :" : "Other Name:");
+    QRadioButton  *revealed       = new QRadioButton;
+    FieldLineEdit *name           = new FieldLineEdit(alias->namefield());
+    QCheckBox     *auto_accept    = new QCheckBox;
+    QCheckBox     *show_in_nav    = new QCheckBox;
+    QComboBox     *case_matching  = new QComboBox;
+    QComboBox     *match_priority = new QComboBox;
+    QPushButton   *delete_name    = new QPushButton("X");
+
+#if 0
+    // XML uses "Correction" whereas RW uses "Auto Correct"
+    for (int key=0; key<case_matching_enum.keyCount(); key++)
+        case_matching->addItem(case_matching_enum.key(key));
+#else
+    case_matching->addItem("Ignore");
+    case_matching->addItem("Sensitive");
+    case_matching->addItem("Auto Correct"); // XML uses "Correction"
+#endif
+
+    for (int key=0; key<match_priority_enum.keyCount(); key++)
+        match_priority->addItem(match_priority_enum.key(key));
+
+    connect(revealed,       &QRadioButton::toggled, alias, &RWAlias::setRevealed);
+    connect(auto_accept,    &QCheckBox::toggled,    alias, &RWAlias::setAutoAccept);
+    connect(show_in_nav,    &QCheckBox::toggled,    alias, &RWAlias::setShowInNav);
+    connect(case_matching,  static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), alias, &RWAlias::setCaseMatchingInt);
+    connect(match_priority, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), alias, &RWAlias::setMatchPriorityInt);
+    connect(delete_name,    &QPushButton::clicked,  this,  &RWCategoryWidget::remove_name);
+    // Don't allow deleting a True Name until all Other Names have been removed.
+    if (is_true_name) delete_name->setEnabled(false);
+
+    name->setPlaceholderText(is_true_name ? "Enter True Name" : "Enter New Alias");
+    revealed->setToolTip("Revealed");
+    auto_accept->setToolTip("Auto Accept");
+    show_in_nav->setToolTip("Shown In Nav");
+    case_matching->setToolTip("Case Matching");
+    match_priority->setToolTip("Priority");
+    delete_name->setToolTip(is_true_name ? "Unable to delete True Name" : "Delete this name");
+
+    revealed->setChecked(alias->isRevealed());
+    auto_accept->setChecked(alias->isAutoAccept());
+    show_in_nav->setChecked(alias->isShowNavPane());
+    case_matching->setCurrentIndex(alias->caseMatching());
+    match_priority->setCurrentIndex(alias->matchPriority());
+
+    if (alias->namefield().modelColumn() >= 0)
+        name->setText(column_name(p_columns, alias->namefield().modelColumn()));
+
+    // Add everything to the layout
+    QHBoxLayout *row = new QHBoxLayout;
+    row->addWidget(revealed, 0);
+    row->addWidget(label,    0);
+    row->addWidget(name,     1);
+    row->addWidget(case_matching,  0);
+    row->addWidget(auto_accept,    0);
+    row->addWidget(show_in_nav,    0);
+    row->addWidget(match_priority, 0);
+    row->addWidget(delete_name,    0);
+
+    // Set properties on the delete button to allow it to do it's work.
+    delete_name->setProperty("alias",  QVariant::fromValue(alias));
+    delete_name->setProperty("layout", QVariant::fromValue(row));
+
+    // Insert new name immediately before the FIRST section
+    QVBoxLayout *top_layout = qobject_cast<QVBoxLayout*>(layout());
+    if (p_first_section)
+        top_layout->insertLayout(top_layout->indexOf(p_first_section), row);
+    else
+        top_layout->addLayout(row);
+}
+
+
+void RWCategoryWidget::add_name()
+{
+    RWAlias *alias = new RWAlias;
+    p_category->aliases.append(alias);
+    add_rwalias(alias);
+}
+
+
+void RWCategoryWidget::remove_name()
+{
+    QPushButton *button = qobject_cast<QPushButton*>(sender());
+    if (button == 0) return;
+
+    QBoxLayout *row   = button->property("layout").value<QBoxLayout*>();
+    RWAlias    *alias = button->property("alias").value<RWAlias*>();
+    if (row == 0 || alias == 0) return;
+
+    // Remove alias from the structure
+    p_category->aliases.removeAll(alias);
+    delete alias;
+
+    // Remove widget from the window
+    QVBoxLayout *top_layout = qobject_cast<QVBoxLayout*>(layout());
+    top_layout->removeItem(row);
+    QLayoutItem *child;
+    while ((child = row->takeAt(0)) != 0)
+    {
+        if (child->widget())
+        {
+            delete child->widget();
+        }
+        delete child;
+    }
+    delete row;
+    top_layout->invalidate();
+}
+
 
 void RWCategoryWidget::do_insert()
 {

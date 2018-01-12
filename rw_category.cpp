@@ -16,9 +16,11 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "rw_alias.h"
 #include "rw_category.h"
 #include "rw_partition.h"
 #include <QXmlStreamWriter>
+#include <QMetaEnum>
 #include <QModelIndex>
 #include <QDebug>
 
@@ -65,6 +67,15 @@ void RWCategory::writeToContents(QXmlStreamWriter *writer, const QModelIndex &in
         QString suffix = p_suffix.valueString(index);
         if (!suffix.isEmpty()) writer->writeAttribute("suffix", suffix);
         if (isRevealed()) writer->writeAttribute("is_revealed", "true");
+
+        // Add alias snippets as the first entry within the topic,
+        // but only generate aliases for those entries that have a non-empty string.
+        // This allows a user to specify several different aliases in the GUI each using a different set of attributes,
+        // and then use a different CSV column for each particular alias.
+        foreach (RWAlias *alias, aliases)
+        {
+            alias->writeToContents(writer, index);
+        }
 
         // Children in the following order:
         //   X x 'alias'
