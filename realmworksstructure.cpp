@@ -23,6 +23,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QProgressBar>
 #include <QProgressDialog>
 #include <QCoreApplication>
+#include <QSortFilterProxyModel>
 
 #define SHOW_XML
 
@@ -158,11 +159,7 @@ RWBaseItem *RealmWorksStructure::read_element(QXmlStreamReader *reader, RWBaseIt
  */
 
 void RealmWorksStructure::writeExportFile(QIODevice *device, RWCategory *category, QAbstractItemModel *model,
-                                          RWCategory *parent_category,
-                                          bool parent_revealed,
-                                          const QString &parent_title,
-                                          const QString &parent_prefix,
-                                          const QString &parent_suffix)
+                                          RWCategory *parent_category)
 {
     QProgressDialog progress;
     progress.setModal(true);
@@ -226,10 +223,14 @@ void RealmWorksStructure::writeExportFile(QIODevice *device, RWCategory *categor
 
         // Process the CSV to write out the entire RWEXPORT file.
         writer->writeStartElement("contents");
+
+        // EITHER a possible a single parent
+        // OR one parent per unique entry in the identified column
+        if (parent_category == 0 || parent_category->namefield().modelColumn() < 0)
         {
             if (parent_category)
             {
-                parent_category->writeParentStartToContents(writer, parent_revealed, parent_title, parent_prefix, parent_suffix);
+                parent_category->writeStartToContents(writer, model->index(0,0));    // TODO - iterate across unique values in the column
             }
             int maxrow = model->rowCount();
             progress.setMaximum(maxrow);
@@ -241,6 +242,47 @@ void RealmWorksStructure::writeExportFile(QIODevice *device, RWCategory *categor
             }
             if (parent_category)
             {
+                writer->writeEndElement();  // topic
+            }
+        }
+        else
+        {
+            // Get list of unique entries in the parent column
+            QSet<QString> parent_names;
+            QMap<QString,int> parent_row;
+            int parent_column = parent_category->namefield().modelColumn();
+            for (int row=0; row<model->columnCount(); row++)
+            {
+                QString name = model->index(row, parent_column).data().toString();
+                if (name.isEmpty()) name = "<no name>";
+                if (!parent_names.contains(name))
+                {
+                    parent_names.insert(name);
+                    parent_row.insert(name, row);
+                }
+            }
+            qDebug() << "Unique Parents =" << parent_names;
+
+            progress.setMaximum(model->rowCount());
+            int count = 0;
+            QSortFilterProxyModel proxy;
+            proxy.setSourceModel(model);
+            proxy.setFilterKeyColumn(parent_column);
+
+            foreach (const QString &parent_name, parent_names)
+            {
+                parent_category->writeStartToContents(writer, model->index(parent_row.value(parent_name),0));    // TODO - iterate across unique values in the column
+
+                // Find the rows which match the parent's name
+                proxy.setFilterFixedString(parent_name);
+
+                int maxrow = proxy.rowCount();
+                for (int row = 0 ; row < maxrow ; row++)
+                {
+                    progress.setValue(count++);
+                    qApp->processEvents();  // for progress dialog
+                    category->writeToContents(writer, proxy.index(row, 0));
+                }
                 writer->writeEndElement();  // topic
             }
         }

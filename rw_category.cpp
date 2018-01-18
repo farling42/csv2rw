@@ -57,6 +57,13 @@ bool RWCategory::canBeGenerated() const
 
 void RWCategory::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index)
 {
+    writeStartToContents(writer, index);
+    writer->writeEndElement();  // </topic>
+}
+
+
+void RWCategory::writeStartToContents(QXmlStreamWriter *writer, const QModelIndex &index)
+{
     writer->writeStartElement("topic");
     {
         writer->writeAttribute("topic_id", QString("topic_%1").arg(topic_id++));
@@ -91,23 +98,4 @@ void RWCategory::writeToContents(QXmlStreamWriter *writer, const QModelIndex &in
         // No actual TEXT for this element (only children)
         //if (!text().valueString(index).isEmpty()) writer->writeCharacters(text().valueString(index));
     }
-    writer->writeEndElement();  // </topic>
-}
-
-
-void RWCategory::writeParentStartToContents(QXmlStreamWriter *writer, bool revealed, const QString &title, const QString &prefix, const QString &suffix)
-{
-    writer->writeStartElement("topic");
-    writer->writeAttribute("topic_id", QString("topic_%1").arg(topic_id++));
-    writer->writeAttribute("public_name", title);
-    if (!id().isEmpty()) writer->writeAttribute("category_id", id());
-    if (!prefix.isEmpty()) writer->writeAttribute("prefix", prefix);
-    if (!suffix.isEmpty()) writer->writeAttribute("suffix", suffix);
-    if (revealed) writer->writeAttribute("is_revealed", "true");
-
-    // Write out the basic structure without any information
-    writeChildrenToContents(writer, QModelIndex());
-
-    // Relevant export tag on every topic
-    writeExportTag(writer);
 }

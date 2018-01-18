@@ -61,6 +61,7 @@ private:
     RealmWorksStructure rw_structure;
     RWCategoryWidget *category_widget;
     RWCategory *parent_choice;
+    RWCategoryWidget *parent_widget;
 };
 
 #endif // MAINWINDOW_H

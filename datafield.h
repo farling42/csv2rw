@@ -39,6 +39,10 @@ public:
         else
             return p_fixed_text;
     }
+    bool isDefined() const
+    {
+        return p_model_column >= 0 || !p_fixed_text.isEmpty();
+    }
 
 public slots:
     void setModelColumn(int column) { p_model_column = column; }

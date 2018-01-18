@@ -33,11 +33,7 @@ public:
     RWCategory(QXmlStreamReader *stream, QObject *parent = 0);
 
     virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index);
-    virtual void writeParentStartToContents(QXmlStreamWriter*,
-                                            bool revealed,
-                                            const QString &title,
-                                            const QString &prefix,
-                                            const QString &suffix);
+    virtual void writeStartToContents(QXmlStreamWriter*, const QModelIndex &index);
     virtual void postLoad();
 
     virtual bool canBeGenerated() const;

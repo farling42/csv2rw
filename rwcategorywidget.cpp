@@ -57,7 +57,7 @@ static inline QString column_name(QAbstractItemModel *model, int column)
  * @param category
  * @param parent
  */
-RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *columns, QWidget *parent) :
+RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *columns, bool include_sections, QWidget *parent) :
     QFrame(parent),
     p_columns(columns),
     p_category(category)
@@ -109,20 +109,23 @@ RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *col
     title->addWidget(addName, 0);
     layout->addLayout(title);
 
-    // Now deal with the sections
-    QList<int> sections;
-    sections.append(1);
-    QList<RWPartition*> child_items = category->childItems<RWPartition*>();
-    p_first_section = 0;
-    foreach (RWPartition *child, child_items)
+    // For a parent category, we don't want to allow sections to be defined.
+    if (include_sections)
     {
-        QWidget *sec = add_partition(sections, columns, child);
-        if (p_first_section == 0) p_first_section = sec;
-        layout->addWidget(sec);
-        sections.last()++;
+        // Now deal with the sections
+        QList<int> sections;
+        sections.append(1);
+        QList<RWPartition*> child_items = category->childItems<RWPartition*>();
+        p_first_section = 0;
+        foreach (RWPartition *child, child_items)
+        {
+            QWidget *sec = add_partition(sections, columns, child);
+            if (p_first_section == 0) p_first_section = sec;
+            layout->addWidget(sec);
+            sections.last()++;
+        }
+        layout->addStretch(2);
     }
-
-    layout->addStretch(2);
     setLayout(layout);
 
     // Maybe they've switched to a category with some name entries already present.

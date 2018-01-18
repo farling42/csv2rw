@@ -34,7 +34,7 @@ class RWCategoryWidget : public QFrame
     QWidget *add_facet(QAbstractItemModel *columns, RWFacet *facet);
 
 public:
-    explicit RWCategoryWidget(RWCategory *category, QAbstractItemModel *columns, QWidget *parent = 0);
+    explicit RWCategoryWidget(RWCategory *category, QAbstractItemModel *columns, bool include_sections = true, QWidget *parent = 0);
     RWCategory *category() const { return p_category; }
 signals:
 

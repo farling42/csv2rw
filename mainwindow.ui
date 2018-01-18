@@ -245,7 +245,7 @@
                   <x>0</x>
                   <y>0</y>
                   <width>321</width>
-                  <height>195</height>
+                  <height>215</height>
                  </rect>
                 </property>
                </widget>
@@ -319,8 +319,8 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QWidget" name="widget_9" native="true">
-                     <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="0,1,0,0">
+                    <widget class="QWidget" name="parentArea" native="true">
+                     <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="">
                       <property name="leftMargin">
                        <number>0</number>
                       </property>
@@ -333,58 +333,6 @@
                       <property name="bottomMargin">
                        <number>0</number>
                       </property>
-                      <item>
-                       <widget class="QRadioButton" name="parentRevealed">
-                        <property name="toolTip">
-                         <string>Revealed?</string>
-                        </property>
-                        <property name="text">
-                         <string/>
-                        </property>
-                       </widget>
-                      </item>
-                      <item>
-                       <widget class="QLineEdit" name="parentTitle">
-                        <property name="placeholderText">
-                         <string>parent Title</string>
-                        </property>
-                        <property name="clearButtonEnabled">
-                         <bool>true</bool>
-                        </property>
-                       </widget>
-                      </item>
-                      <item>
-                       <widget class="QLineEdit" name="parentPrefix">
-                        <property name="maximumSize">
-                         <size>
-                          <width>75</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="placeholderText">
-                         <string>parent Prefix</string>
-                        </property>
-                        <property name="clearButtonEnabled">
-                         <bool>true</bool>
-                        </property>
-                       </widget>
-                      </item>
-                      <item>
-                       <widget class="QLineEdit" name="parentSuffix">
-                        <property name="maximumSize">
-                         <size>
-                          <width>75</width>
-                          <height>16777215</height>
-                         </size>
-                        </property>
-                        <property name="placeholderText">
-                         <string>parent Suffix</string>
-                        </property>
-                        <property name="clearButtonEnabled">
-                         <bool>true</bool>
-                        </property>
-                       </widget>
-                      </item>
                      </layout>
                     </widget>
                    </item>

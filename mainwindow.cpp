@@ -36,7 +36,8 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
     category_widget(0),
-    parent_choice(0)
+    parent_choice(0),
+    parent_widget(0)
 {
     ui->setupUi(this);
 
@@ -178,6 +179,15 @@ void MainWindow::on_parentCategoryComboBox_currentIndexChanged(const QString &se
     }
     if (parent_choice == 0) return;
 
+    QLayout *layout = ui->parentArea->layout();
+    if (parent_widget)
+    {
+        layout->removeWidget(parent_widget);
+        parent_widget->deleteLater();
+    }
+    parent_widget = new RWCategoryWidget(parent_choice, header_model, /*include_sections*/ false);
+    layout->addWidget(parent_widget);
+
     //qDebug() << "Selected category" << parent_choice->name();
 }
 
@@ -201,7 +211,7 @@ void MainWindow::on_generateButton_clicked()
     // Check that if a parent has been specified, that it has a name
     if (ui->parentGroupBox->isChecked() && parent_choice)
     {
-        if (ui->parentTitle->text().isEmpty())
+        if (!parent_choice->namefield().isDefined())
         {
             QMessageBox::critical(this, tr("Incomplete Parent"),
                                   tr("The parent topic/article needs a name."));
@@ -215,15 +225,6 @@ void MainWindow::on_generateButton_clicked()
             ui->generateButton->setEnabled(true);
             return;
         }
-#if 0
-        if (!parent_choice->canBeGenerated())
-        {
-            QMessageBox::critical(this, tr("Incomplete Parent"),
-                                  tr("The selected parent cannot be used for some unknown reason."));
-            ui->generateButton->setEnabled(true);
-            return;
-        }
-#endif
     }
 
     // Prompt for output filename
@@ -244,9 +245,7 @@ void MainWindow::on_generateButton_clicked()
     settings.setValue(OUTPUT_DIRECTORY_PARAM, QFileInfo(file).absolutePath());
 
     rw_structure.writeExportFile(&file, category_widget->category(), csv_full_model,
-                                 (ui->parentGroupBox->isChecked() && parent_choice) ? parent_choice : 0,
-                                 ui->parentRevealed->isChecked(),
-                                 ui->parentTitle->text(), ui->parentPrefix->text(), ui->parentSuffix->text());
+                                 (ui->parentGroupBox->isChecked() && parent_choice) ? parent_choice : 0);
     file.close();
 
     // Enable button again (so that we know it is finished
