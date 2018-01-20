@@ -30,6 +30,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "rw_partition.h"
 #include "rw_structure.h"
 
+class QProgressDialog;
+
 class RealmWorksStructure
 {
 public:
@@ -49,6 +51,8 @@ public Q_SLOTS:
 private:
     QString namespace_uri;
     RWBaseItem *read_element(QXmlStreamReader *reader, RWBaseItem *parent);
+    void writeTopics(QProgressDialog &progress, QXmlStreamWriter *writer, RWCategory *category, QAbstractItemModel *model);
+    void writeParentToStructure(QProgressDialog &progress, QXmlStreamWriter *writer, RWCategory *category, QAbstractItemModel *model, RWCategory *parent_category);
 };
 
 #endif // REALMWORKSSTRUCTURE_H

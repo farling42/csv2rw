@@ -166,14 +166,6 @@ void RealmWorksStructure::writeExportFile(QIODevice *device, RWCategory *categor
     progress.setWindowTitle("Progress");
     progress.setLabelText("Generating topics/articles...");
     progress.setCancelButton(0);  // hide cancel button
-#if 0
-    // All I want is "%v of %m", but the bar displays differently!
-    QProgressBar *bar = new QProgressBar;
-    bar->setFormat("%v of %m");
-    bar->setAlignment(Qt::AlignCenter);
-    bar->setMinimumWidth(100);
-    progress.setBar(bar);
-#endif
     progress.show();
 
     QXmlStreamWriter *writer = new QXmlStreamWriter(device);
@@ -224,67 +216,25 @@ void RealmWorksStructure::writeExportFile(QIODevice *device, RWCategory *categor
         // Process the CSV to write out the entire RWEXPORT file.
         writer->writeStartElement("contents");
 
-        // EITHER a possible a single parent
-        // OR one parent per unique entry in the identified column
-        if (parent_category == 0 || parent_category->namefield().modelColumn() < 0)
+        // Progress is across all rows of the base model
+        progress.setMaximum(model->rowCount());
+
+        if (parent_category == 0)
         {
-            if (parent_category)
-            {
-                parent_category->writeStartToContents(writer, model->index(0,0));    // TODO - iterate across unique values in the column
-            }
-            int maxrow = model->rowCount();
-            progress.setMaximum(maxrow);
-            for (int row = 0 ; row < maxrow ; row++)
-            {
-                progress.setValue(row);
-                qApp->processEvents();  // for progress dialog
-                category->writeToContents(writer, model->index(row, 0));
-            }
-            if (parent_category)
-            {
-                writer->writeEndElement();  // topic
-            }
+            // No parent topic
+            writeTopics(progress, writer, category, model);
+        }
+        else if (parent_category->namefield().modelColumn() < 0)
+        {
+            // A single parent with a fixed string for the name
+            parent_category->writeStartToContents(writer, model->index(0,0));
+            writeTopics(progress, writer, category, model);
+            writer->writeEndElement();
         }
         else
         {
-            // Get list of unique entries in the parent column
-            QSet<QString> parent_names;
-            QMap<QString,int> parent_row;
-            int parent_column = parent_category->namefield().modelColumn();
-            for (int row=0; row<model->columnCount(); row++)
-            {
-                QString name = model->index(row, parent_column).data().toString();
-                if (name.isEmpty()) name = "<no name>";
-                if (!parent_names.contains(name))
-                {
-                    parent_names.insert(name);
-                    parent_row.insert(name, row);
-                }
-            }
-            qDebug() << "Unique Parents =" << parent_names;
-
-            progress.setMaximum(model->rowCount());
-            int count = 0;
-            QSortFilterProxyModel proxy;
-            proxy.setSourceModel(model);
-            proxy.setFilterKeyColumn(parent_column);
-
-            foreach (const QString &parent_name, parent_names)
-            {
-                parent_category->writeStartToContents(writer, model->index(parent_row.value(parent_name),0));    // TODO - iterate across unique values in the column
-
-                // Find the rows which match the parent's name
-                proxy.setFilterFixedString(parent_name);
-
-                int maxrow = proxy.rowCount();
-                for (int row = 0 ; row < maxrow ; row++)
-                {
-                    progress.setValue(count++);
-                    qApp->processEvents();  // for progress dialog
-                    category->writeToContents(writer, proxy.index(row, 0));
-                }
-                writer->writeEndElement();  // topic
-            }
+            // one parent per unique entry in the identified column
+            writeParentToStructure(progress, writer, category, model, parent_category);
         }
         writer->writeEndElement(); // contents
     }
@@ -293,3 +243,73 @@ void RealmWorksStructure::writeExportFile(QIODevice *device, RWCategory *categor
     writer->writeEndDocument();
     delete writer;
 }
+
+/**
+ * @brief RealmWorksStructure::writeParentToStructure
+ * Write out the parent topics, with the subject topics as children of the appropriate lowest parent.
+ *
+ * @param progress
+ * @param writer
+ * @param topic_category
+ * @param model
+ * @param parent_category
+ */
+void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress, QXmlStreamWriter *writer,
+                                                 RWCategory *topic_category, QAbstractItemModel *model,
+                                                 RWCategory *parent_category)
+{
+    // Get list of unique entries in the parent column
+    // We have X parents, based on the unique values in the indicated column
+    QSet<QString> parent_names;
+    int parent_column = parent_category->namefield().modelColumn();
+    for (int row=0; row<model->rowCount(); row++)
+    {
+        QString name = model->index(row, parent_column).data().toString();
+        if (name.isEmpty())
+        {
+            name = "<no name>";
+            qDebug() << "row" << row << "has no name";
+        }
+        parent_names.insert(name);
+    }
+    qDebug() << "Unique Parents =" << parent_names;
+
+    QSortFilterProxyModel proxy;
+    proxy.setSourceModel(model);
+    proxy.setFilterKeyColumn(parent_column);
+
+    // TODO - iterate across unique values in the column
+    foreach (const QString &parent_name, parent_names)
+    {
+        // Find the rows which match the parent's name
+        proxy.setFilterFixedString(parent_name);
+
+        parent_category->writeStartToContents(writer, proxy.index(0,0));
+        writeTopics(progress, writer, topic_category, &proxy);
+        writer->writeEndElement();
+    }
+}
+
+/**
+ * @brief RealmWorksStructure::writeToStructure
+ * Write out the actual topics, creating one topic for each row in the supplied model.
+ *
+ * @param progress
+ * @param writer
+ * @param topic_category
+ * @param model
+ */
+
+void RealmWorksStructure::writeTopics(QProgressDialog &progress, QXmlStreamWriter *writer,
+                                        RWCategory *category, QAbstractItemModel *model)
+{
+    int maxrow = model->rowCount();
+    for (int row = 0 ; row < maxrow ; row++)
+    {
+        progress.setValue(progress.value()+1);
+        qApp->processEvents();  // for progress dialog
+        category->writeToContents(writer, model->index(row, 0));
+    }
+}
+
+
