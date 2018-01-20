@@ -27,7 +27,6 @@ class RWFacet : public RWBaseItem
 {
     Q_OBJECT
     Q_PROPERTY(SnippetType  snippetType  READ snippetType)
-    Q_PROPERTY(SnippetStyle snippetStyle READ snippetStyle WRITE setSnippetStyle)
 
 public:
     // SnippetType values are taken from the XSD v2
@@ -35,23 +34,19 @@ public:
                        Tag_Standard, Tag_Multi_Domain, Hybrid_Tag, Foreign,
                        Statblock, Portfolio, Picture, Rich_Text, PDF,
                        Audio, Video, HTML, Smart_Image };
-    enum SnippetStyle { Normal, Read_Aloud, Handout, Flavor, Callout };
 
     Q_ENUM(SnippetType)
-    Q_ENUM(SnippetStyle)
 
     RWFacet(QXmlStreamReader *stream, QObject *parent = 0);
     virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index);
 
     SnippetType  snippetType()  const { return p_snippet_type;  }
-    SnippetStyle snippetStyle() const { return p_snippet_style; }
     DataField &tags()      { return p_tags; }
     DataField &gmDirections() { return p_gm_directions; }
     DataField &labelText() { return p_label_text; }
     DataField &filename() { return p_filename; }
 
 public slots:
-    void setSnippetStyle(SnippetStyle style) { p_snippet_style = style; }
 
 private:
     void write_asset(QXmlStreamWriter *writer, const QString &filename);
@@ -60,7 +55,6 @@ private:
     DataField p_tags;
     DataField p_gm_directions;
     SnippetType p_snippet_type;
-    SnippetStyle p_snippet_style;
     DataField p_label_text;   // for Labeled_Text fields
     DataField p_filename;
 };

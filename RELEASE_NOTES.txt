@@ -1,3 +1,6 @@
+v1.21
+Add a method of setting the Snippet Style on every snippet.
+
 v1.20
 A hierarchy of parents can be created, although each level of parent must use a different type of category.
 

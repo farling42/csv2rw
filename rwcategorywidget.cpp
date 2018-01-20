@@ -20,6 +20,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include <QAbstractItemModel>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QDebug>
 #include <QLabel>
 #include <QFrame>
@@ -28,7 +29,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QRadioButton>
 #include <QPushButton>
 #include <QTextStream>
-#include <QSignalMapper>
 
 #include "fieldcombobox.h"
 #include "fieldlineedit.h"
@@ -165,8 +165,8 @@ void RWCategoryWidget::add_rwalias(RWAlias *alias)
     connect(revealed,       &QRadioButton::toggled, alias, &RWAlias::setRevealed);
     connect(auto_accept,    &QCheckBox::toggled,    alias, &RWAlias::setAutoAccept);
     connect(show_in_nav,    &QCheckBox::toggled,    alias, &RWAlias::setShowInNav);
-    connect(case_matching,  static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), alias, &RWAlias::setCaseMatchingInt);
-    connect(match_priority, static_cast<void (QComboBox::*)(int)>(&QComboBox::activated), alias, &RWAlias::setMatchPriorityInt);
+    connect(case_matching,  QOverload<int>::of(&QComboBox::activated), alias, &RWAlias::setCaseMatchingInt);
+    connect(match_priority, QOverload<int>::of(&QComboBox::activated), alias, &RWAlias::setMatchPriorityInt);
     connect(delete_name,    &QPushButton::clicked,  this,  &RWCategoryWidget::remove_name);
     // Don't allow deleting a True Name until all Other Names have been removed.
     if (is_true_name) delete_name->setEnabled(false);
@@ -318,9 +318,20 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
     if (partition->contentsText().modelColumn() >= 0)
         edit->setText(column_name(columns, partition->contentsText().modelColumn()));
 
+    QComboBox *snippet_style = new QComboBox;
+    snippet_style->setToolTip("Snippet Style");
+    snippet_style->addItem("Normal",     RWFacet::Normal);
+    snippet_style->addItem("Read Aloud", RWFacet::Read_Aloud);
+    snippet_style->addItem("Message",    RWFacet::Handout);
+    snippet_style->addItem("Flavor",     RWFacet::Flavor);
+    snippet_style->addItem("Callout",    RWFacet::Callout);
+    snippet_style->setCurrentIndex(partition->snippetStyle());
+    connect(snippet_style, QOverload<int>::of(&QComboBox::currentIndexChanged), [=] { set_style(snippet_style, partition); } );
+
     QHBoxLayout *textlayout = new QHBoxLayout;
     textlayout->addWidget(reveal);
     textlayout->addWidget(edit);
+    textlayout->addWidget(snippet_style);
     layout->addLayout(textlayout);
 
 #ifdef ADD_SNIPPET
@@ -467,6 +478,15 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
             edit->setText(column_name(columns, facet->contentsText().modelColumn()));
         }
     }
+    QComboBox *snippet_style = new QComboBox;
+    snippet_style->setToolTip("Snippet Style");
+    snippet_style->addItem("Normal",     RWFacet::Normal);
+    snippet_style->addItem("Read Aloud", RWFacet::Read_Aloud);
+    snippet_style->addItem("Message",    RWFacet::Handout);
+    snippet_style->addItem("Flavor",     RWFacet::Flavor);
+    snippet_style->addItem("Callout",    RWFacet::Callout);
+    snippet_style->setCurrentIndex(facet->snippetStyle());
+    connect(snippet_style, QOverload<int>::of(&QComboBox::currentIndexChanged), [=] { set_style(snippet_style, facet); } );
 
     // Create a row containing all these widgets
     QHBoxLayout *boxl = new QHBoxLayout;
@@ -476,10 +496,17 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
     if (filename) boxl->addWidget(filename);
     if (combo) boxl->addWidget(combo);
     if (edit_widget) boxl->addWidget(edit_widget);
+    if (snippet_style) boxl->addWidget(snippet_style);
 
     QWidget *box = new QWidget;
     box->setProperty("facet", QVariant::fromValue((void*)facet));
     box->setLayout(boxl);
 
     return box;
+}
+
+
+void RWCategoryWidget::set_style(QComboBox *combo, RWBaseItem *facet)
+{
+    facet->setSnippetStyle(combo->currentData().value<RWFacet::SnippetStyle>());
 }

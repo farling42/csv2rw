@@ -19,6 +19,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "rw_partition.h"
 #include "rw_facet.h"
 #include <QXmlStreamWriter>
+#include <QMetaEnum>
+
+static QMetaEnum snip_style_enum = QMetaEnum::fromType<RWPartition::SnippetStyle>();
 
 RWPartition::RWPartition(QXmlStreamReader *stream, QObject *parent) :
     RWBaseItem(stream, parent)
@@ -50,6 +53,7 @@ void RWPartition::writeToContents(QXmlStreamWriter *writer, const QModelIndex &i
         {
             writer->writeAttribute("type", "Multi_Line");
             // no facet_id
+            if (p_snippet_style != Normal) writer->writeAttribute("style", snip_style_enum.valueToKey(p_snippet_style));
             if (isRevealed()) writer->writeAttribute("is_revealed", "true");
             QString text;
             foreach (const QString &para, user_text.split("\n\n"))

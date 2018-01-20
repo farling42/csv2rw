@@ -33,7 +33,7 @@ ParentCategoryWidget::ParentCategoryWidget(RealmWorksStructure *structure, QAbst
     setLayout(main_layout);
 
     connect(delete_button, &QPushButton::clicked, this, &ParentCategoryWidget::deleteRequested);
-    connect(combo, static_cast<void(QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged), this, &ParentCategoryWidget::select_category);
+    connect(combo, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, &ParentCategoryWidget::select_category);
 
     // Set up the list of available categories
     QStringList cats;

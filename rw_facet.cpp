@@ -36,8 +36,7 @@ const int NAME_TYPE_LENGTH = 50;
 
 RWFacet::RWFacet(QXmlStreamReader *stream, QObject *parent) :
     RWBaseItem(stream, parent),
-    p_snippet_type(Multi_Line),
-    p_snippet_style(Normal)
+    p_snippet_type(Multi_Line)
 {
     static bool first = true;
     if (first)
@@ -72,7 +71,7 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
 
         if (!id().isEmpty()) writer->writeAttribute("facet_id", id());
         writer->writeAttribute("type", snip_type_enum.valueToKey(p_snippet_type));
-        if (p_snippet_style != Normal) writer->writeAttribute("style", snip_type_enum.valueToKey(p_snippet_style));
+        if (p_snippet_style != Normal) writer->writeAttribute("style", snip_style_enum.valueToKey(p_snippet_style));
         if (isRevealed()) writer->writeAttribute("is_revealed", "true");
         if (!gm_dir.isEmpty()) writer->writeAttribute("purpose", user_text.isEmpty() ? "Directions_Only" : "Both");
 

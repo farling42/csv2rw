@@ -32,12 +32,19 @@ class RWBaseItem : public QObject
     Q_PROPERTY(QString structureElement READ structureElement)
     Q_PROPERTY(bool revealed          READ isRevealed        WRITE setIsRevealed)
     Q_PROPERTY(bool ignoreForContents READ ignoreForContents WRITE setIgnoreForContents)
+    Q_PROPERTY(SnippetStyle snippetStyle READ snippetStyle WRITE setSnippetStyle)
+    // SnippetStyle should be in RWFacet, but it is used by RWPartition
 
 public:
     RWBaseItem(QXmlStreamReader *stream, QObject *parent = 0, bool ignore_for_contents = false);
 
+    enum SnippetStyle { Normal, Read_Aloud, Handout, Flavor, Callout };
+    Q_ENUM(SnippetStyle)
+
 public Q_SLOTS:
     void setIsRevealed(bool is_revealed) { p_revealed = is_revealed; }
+    void setSnippetStyleInt(int style) { p_snippet_style = (SnippetStyle)style; }
+    void setSnippetStyle(SnippetStyle style) { p_snippet_style = style; }
 
 public:
     // Attributes from the structure definition
@@ -46,6 +53,7 @@ public:
     bool global() const { return p_global; }
     QString uuid() const { return p_uuid; }
     QString signature() const { return p_signature; }
+    SnippetStyle snippetStyle() const { return p_snippet_style; }
 
     // More information
     virtual bool canBeGenerated() const;
@@ -83,6 +91,7 @@ public:
 protected:
     virtual void writeChildrenToStructure(QXmlStreamWriter *writer);
     virtual void writeChildrenToContents(QXmlStreamWriter *writer, const QModelIndex &index);
+    SnippetStyle p_snippet_style;
 
 private:
     QXmlStreamAttributes p_attributes;
