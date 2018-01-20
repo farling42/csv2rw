@@ -45,6 +45,8 @@ public:
     DataField &prefix() { return p_prefix; }
     DataField &suffix() { return p_suffix; }
 
+    static void setDefaultName(const QString &name);
+
 private:
     DataField p_name;
     DataField p_prefix;

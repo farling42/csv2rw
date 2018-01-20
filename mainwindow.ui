@@ -114,6 +114,9 @@
                   <property name="text">
                    <string>Load CSV</string>
                   </property>
+                  <property name="icon">
+                   <iconset theme="SP_FileDialogStart"/>
+                  </property>
                  </widget>
                 </item>
                </layout>
@@ -201,6 +204,9 @@
                   <property name="text">
                    <string>Load Structure</string>
                   </property>
+                  <property name="icon">
+                   <iconset theme="SP_FileDialogStart"/>
+                  </property>
                  </widget>
                 </item>
                </layout>
@@ -245,24 +251,21 @@
                   <x>0</x>
                   <y>0</y>
                   <width>321</width>
-                  <height>215</height>
+                  <height>225</height>
                  </rect>
                 </property>
                </widget>
               </widget>
              </item>
              <item>
-              <widget class="QGroupBox" name="parentGroupBox">
-               <property name="title">
-                <string>Use Parent Topic</string>
+              <widget class="QFrame" name="frame_2">
+               <property name="frameShape">
+                <enum>QFrame::Panel</enum>
                </property>
-               <property name="checkable">
-                <bool>true</bool>
+               <property name="frameShadow">
+                <enum>QFrame::Sunken</enum>
                </property>
-               <property name="checked">
-                <bool>false</bool>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_6">
+               <layout class="QVBoxLayout" name="verticalLayout_7">
                 <property name="leftMargin">
                  <number>0</number>
                 </property>
@@ -276,8 +279,15 @@
                  <number>0</number>
                 </property>
                 <item>
-                 <widget class="QWidget" name="parentDetails" native="true">
-                  <layout class="QVBoxLayout" name="verticalLayout_7">
+                 <widget class="QPushButton" name="addParent">
+                  <property name="text">
+                   <string>Add Parent</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QWidget" name="parentWidget" native="true">
+                  <layout class="QVBoxLayout" name="verticalLayout_6">
                    <property name="leftMargin">
                     <number>0</number>
                    </property>
@@ -290,52 +300,6 @@
                    <property name="bottomMargin">
                     <number>0</number>
                    </property>
-                   <item>
-                    <widget class="QWidget" name="widget_7" native="true">
-                     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,1">
-                      <property name="leftMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="topMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="rightMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="bottomMargin">
-                       <number>0</number>
-                      </property>
-                      <item>
-                       <widget class="QLabel" name="label_2">
-                        <property name="text">
-                         <string>Parent Category:</string>
-                        </property>
-                       </widget>
-                      </item>
-                      <item>
-                       <widget class="QComboBox" name="parentCategoryComboBox"/>
-                      </item>
-                     </layout>
-                    </widget>
-                   </item>
-                   <item>
-                    <widget class="QWidget" name="parentArea" native="true">
-                     <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="">
-                      <property name="leftMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="topMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="rightMargin">
-                       <number>0</number>
-                      </property>
-                      <property name="bottomMargin">
-                       <number>0</number>
-                      </property>
-                     </layout>
-                    </widget>
-                   </item>
                   </layout>
                  </widget>
                 </item>
@@ -451,6 +415,9 @@
                <property name="text">
                 <string>GENERATE</string>
                </property>
+               <property name="icon">
+                <iconset theme="SP_DialogSaveButton"/>
+               </property>
               </widget>
              </item>
             </layout>
@@ -530,22 +497,6 @@
     <hint type="destinationlabel">
      <x>325</x>
      <y>276</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>parentGroupBox</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>parentDetails</receiver>
-   <slot>setVisible(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>530</x>
-     <y>328</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>530</x>
-     <y>334</y>
     </hint>
    </hints>
   </connection>

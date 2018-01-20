@@ -31,13 +31,12 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include "realmworksstructure.h"
 #include "performxsltranslation.h"
+#include "parentcategorywidget.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    category_widget(0),
-    parent_choice(0),
-    parent_widget(0)
+    category_widget(0)
 {
     ui->setupUi(this);
 
@@ -47,12 +46,16 @@ MainWindow::MainWindow(QWidget *parent) :
     proxy->setSourceModel(csv_full_model);
     ui->csvContentsTableView->setModel(proxy);
 
-    // Ensure the parent panel visibility matches the check box
-    ui->parentDetails->setVisible(ui->parentGroupBox->isChecked());
-
     // Set up the list of headers
     header_model = new QStringListModel;
     ui->headerListView->setModel(header_model);
+    ui->addParent->setEnabled(false);
+
+    // Set some icons that can't be set in Qt Creator
+    ui->loadCsvButton->setIcon(style()->standardIcon(QStyle::SP_FileDialogStart));
+    ui->loadStructureButton->setIcon(style()->standardIcon(QStyle::SP_FileDialogStart));
+    ui->generateButton->setIcon(style()->standardIcon(QStyle::SP_DialogSaveButton));
+    ui->generateButton->setEnabled(false);
 }
 
 MainWindow::~MainWindow()
@@ -107,7 +110,9 @@ void MainWindow::on_loadCsvButton_pressed()
     }
     header_model->setStringList(headers);
     //qDebug() << "Model size: " << csv_full_model->rowCount() << "rows and" << csv_full_model->columnCount() << "columns";
+    ui->generateButton->setEnabled(rw_structure.categories.size() > 0);
 }
+
 
 void MainWindow::on_loadStructureButton_pressed()
 {
@@ -138,12 +143,9 @@ void MainWindow::on_loadStructureButton_pressed()
     }
     cats.sort();
     ui->categoryComboBox->clear();
-    ui->parentCategoryComboBox->clear();
-    foreach (const QString &str, cats)
-    {
-        ui->categoryComboBox->addItem(str);
-        ui->parentCategoryComboBox->addItem(str);
-    }
+    ui->categoryComboBox->addItems(cats);
+    ui->addParent->setEnabled(true);
+    ui->generateButton->setEnabled(csv_full_model->rowCount() > 0);
 }
 
 void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selection)
@@ -166,32 +168,6 @@ void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selectio
 }
 
 
-void MainWindow::on_parentCategoryComboBox_currentIndexChanged(const QString &selection)
-{
-    parent_choice = 0;
-    foreach (RWCategory *category, rw_structure.categories)
-    {
-        if (category->name() == selection)
-        {
-            parent_choice = category;
-            break;
-        }
-    }
-    if (parent_choice == 0) return;
-
-    QLayout *layout = ui->parentArea->layout();
-    if (parent_widget)
-    {
-        layout->removeWidget(parent_widget);
-        parent_widget->deleteLater();
-    }
-    parent_widget = new RWCategoryWidget(parent_choice, header_model, /*include_sections*/ false);
-    layout->addWidget(parent_widget);
-
-    //qDebug() << "Selected category" << parent_choice->name();
-}
-
-
 void MainWindow::on_generateButton_clicked()
 {
     QSettings settings;
@@ -209,22 +185,25 @@ void MainWindow::on_generateButton_clicked()
     }
 
     // Check that if a parent has been specified, that it has a name
-    if (ui->parentGroupBox->isChecked() && parent_choice)
+    QSet<RWCategory*> used_categories;
+    used_categories.insert(category_widget->category());
+    foreach (ParentCategoryWidget *widget, parents)
     {
-        if (!parent_choice->namefield().isDefined())
+        if (!widget->category()->namefield().isDefined())
         {
             QMessageBox::critical(this, tr("Incomplete Parent"),
                                   tr("The parent topic/article needs a name."));
             ui->generateButton->setEnabled(true);
             return;
         }
-        if (parent_choice == category_widget->category())
+        if (used_categories.contains(widget->category()))
         {
             QMessageBox::critical(this, tr("Bad Parent Category"),
-                                  tr("The parent should be a different category to the CSV topic."));
+                                  tr("The parent should be a different category to the CSV topic and other parents."));
             ui->generateButton->setEnabled(true);
             return;
         }
+        used_categories.insert(widget->category());
     }
 
     // Prompt for output filename
@@ -244,8 +223,10 @@ void MainWindow::on_generateButton_clicked()
 
     settings.setValue(OUTPUT_DIRECTORY_PARAM, QFileInfo(file).absolutePath());
 
-    rw_structure.writeExportFile(&file, category_widget->category(), csv_full_model,
-                                 (ui->parentGroupBox->isChecked() && parent_choice) ? parent_choice : 0);
+    QList<RWCategory*> parent_cats;
+    foreach (ParentCategoryWidget *widget, parents)
+        parent_cats.append(widget->category());
+    rw_structure.writeExportFile(&file, category_widget->category(), csv_full_model, parent_cats);
     file.close();
 
     // Enable button again (so that we know it is finished
@@ -268,4 +249,27 @@ void MainWindow::on_helpButton_clicked()
 void MainWindow::on_convertOP_triggered()
 {
     translate_obsidian_portal();
+}
+
+/**
+ * @brief MainWindow::on_addParent_clicked
+ * Add another parent to the list of nested parents, and don't allow the previous parents to be deleted.
+ */
+void MainWindow::on_addParent_clicked()
+{
+    if (parents.size() > 0) parents.last()->setCanDelete(false);
+    ParentCategoryWidget *widget = new ParentCategoryWidget(&rw_structure, header_model, parents.count() * 20);
+    connect(widget, &ParentCategoryWidget::deleteRequested, this, &MainWindow::delete_parent);
+    parents.append(widget);
+    ui->parentWidget->layout()->addWidget(widget);
+}
+
+/**
+ * @brief MainWindow::delete_parent
+ * Remove the most recently added parent.
+ */
+void MainWindow::delete_parent()
+{
+    parents.takeLast()->deleteLater();
+    if (parents.size() > 0) parents.last()->setCanDelete(true);
 }

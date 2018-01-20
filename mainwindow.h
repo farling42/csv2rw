@@ -28,6 +28,7 @@ class MainWindow;
 
 class CsvModel;
 class QStringListModel;
+class ParentCategoryWidget;
 class RWCategoryWidget;
 
 class MainWindow : public QMainWindow
@@ -47,21 +48,22 @@ public Q_SLOTS:
     void on_loadCsvButton_pressed();
     void on_loadStructureButton_pressed();
     void on_categoryComboBox_currentIndexChanged(const QString&);
-    void on_parentCategoryComboBox_currentIndexChanged(const QString&);
 
 private slots:
     void on_generateButton_clicked();
     void on_helpButton_clicked();
     void on_convertOP_triggered();
 
+    void on_addParent_clicked();
+
+    void delete_parent();
 private:
     Ui::MainWindow *ui;
     CsvModel *csv_full_model;
     QStringListModel *header_model;
     RealmWorksStructure rw_structure;
     RWCategoryWidget *category_widget;
-    RWCategory *parent_choice;
-    RWCategoryWidget *parent_widget;
+    QList<ParentCategoryWidget*> parents;
 };
 
 #endif // MAINWINDOW_H

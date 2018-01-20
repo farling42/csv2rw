@@ -26,7 +26,8 @@ SOURCES += main.cpp\
     fieldcombobox.cpp \
     fieldmultilineedit.cpp \
     performxsltranslation.cpp \
-    rw_alias.cpp
+    rw_alias.cpp \
+    parentcategorywidget.cpp
 
 HEADERS  += mainwindow.h \
     csvmodel.h \
@@ -44,7 +45,8 @@ HEADERS  += mainwindow.h \
     fieldmultilineedit.h \
     regexp.h \
     performxsltranslation.h \
-    rw_alias.h
+    rw_alias.h \
+    parentcategorywidget.h
 
 FORMS    += mainwindow.ui \
     Installer/packages/com.amusingtime.csv2rw/meta/page.ui

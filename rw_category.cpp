@@ -25,6 +25,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QDebug>
 
 static int topic_id = 1;
+static QString g_default_name = "no-name";
 
 RWCategory::RWCategory(QXmlStreamReader *stream, QObject *parent) :
     RWBaseItem(stream, parent)
@@ -68,7 +69,9 @@ void RWCategory::writeStartToContents(QXmlStreamWriter *writer, const QModelInde
     {
         writer->writeAttribute("topic_id", QString("topic_%1").arg(topic_id++));
         if (!id().isEmpty()) writer->writeAttribute("category_id", id());
-        writer->writeAttribute("public_name", p_name.valueString(index));
+        QString public_name = p_name.valueString(index);
+        if (public_name.isEmpty()) public_name = g_default_name;
+        writer->writeAttribute("public_name", public_name);
         QString prefix = p_prefix.valueString(index);
         if (!prefix.isEmpty()) writer->writeAttribute("prefix", prefix);
         QString suffix = p_suffix.valueString(index);
@@ -98,4 +101,10 @@ void RWCategory::writeStartToContents(QXmlStreamWriter *writer, const QModelInde
         // No actual TEXT for this element (only children)
         //if (!text().valueString(index).isEmpty()) writer->writeCharacters(text().valueString(index));
     }
+}
+
+
+void RWCategory::setDefaultName(const QString &name)
+{
+    g_default_name = name;
 }

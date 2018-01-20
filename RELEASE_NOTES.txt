@@ -1,3 +1,6 @@
+v1.20
+A hierarchy of parents can be created, although each level of parent must use a different type of category.
+
 v1.19
 When defining a parent category, a column can be dragged across to define the parent in which case one parent will be created for each unique string in the indicated column of the CSV, and it will be a parent to only those topics which have
 the same string in that particular CSV column.

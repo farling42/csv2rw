@@ -158,8 +158,9 @@ RWBaseItem *RealmWorksStructure::read_element(QXmlStreamReader *reader, RWBaseIt
  * @param model
  */
 
-void RealmWorksStructure::writeExportFile(QIODevice *device, RWCategory *category, QAbstractItemModel *model,
-                                          RWCategory *parent_category)
+void RealmWorksStructure::writeExportFile(QIODevice *device, RWCategory *category,
+                                          QAbstractItemModel *model,
+                                          QList<RWCategory*> parent_categories)
 {
     QProgressDialog progress;
     progress.setModal(true);
@@ -219,23 +220,7 @@ void RealmWorksStructure::writeExportFile(QIODevice *device, RWCategory *categor
         // Progress is across all rows of the base model
         progress.setMaximum(model->rowCount());
 
-        if (parent_category == 0)
-        {
-            // No parent topic
-            writeTopics(progress, writer, category, model);
-        }
-        else if (parent_category->namefield().modelColumn() < 0)
-        {
-            // A single parent with a fixed string for the name
-            parent_category->writeStartToContents(writer, model->index(0,0));
-            writeTopics(progress, writer, category, model);
-            writer->writeEndElement();
-        }
-        else
-        {
-            // one parent per unique entry in the identified column
-            writeParentToStructure(progress, writer, category, model, parent_category);
-        }
+        writeParentToStructure(progress, writer, category, model, parent_categories);
         writer->writeEndElement(); // contents
     }
     writer->writeEndElement(); // export
@@ -255,61 +240,61 @@ void RealmWorksStructure::writeExportFile(QIODevice *device, RWCategory *categor
  * @param parent_category
  */
 void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress, QXmlStreamWriter *writer,
-                                                 RWCategory *topic_category, QAbstractItemModel *model,
-                                                 RWCategory *parent_category)
+                                                 RWCategory *category, QAbstractItemModel *model,
+                                                 QList<RWCategory*> parent_categories)
 {
-    // Get list of unique entries in the parent column
-    // We have X parents, based on the unique values in the indicated column
-    QSet<QString> parent_names;
-    int parent_column = parent_category->namefield().modelColumn();
-    for (int row=0; row<model->rowCount(); row++)
+    if (parent_categories.isEmpty())
     {
-        QString name = model->index(row, parent_column).data().toString();
-        if (name.isEmpty())
+        // No parent topic - so write out the table as individual topics
+        int maxrow = model->rowCount();
+        for (int row = 0 ; row < maxrow ; row++)
         {
-            name = "<no name>";
-            qDebug() << "row" << row << "has no name";
+            progress.setValue(progress.value()+1);
+            qApp->processEvents();  // for progress dialog
+
+            category->writeToContents(writer, model->index(row, 0));
         }
-        parent_names.insert(name);
     }
-    qDebug() << "Unique Parents =" << parent_names;
-
-    QSortFilterProxyModel proxy;
-    proxy.setSourceModel(model);
-    proxy.setFilterKeyColumn(parent_column);
-
-    // TODO - iterate across unique values in the column
-    foreach (const QString &parent_name, parent_names)
+    else if (parent_categories.first()->namefield().modelColumn() < 0)
     {
-        // Find the rows which match the parent's name
-        proxy.setFilterFixedString(parent_name);
-
-        parent_category->writeStartToContents(writer, proxy.index(0,0));
-        writeTopics(progress, writer, topic_category, &proxy);
+        // The parent has a FIXED STRING
+        parent_categories.first()->writeStartToContents(writer, model->index(0,0));
+        // Maybe more children to write
+        writeParentToStructure(progress, writer, category, model, parent_categories.mid(1));
         writer->writeEndElement();
     }
-}
-
-/**
- * @brief RealmWorksStructure::writeToStructure
- * Write out the actual topics, creating one topic for each row in the supplied model.
- *
- * @param progress
- * @param writer
- * @param topic_category
- * @param model
- */
-
-void RealmWorksStructure::writeTopics(QProgressDialog &progress, QXmlStreamWriter *writer,
-                                        RWCategory *category, QAbstractItemModel *model)
-{
-    int maxrow = model->rowCount();
-    for (int row = 0 ; row < maxrow ; row++)
+    else
     {
-        progress.setValue(progress.value()+1);
-        qApp->processEvents();  // for progress dialog
-        category->writeToContents(writer, model->index(row, 0));
+        // The parent identifies a COLUMN to use to generate a parent for each unique entry
+        // in that column.
+        QSet<QString> parent_set;
+        int parent_column = parent_categories.first()->namefield().modelColumn();
+        for (int row=0; row<model->rowCount(); row++)
+        {
+            QString name = model->index(row, parent_column).data().toString();
+            if (name.isEmpty())
+            {
+                qDebug() << "row" << row << "has no name";
+            }
+            parent_set.insert(name);
+        }
+        // Always put the parents in a predicable (i.e. alphabetical) order
+        QList<QString> parent_names = parent_set.toList();
+        qSort(parent_names);
+
+        QSortFilterProxyModel proxy;
+        proxy.setSourceModel(model);
+        proxy.setFilterKeyColumn(parent_column);
+
+        // TODO - iterate across unique values in the column
+        foreach (const QString &name, parent_names)
+        {
+            // Find the rows which match the parent's name
+            proxy.setFilterFixedString(name);
+
+            parent_categories.first()->writeStartToContents(writer, proxy.index(0,0));
+            writeParentToStructure(progress, writer, category, &proxy, parent_categories.mid(1));
+            writer->writeEndElement();
+        }
     }
 }
-
-
