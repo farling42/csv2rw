@@ -39,7 +39,8 @@ public:
 
 public Q_SLOTS:
     void loadFile(QIODevice*);
-    void writeExportFile(QIODevice*, RWCategory *category, QAbstractItemModel *model,
+    void writeExportFile(QIODevice*, const QString &import_name,
+                         RWCategory *category, QAbstractItemModel *model,
                          QList<RWCategory*> parent_categories);
 
     int format_version;

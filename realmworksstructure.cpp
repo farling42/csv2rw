@@ -158,7 +158,9 @@ RWBaseItem *RealmWorksStructure::read_element(QXmlStreamReader *reader, RWBaseIt
  * @param model
  */
 
-void RealmWorksStructure::writeExportFile(QIODevice *device, RWCategory *category,
+void RealmWorksStructure::writeExportFile(QIODevice *device,
+                                          const QString &import_name,
+                                          RWCategory *category,
                                           QAbstractItemModel *model,
                                           QList<RWCategory*> parent_categories)
 {
@@ -190,7 +192,7 @@ void RealmWorksStructure::writeExportFile(QIODevice *device, RWCategory *categor
             // Replace details with our own details
             writer->writeStartElement("details");
             {
-                writer->writeAttribute("name", "Test Import");
+                writer->writeAttribute("name", import_name);
                 writer->writeAttribute("import_tag_id", "Tag_1");
 
                 writer->writeTextElement("summary", "Imported");
@@ -280,7 +282,7 @@ void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress, QXml
         }
         // Always put the parents in a predicable (i.e. alphabetical) order
         QList<QString> parent_names = parent_set.toList();
-        qSort(parent_names);
+        std::sort(parent_names.begin(), parent_names.end());
 
         QSortFilterProxyModel proxy;
         proxy.setSourceModel(model);

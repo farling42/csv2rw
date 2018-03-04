@@ -57,6 +57,8 @@ private slots:
     void on_addParent_clicked();
 
     void delete_parent();
+    void on_importName_textChanged(const QString &arg1);
+
 private:
     Ui::MainWindow *ui;
     CsvModel *csv_full_model;

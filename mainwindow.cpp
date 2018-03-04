@@ -56,6 +56,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->loadStructureButton->setIcon(style()->standardIcon(QStyle::SP_FileDialogStart));
     ui->generateButton->setIcon(style()->standardIcon(QStyle::SP_DialogSaveButton));
     ui->generateButton->setEnabled(false);
+    ui->importName->setText("Test Import");
 }
 
 MainWindow::~MainWindow()
@@ -207,7 +208,10 @@ void MainWindow::on_generateButton_clicked()
     }
 
     // Prompt for output filename
-    QString filename = QFileDialog::getSaveFileName(this, tr("Realm Works® Export File"), /*dir*/ settings.value(OUTPUT_DIRECTORY_PARAM).toString(), /*filter*/ tr("Realm Works® Export Files (*.rwexport)"));
+    QString filename = QFileDialog::getSaveFileName(this,
+                                                    /*caption*/ tr("Realm Works® Export File"),
+                                                    /*dir*/ settings.value(OUTPUT_DIRECTORY_PARAM).toString() + '/' + ui->importName->text() + ".rwexport",
+                                                    /*filter*/ tr("Realm Works® Export Files (*.rwexport)"));
     if (filename.isEmpty())
     {
         ui->generateButton->setEnabled(true);
@@ -226,7 +230,7 @@ void MainWindow::on_generateButton_clicked()
     QList<RWCategory*> parent_cats;
     foreach (ParentCategoryWidget *widget, parents)
         parent_cats.append(widget->category());
-    rw_structure.writeExportFile(&file, category_widget->category(), csv_full_model, parent_cats);
+    rw_structure.writeExportFile(&file, ui->importName->text(), category_widget->category(), csv_full_model, parent_cats);
     file.close();
 
     // Enable button again (so that we know it is finished
@@ -272,4 +276,9 @@ void MainWindow::delete_parent()
 {
     parents.takeLast()->deleteLater();
     if (parents.size() > 0) parents.last()->setCanDelete(true);
+}
+
+void MainWindow::on_importName_textChanged(const QString &value)
+{
+    ui->generateButton->setDisabled(value.isEmpty());
 }

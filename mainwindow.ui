@@ -115,7 +115,8 @@
                    <string>Load CSV</string>
                   </property>
                   <property name="icon">
-                   <iconset theme="SP_FileDialogStart"/>
+                   <iconset theme="SP_FileDialogStart">
+                    <normaloff>.</normaloff>.</iconset>
                   </property>
                  </widget>
                 </item>
@@ -205,7 +206,8 @@
                    <string>Load Structure</string>
                   </property>
                   <property name="icon">
-                   <iconset theme="SP_FileDialogStart"/>
+                   <iconset theme="SP_FileDialogStart">
+                    <normaloff>.</normaloff>.</iconset>
                   </property>
                  </widget>
                 </item>
@@ -251,7 +253,7 @@
                   <x>0</x>
                   <y>0</y>
                   <width>321</width>
-                  <height>225</height>
+                  <height>224</height>
                  </rect>
                 </property>
                </widget>
@@ -411,12 +413,30 @@
               </spacer>
              </item>
              <item>
+              <widget class="QLabel" name="label_2">
+               <property name="text">
+                <string>Import Name:</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="importName">
+               <property name="minimumSize">
+                <size>
+                 <width>120</width>
+                 <height>0</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item>
               <widget class="QPushButton" name="generateButton">
                <property name="text">
                 <string>GENERATE</string>
                </property>
                <property name="icon">
-                <iconset theme="SP_DialogSaveButton"/>
+                <iconset theme="SP_DialogSaveButton">
+                 <normaloff>.</normaloff>.</iconset>
                </property>
               </widget>
              </item>
