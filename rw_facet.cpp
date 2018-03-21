@@ -194,17 +194,17 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
     writer->writeEndElement();  // snippet
 }
 
-void RWFacet::write_asset(QXmlStreamWriter *writer, const QString &filename)
+void RWFacet::write_asset(QXmlStreamWriter *writer, const QString &asset)
 {
-    QFile file(filename);
-    QUrl url(filename);
+    QFile file(asset);
+    QUrl url(asset);
     const int FILENAME_TYPE_LENGTH = 200;
     if (file.open(QFile::ReadOnly))
     {
         QFileInfo info(file);
 
         writer->writeStartElement("asset");
-        writer->writeAttribute("filename", filename.right(FILENAME_TYPE_LENGTH));
+        writer->writeAttribute("filename", info.fileName().right(FILENAME_TYPE_LENGTH));
         //writer->writeAttribute("thumbnail_size", info.fileName());
 
         QByteArray contents = file.readAll();
@@ -232,12 +232,12 @@ void RWFacet::write_asset(QXmlStreamWriter *writer, const QString &filename)
         }
         if (reply->error() != QNetworkReply::NoError)
         {
-            qWarning() << "Failed to locate URL:" << filename;
+            qWarning() << "Failed to locate URL:" << asset;
         }
         // A redirect has ContentType of "text/html; charset=UTF-8, image/png"
         // which is an ordered comma-separated list of types.
         // So we need to check the LAST type which will be for readAll()
-        else if(reply->header(QNetworkRequest::ContentTypeHeader).toString().split(',').last().trimmed().startsWith("image/"))
+        else if (reply->header(QNetworkRequest::ContentTypeHeader).toString().split(',').last().trimmed().startsWith("image/"))
         {
             QString tempname = QFileInfo(url.path()).baseName() + '.' + reply->header(QNetworkRequest::ContentTypeHeader).toString().split("/").last();
             writer->writeStartElement("asset");
@@ -256,7 +256,7 @@ void RWFacet::write_asset(QXmlStreamWriter *writer, const QString &filename)
             // the body of the message is actually PNG binary data.
             // QPair("Server","Microsoft-IIS/8.5, Microsoft-IIS/8.5") so maybe ISS sent wrong content type
 
-            qWarning() << "Only URLs to images are supported (not" << reply->header(QNetworkRequest::ContentTypeHeader) << ")! Check source at" << filename;
+            qWarning() << "Only URLs to images are supported (not" << reply->header(QNetworkRequest::ContentTypeHeader) << ")! Check source at" << asset;
             //if (reply->header(QNetworkRequest::ContentTypeHeader).toString().startsWith("text/"))
             //    qWarning() << "Body =" << reply->readAll();
             //qWarning() << "Raw Header List =" << reply->rawHeaderPairs();
@@ -265,7 +265,7 @@ void RWFacet::write_asset(QXmlStreamWriter *writer, const QString &filename)
     }
     else
     {
-        QString message = "File/URL does not exist: " + filename;
+        QString message = "File/URL does not exist: " + asset;
 
         static QMessageBox *warning = 0;
         if (warning == 0)
@@ -284,20 +284,20 @@ void RWFacet::write_asset(QXmlStreamWriter *writer, const QString &filename)
  * @param exttype one of Foreign, Statblock, Portfolio, Picture, Rich_Text, PDF, Audio, Video, HTML
  * @param filename
  */
-void RWFacet::write_ext_object(QXmlStreamWriter *writer, const QString &exttype, const QString &filename)
+void RWFacet::write_ext_object(QXmlStreamWriter *writer, const QString &exttype, const QString &asset)
 {
     writer->writeStartElement("ext_object");
-    writer->writeAttribute("name", QFileInfo(filename).fileName().right(NAME_TYPE_LENGTH));
+    writer->writeAttribute("name", QFileInfo(asset).fileName().right(NAME_TYPE_LENGTH));
     writer->writeAttribute("type", exttype);
-    write_asset(writer, filename);
+    write_asset(writer, asset);
     writer->writeEndElement();
 }
 
-void RWFacet::write_smart_image(QXmlStreamWriter *writer, const QString &filename)
+void RWFacet::write_smart_image(QXmlStreamWriter *writer, const QString &asset)
 {
     writer->writeStartElement("smart_image");
-    writer->writeAttribute("name", QFileInfo(filename).fileName().right(NAME_TYPE_LENGTH));
-    write_asset(writer, filename);
+    writer->writeAttribute("name", QFileInfo(asset).fileName().right(NAME_TYPE_LENGTH));
+    write_asset(writer, asset);
     // write_overlay (0-1)
     // write_subset_mask (0-1)
     // write_superset_mask (0-1)
