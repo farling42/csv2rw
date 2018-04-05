@@ -175,13 +175,20 @@ QString RWBaseItem::xmlSpan(const QString &text, bool bold, bool italic, bool li
         style = " style=\"" + styles.join(';') + "\"";
     }
 
-    // Parse for possible URLs, remembering style for future text
     const QString start_rwsnippet(QString("<span class=\"RWSnippet\"%1>").arg(style));
-    const QString url_replacement("<a class=\"RWLink\" style=\"color:#000000;text-decoration:none\" href=\"\\1\" title=\"\\1\"><span class=\"RWLink\">\\1</span></a></span>" + start_rwsnippet);
 
     // Subscript   uses <sub> ... </sub>
     // Superscript uses <sup> ... </sup>
     QString buffer = text;
+
+    // Prevent "<" being interpreted as the start of an element, but not if the entire field looks like XML/HTML
+    if (!buffer.startsWith('<') || !buffer.endsWith('>'))
+    {
+        buffer.replace("<", "&lt;");
+    }
+
+    // Parse for possible URLs, remembering style for future text
+    const QString url_replacement("<a class=\"RWLink\" style=\"color:#000000;text-decoration:none\" href=\"\\1\" title=\"\\1\"><span class=\"RWLink\">\\1</span></a></span>" + start_rwsnippet);
     return start_rwsnippet + buffer.replace(url_regexp, url_replacement) + "</span>";
 }
 
