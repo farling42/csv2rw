@@ -46,8 +46,11 @@ public:
 
     void readCSV(QFile &);
 
+    void setCSVseparator(QChar);
+
 private:
-    QStringList parseCSV(QTextStream &);
+    QStringList readRowFromCSV(QTextStream &);
+    QChar p_csv_separator;
     QStringList headers;
     QList<QStringList> lines;
 };

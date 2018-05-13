@@ -58,16 +58,39 @@ RWFacet::RWFacet(QXmlStreamReader *stream, QObject *parent) :
         p_snippet_type = Multi_Line;
 }
 
+
+static QString to_gregorian(const QString &from)
+{
+    // TODO - Realm Works does not like "gregorian" fields in this format!
+
+    /* Must be [Y]YYYY-MM-DD hh:mm:ss[ BCE]
+     * year limit is 20000 */
+    if (from.length() >= 19) return from;
+    // If no time in the field, then simply append midnight time */
+    if (from.length() == 10 || from.length() == 11) return from + " 00:00:00";
+    qWarning() << "INVALID DATE FORMAT:" << from << "(should be [Y]YYYY-MM-DD HH:MM:SS)";
+    return from;
+}
+
+
 void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index)
 {
     Q_UNUSED(index);
     bool bold = false;
+
+    // Ignore date snippets if no data available
+    const QString start_date  = startDate().valueString(index);
+    if ((p_snippet_type == Date_Game || p_snippet_type == Date_Range) && start_date.isEmpty())
+    {
+        return;
+    }
 
     writer->writeStartElement("snippet");
     {
         const QString user_text = contentsText().valueString(index);
         const QString gm_dir    = gmDirections().valueString(index);
         const QString asset     = filename().valueString(index);
+        const QString finish_date = finishDate().valueString(index);
 
         if (!id().isEmpty()) writer->writeAttribute("facet_id", id());
         writer->writeAttribute("type", snip_type_enum.valueToKey(p_snippet_type));
@@ -93,7 +116,7 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
         //  X x tag_assign
 
         // Maybe an ANNOTATION or CONTENTS
-        if (!user_text.isEmpty() || !asset.isEmpty())
+        if (!user_text.isEmpty() || !asset.isEmpty() || !start_date.isEmpty())
         {
             switch (p_snippet_type)
             {
@@ -145,9 +168,34 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
                 write_smart_image(writer, asset);
                 break;
 
-            case Numeric:
             case Date_Game:
+                writer->writeStartElement("game_date");
+                //writer->writeAttribute("canonical", start_date);
+                writer->writeAttribute("gregorian", to_gregorian(start_date));
+                //writer->writeAttribute("display", start_date); // XML v3?
+                writer->writeEndElement();
+                if (!user_text.isEmpty())
+                {
+                    writer->writeTextElement("annotation", xmlParagraph(xmlSpan(user_text, bold)));
+                }
+                break;
+
             case Date_Range:
+                writer->writeStartElement("date_range");
+                //writer->writeAttribute("canonical_start", start_date);
+                writer->writeAttribute("gregorian_start", to_gregorian(start_date));
+                //writer->writeAttribute("display_start", start_date);
+                //writer->writeAttribute("canonical_end",   finish_date);
+                writer->writeAttribute("gregorian_end",   to_gregorian(finish_date));
+                //writer->writeAttribute("display_end",   finish_date);
+                writer->writeEndElement();
+                if (!user_text.isEmpty())
+                {
+                    writer->writeTextElement("annotation", xmlParagraph(xmlSpan(user_text, bold)));
+                }
+                break;
+
+            case Numeric:
             case Tag_Multi_Domain:
                 qFatal("RWFacet::writeToContents: invalid snippet type: %d", p_snippet_type);
                 break;

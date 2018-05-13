@@ -86,7 +86,7 @@ void FieldMultiLineEdit::insertFromMimeData(const QMimeData *source)
 }
 
 
-void FieldMultiLineEdit::setMode(FieldMultiLineEdit::DataMode mode)
+void FieldMultiLineEdit::setMode(DataMode mode)
 {
     if (p_mode == mode) return;
     p_mode = mode;

@@ -47,7 +47,7 @@ ParentCategoryWidget::ParentCategoryWidget(RealmWorksStructure *structure, QAbst
 }
 
 
-RWCategory *ParentCategoryWidget::category()
+RWCategory *ParentCategoryWidget::category() const
 {
     return category_widget ? category_widget->category() : 0;
 }

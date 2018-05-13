@@ -45,6 +45,8 @@ public:
     DataField &gmDirections() { return p_gm_directions; }
     DataField &labelText() { return p_label_text; }
     DataField &filename() { return p_filename; }
+    DataField &startDate() { return p_start_date; }
+    DataField &finishDate() { return p_finish_date; }
 
 public slots:
 
@@ -57,6 +59,8 @@ private:
     SnippetType p_snippet_type;
     DataField p_label_text;   // for Labeled_Text fields
     DataField p_filename;
+    DataField p_start_date;
+    DataField p_finish_date;
 };
 
 #endif // RWFACET_H

@@ -82,7 +82,7 @@ void FieldLineEdit::mousePressEvent(QMouseEvent *event)
         QLineEdit::mousePressEvent(event);
 }
 
-void FieldLineEdit::setMode(FieldLineEdit::DataMode mode)
+void FieldLineEdit::setMode(DataMode mode)
 {
     if (p_mode == mode) return;
     p_mode = mode;

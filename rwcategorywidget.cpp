@@ -365,6 +365,8 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
     QRadioButton *reveal = 0;
     QLabel *label = 0;
     FieldLineEdit *filename = 0;
+    FieldLineEdit *start_date = 0;
+    FieldLineEdit *finish_date = 0;
     FieldComboBox *combo = 0;
     QWidget *edit_widget = 0;
 
@@ -375,7 +377,10 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
     connect(reveal, &QRadioButton::toggled, facet, &RWFacet::setIsRevealed);
 
     // Maybe a field-name to start the line
-    if (facet->snippetType() == RWFacet::Labeled_Text || facet->snippetType() == RWFacet::Hybrid_Tag)
+    if (facet->snippetType() == RWFacet::Labeled_Text ||
+        facet->snippetType() == RWFacet::Hybrid_Tag   ||
+        facet->snippetType() == RWFacet::Date_Game    ||
+        facet->snippetType() == RWFacet::Date_Range )
     {
         label = new QLabel;
         label->setText(facet->name() + ":");
@@ -419,9 +424,42 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
         filename->setPalette(p);
         filename->setBackgroundRole(QPalette::Button);
         filename->setMaximumWidth(100);
-        if (facet->contentsText().modelColumn() >= 0)
+        if (facet->filename().modelColumn() >= 0)
         {
             filename->setText(column_name(columns, facet->filename().modelColumn()));
+        }
+    }
+
+    if (facet->snippetType() == RWFacet::Date_Game || facet->snippetType() == RWFacet::Date_Range)
+    {
+        start_date = new FieldLineEdit(facet->startDate());
+        start_date->setToolTip("Start Date");
+        start_date->setPlaceholderText(facet->name());
+        // Change the background colour
+        QPalette p = start_date->palette();
+        p.setBrush(QPalette::Base, p.button());
+        start_date->setPalette(p);
+        start_date->setBackgroundRole(QPalette::Button);
+        start_date->setMaximumWidth(100);
+        if (facet->startDate().modelColumn() >= 0)
+        {
+            start_date->setText(column_name(columns, facet->startDate().modelColumn()));
+        }
+    }
+    if (facet->snippetType() == RWFacet::Date_Range)
+    {
+        finish_date = new FieldLineEdit(facet->finishDate());
+        finish_date->setToolTip("Finish Date");
+        finish_date->setPlaceholderText(facet->name());
+        // Change the background colour
+        QPalette p = finish_date->palette();
+        p.setBrush(QPalette::Base, p.button());
+        finish_date->setPalette(p);
+        finish_date->setBackgroundRole(QPalette::Button);
+        finish_date->setMaximumWidth(100);
+        if (facet->finishDate().modelColumn() >= 0)
+        {
+            finish_date->setText(column_name(columns, facet->finishDate().modelColumn()));
         }
     }
 
@@ -494,6 +532,8 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
     if (reveal) boxl->addWidget(reveal);
     if (label) boxl->addWidget(label);
     if (filename) boxl->addWidget(filename);
+    if (start_date) boxl->addWidget(start_date);
+    if (finish_date) boxl->addWidget(finish_date);
     if (combo) boxl->addWidget(combo);
     if (edit_widget) boxl->addWidget(edit_widget);
     if (snippet_style) boxl->addWidget(snippet_style);

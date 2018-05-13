@@ -16,7 +16,7 @@ class ParentCategoryWidget : public QFrame
     Q_OBJECT
 public:
     explicit ParentCategoryWidget(RealmWorksStructure *structure, QAbstractItemModel *columns, int indent, QWidget *parent = nullptr);
-    RWCategory *category();
+    RWCategory *category() const;
 
 signals:
     void deleteRequested();

@@ -21,7 +21,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QFile>
 
 CsvModel::CsvModel(QObject *parent)
-    : QAbstractItemModel(parent)
+    : QAbstractItemModel(parent),
+    p_csv_separator(',')
 {
 }
 
@@ -93,7 +94,7 @@ void CsvModel::readCSV(QFile &file)
     lines.clear();
 
     // Get headers
-    headers = parseCSV(stream);
+    headers = readRowFromCSV(stream);
     if (headers.size() == 0)
     {
         qWarning("No lines in source file");
@@ -102,7 +103,7 @@ void CsvModel::readCSV(QFile &file)
     {
         while (!stream.atEnd())
         {
-            QStringList fields = parseCSV(stream);
+            QStringList fields = readRowFromCSV(stream);
             // Ensure this row of the table is the same length as the header row
             if (fields.size() > 0)
             {
@@ -114,15 +115,21 @@ void CsvModel::readCSV(QFile &file)
     endResetModel();
 }
 
+void CsvModel::setCSVseparator(QChar separator)
+{
+    p_csv_separator = separator;
+}
+
 
 /**
  * @brief MainWindow::parseCSV
- * Parses the supplied single line from a CSV file and returns the list of individual cells.
+ * Reads a single row from the supplied CSV input stream. This might requiring more than one line from
+ * the stream in order to read a single complete row.
  *
- * @param string the contents of a full row from the CSV file
+ * @param stream the stream from which the CSV file is being read.
  * @return a list of strings for each field on the row
  */
-QStringList CsvModel::parseCSV(QTextStream &stream)
+QStringList CsvModel::readRowFromCSV(QTextStream &stream)
 {
     enum State {Normal, Quote} state = Normal;
     QStringList fields;
@@ -162,8 +169,8 @@ QStringList CsvModel::parseCSV(QTextStream &stream)
         // Normal state
         if (state == Normal)
         {
-            // Comma
-            if (current == ',')
+            // CSV-column separator
+            if (current == p_csv_separator)
             {
                 // Save field
                 fields.append(value);
