@@ -159,7 +159,6 @@ RWBaseItem *RealmWorksStructure::read_element(QXmlStreamReader *reader, RWBaseIt
  */
 
 void RealmWorksStructure::writeExportFile(QIODevice *device,
-                                          const QString &import_name,
                                           RWCategory *category,
                                           QAbstractItemModel *model,
                                           QList<RWCategory*> parent_categories)
@@ -192,13 +191,17 @@ void RealmWorksStructure::writeExportFile(QIODevice *device,
             // Replace details with our own details
             writer->writeStartElement("details");
             {
-                writer->writeAttribute("name", import_name);
-                writer->writeAttribute("import_tag_id", "Tag_1");
+                writer->writeAttribute("name", details_name);
+                writer->writeAttribute("import_tag_id", "Tag_1");   // can't be user specified!
+                if (!details_version.isEmpty()) writer->writeAttribute("version", details_version);
+                if (!details_abbrev.isEmpty()) writer->writeAttribute("abbrev", details_abbrev);
 
-                writer->writeTextElement("summary", "Imported");
-                writer->writeTextElement("requirements", "None");
-                writer->writeTextElement("credits", "Imported");
-                writer->writeTextElement("legal", "Imported");
+                if (!details_summary.isEmpty()) writer->writeTextElement("summary", details_summary);
+                if (!details_description.isEmpty()) writer->writeTextElement("description", details_description);
+                if (!details_requirements.isEmpty()) writer->writeTextElement("requirements", details_requirements);
+                if (!details_credits.isEmpty()) writer->writeTextElement("credits", details_credits);
+                if (!details_legal.isEmpty()) writer->writeTextElement("legal", details_legal);
+                if (!details_other_notes.isEmpty()) writer->writeTextElement("other_notes", details_other_notes);
             }
             writer->writeEndElement();  // details
 

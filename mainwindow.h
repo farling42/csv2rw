@@ -27,6 +27,7 @@ class MainWindow;
 }
 
 class CsvModel;
+class FileDetails;
 class QStringListModel;
 class ParentCategoryWidget;
 class RWCategoryWidget;
@@ -66,6 +67,7 @@ private:
     RealmWorksStructure rw_structure;
     RWCategoryWidget *category_widget;
     QList<ParentCategoryWidget*> parents;
+    FileDetails *file_details;
 };
 
 #endif // MAINWINDOW_H

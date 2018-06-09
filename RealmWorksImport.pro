@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-VERSION = 1.25
+VERSION = 1.26
 
 QT       += core gui network xmlpatterns
 
@@ -40,7 +40,8 @@ SOURCES += main.cpp\
     fieldmultilineedit.cpp \
     performxsltranslation.cpp \
     rw_alias.cpp \
-    parentcategorywidget.cpp
+    parentcategorywidget.cpp \
+    filedetails.cpp
 
 HEADERS  += mainwindow.h \
     csvmodel.h \
@@ -59,9 +60,11 @@ HEADERS  += mainwindow.h \
     regexp.h \
     performxsltranslation.h \
     rw_alias.h \
-    parentcategorywidget.h
+    parentcategorywidget.h \
+    filedetails.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    filedetails.ui
 
 TRANSLATIONS += csv2rw_en.ts
 

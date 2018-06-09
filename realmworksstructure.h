@@ -39,7 +39,7 @@ public:
 
 public Q_SLOTS:
     void loadFile(QIODevice*);
-    void writeExportFile(QIODevice*, const QString &import_name,
+    void writeExportFile(QIODevice*,
                          RWCategory *category, QAbstractItemModel *model,
                          QList<RWCategory*> parent_categories);
 
@@ -48,6 +48,18 @@ public Q_SLOTS:
     RWBaseItem *export_element;
     QList<RWCategory*> categories;
     QList<RWDomain*> domains;
+
+    QString details_name;
+    //QString details_import_tag_id;  // not easily user-specified
+    QString details_version;
+    QString details_abbrev;
+
+    QString details_summary;
+    QString details_description;
+    QString details_requirements;
+    QString details_credits;
+    QString details_legal;
+    QString details_other_notes;
 
 private:
     QString namespace_uri;

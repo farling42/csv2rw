@@ -29,6 +29,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QSettings>
 #include <rwcategorywidget.h>
 
+#include "filedetails.h"
 #include "realmworksstructure.h"
 #include "performxsltranslation.h"
 #include "parentcategorywidget.h"
@@ -56,7 +57,12 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->loadStructureButton->setIcon(style()->standardIcon(QStyle::SP_FileDialogStart));
     ui->generateButton->setIcon(style()->standardIcon(QStyle::SP_DialogSaveButton));
     ui->generateButton->setEnabled(false);
-    ui->importName->setText("Test Import");
+    rw_structure.details_name = "Test Import";
+
+    // Create the dialog box for entering file details
+    file_details = new FileDetails(&rw_structure, this);
+    connect(ui->fileDetails, &QPushButton::pressed, file_details, &QDialog::show);
+    ui->fileDetails->setEnabled(false);
 }
 
 MainWindow::~MainWindow()
@@ -147,6 +153,7 @@ void MainWindow::on_loadStructureButton_pressed()
     ui->categoryComboBox->addItems(cats);
     ui->addParent->setEnabled(true);
     ui->generateButton->setEnabled(csv_full_model->rowCount() > 0);
+    ui->fileDetails->setEnabled(true);
 }
 
 void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selection)
@@ -210,7 +217,7 @@ void MainWindow::on_generateButton_clicked()
     // Prompt for output filename
     QString filename = QFileDialog::getSaveFileName(this,
                                                     /*caption*/ tr("Realm Works® Export File"),
-                                                    /*dir*/ settings.value(OUTPUT_DIRECTORY_PARAM).toString() + '/' + ui->importName->text() + ".rwexport",
+                                                    /*dir*/ settings.value(OUTPUT_DIRECTORY_PARAM).toString() + '/' + rw_structure.details_name + ".rwexport",
                                                     /*filter*/ tr("Realm Works® Export Files (*.rwexport)"));
     if (filename.isEmpty())
     {
@@ -230,7 +237,7 @@ void MainWindow::on_generateButton_clicked()
     QList<RWCategory*> parent_cats;
     foreach (ParentCategoryWidget *widget, parents)
         parent_cats.append(widget->category());
-    rw_structure.writeExportFile(&file, ui->importName->text(), category_widget->category(), csv_full_model, parent_cats);
+    rw_structure.writeExportFile(&file, category_widget->category(), csv_full_model, parent_cats);
     file.close();
 
     // Enable button again (so that we know it is finished
