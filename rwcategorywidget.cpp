@@ -367,6 +367,7 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
     FieldLineEdit *filename = 0;
     FieldLineEdit *start_date = 0;
     FieldLineEdit *finish_date = 0;
+    FieldLineEdit *number = 0;
     FieldComboBox *combo = 0;
     QWidget *edit_widget = 0;
 
@@ -380,7 +381,8 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
     if (facet->snippetType() == RWFacet::Labeled_Text ||
         facet->snippetType() == RWFacet::Hybrid_Tag   ||
         facet->snippetType() == RWFacet::Date_Game    ||
-        facet->snippetType() == RWFacet::Date_Range )
+        facet->snippetType() == RWFacet::Date_Range   ||
+        facet->snippetType() == RWFacet::Numeric)
     {
         label = new QLabel;
         label->setText(facet->name() + ":");
@@ -433,7 +435,7 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
     if (facet->snippetType() == RWFacet::Date_Game || facet->snippetType() == RWFacet::Date_Range)
     {
         start_date = new FieldLineEdit(facet->startDate());
-        start_date->setToolTip("Start Date");
+        start_date->setToolTip((facet->snippetType() == RWFacet::Date_Game) ? "Date" : "Start Date");
         start_date->setPlaceholderText(facet->name());
         // Change the background colour
         QPalette p = start_date->palette();
@@ -460,6 +462,22 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
         if (facet->finishDate().modelColumn() >= 0)
         {
             finish_date->setText(column_name(columns, facet->finishDate().modelColumn()));
+        }
+    }
+    if (facet->snippetType() == RWFacet::Numeric)
+    {
+        number = new FieldLineEdit(facet->number());
+        number->setMaximumWidth(100);
+        number->setToolTip(tr("Numeric value"));
+        // Change the background colour
+        QPalette p = number->palette();
+        p.setBrush(QPalette::Base, p.button());
+        number->setPalette(p);
+        number->setBackgroundRole(QPalette::Button);
+        number->setPlaceholderText(facet->name());
+        if (facet->number().modelColumn() >= 0)
+        {
+            number->setText(column_name(columns, facet->number().modelColumn()));
         }
     }
 
@@ -494,6 +512,7 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
         RWBaseItem *description = facet->childElement("description");
         edit->setToolTip(description ? description->structureText() : facet->uuid());
         if (facet->snippetType() == RWFacet::Hybrid_Tag ||
+                facet->snippetType() == RWFacet::Numeric ||
                 facet->snippetType() == RWFacet::Picture ||
                 facet->snippetType() == RWFacet::Smart_Image ||
                 facet->snippetType() == RWFacet::Statblock ||
@@ -535,6 +554,7 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
     if (start_date) boxl->addWidget(start_date);
     if (finish_date) boxl->addWidget(finish_date);
     if (combo) boxl->addWidget(combo);
+    if (number) boxl->addWidget(number);
     if (edit_widget) boxl->addWidget(edit_widget);
     if (snippet_style) boxl->addWidget(snippet_style);
 

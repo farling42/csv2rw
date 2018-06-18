@@ -47,6 +47,7 @@ public:
     DataField &filename() { return p_filename; }
     DataField &startDate() { return p_start_date; }
     DataField &finishDate() { return p_finish_date; }
+    DataField &number() { return p_number; }
 
 public slots:
 
@@ -61,6 +62,7 @@ private:
     DataField p_filename;
     DataField p_start_date;
     DataField p_finish_date;
+    DataField p_number;
 };
 
 #endif // RWFACET_H

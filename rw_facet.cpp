@@ -91,6 +91,7 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
         const QString gm_dir    = gmDirections().valueString(index);
         const QString asset     = filename().valueString(index);
         const QString finish_date = finishDate().valueString(index);
+        const QString digits = number().valueString(index);
 
         if (!id().isEmpty()) writer->writeAttribute("facet_id", id());
         writer->writeAttribute("type", snip_type_enum.valueToKey(p_snippet_type));
@@ -116,7 +117,7 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
         //  X x tag_assign
 
         // Maybe an ANNOTATION or CONTENTS
-        if (!user_text.isEmpty() || !asset.isEmpty() || !start_date.isEmpty())
+        if (!user_text.isEmpty() || !asset.isEmpty() || !start_date.isEmpty() || !digits.isEmpty())
         {
             switch (p_snippet_type)
             {
@@ -132,6 +133,11 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
             case Tag_Standard:
             case Hybrid_Tag:
                 writer->writeTextElement("annotation", xmlParagraph(xmlSpan(user_text, bold)));
+                break;
+
+            case Numeric:
+                if (!digits.isEmpty()) writer->writeTextElement("contents", digits);
+                if (!user_text.isEmpty()) writer->writeTextElement("annotation", xmlParagraph(xmlSpan(user_text, bold)));
                 break;
 
                 // There are a lot of snippet types which have an ext_object child (which has an asset child)
@@ -195,7 +201,6 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
                 }
                 break;
 
-            case Numeric:
             case Tag_Multi_Domain:
                 qFatal("RWFacet::writeToContents: invalid snippet type: %d", p_snippet_type);
                 break;
