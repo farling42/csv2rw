@@ -28,6 +28,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 RWBaseItem::RWBaseItem(QXmlStreamReader *reader, QObject *parent, bool ignore_for_contents) :
     QObject(parent),
     p_snippet_style(Normal),
+    p_snippet_veracity(Truth),
+    p_snippet_purpose(Story_Only),
     p_ignore_for_contents(ignore_for_contents)
 {
     // Extract common data from this XML element

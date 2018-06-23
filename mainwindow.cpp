@@ -224,7 +224,16 @@ void MainWindow::on_generateButton_clicked()
         ui->generateButton->setEnabled(true);
         return;
     }
+
     QFile file(filename);
+    // On windows, the creation time-stamp needs to be created properly
+    if (file.exists() && !file.remove())
+    {
+        qWarning() << tr("Failed to remove old file") << file.fileName();
+        ui->generateButton->setEnabled(true);
+        return;
+    }
+
     if (!file.open(QFile::WriteOnly))
     {
         qWarning() << tr("Failed to create file") << file.fileName();
@@ -283,9 +292,4 @@ void MainWindow::delete_parent()
 {
     parents.takeLast()->deleteLater();
     if (parents.size() > 0) parents.last()->setCanDelete(true);
-}
-
-void MainWindow::on_importName_textChanged(const QString &value)
-{
-    ui->generateButton->setDisabled(value.isEmpty());
 }

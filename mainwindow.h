@@ -54,11 +54,8 @@ private slots:
     void on_generateButton_clicked();
     void on_helpButton_clicked();
     void on_convertOP_triggered();
-
     void on_addParent_clicked();
-
     void delete_parent();
-    void on_importName_textChanged(const QString &arg1);
 
 private:
     Ui::MainWindow *ui;

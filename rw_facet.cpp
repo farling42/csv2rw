@@ -30,7 +30,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "rw_domain.h"
 
 static QMetaEnum snip_type_enum  = QMetaEnum::fromType<RWFacet::SnippetType>();
+static QMetaEnum snip_veracity_enum = QMetaEnum::fromType<RWFacet::SnippetVeracity>();
 static QMetaEnum snip_style_enum = QMetaEnum::fromType<RWFacet::SnippetStyle>();
+static QMetaEnum snip_purpose_enum = QMetaEnum::fromType<RWFacet::SnippetPurpose>();
 
 const int NAME_TYPE_LENGTH = 50;
 
@@ -95,7 +97,9 @@ void RWFacet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
 
         if (!id().isEmpty()) writer->writeAttribute("facet_id", id());
         writer->writeAttribute("type", snip_type_enum.valueToKey(p_snippet_type));
+        if (p_snippet_veracity != Truth) writer->writeAttribute("veracity", snip_veracity_enum.valueToKey(p_snippet_veracity));
         if (p_snippet_style != Normal) writer->writeAttribute("style", snip_style_enum.valueToKey(p_snippet_style));
+        if (p_snippet_purpose != Story_Only) writer->writeAttribute("purpose", snip_purpose_enum.valueToKey(p_snippet_purpose));
         if (isRevealed()) writer->writeAttribute("is_revealed", "true");
         if (!gm_dir.isEmpty()) writer->writeAttribute("purpose", user_text.isEmpty() ? "Directions_Only" : "Both");
 

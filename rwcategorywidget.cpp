@@ -19,12 +19,15 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "rwcategorywidget.h"
 
 #include <QAbstractItemModel>
+#include <QActionGroup>
 #include <QCheckBox>
 #include <QComboBox>
 #include <QDebug>
+#include <QIcon>
 #include <QLabel>
 #include <QFrame>
 #include <QBoxLayout>
+#include <QMenu>
 #include <QMetaEnum>
 #include <QRadioButton>
 #include <QPushButton>
@@ -211,7 +214,6 @@ void RWCategoryWidget::add_rwalias(RWAlias *alias)
         top_layout->addLayout(row);
 }
 
-
 void RWCategoryWidget::add_name()
 {
     RWAlias *alias = new RWAlias;
@@ -318,20 +320,12 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
     if (partition->contentsText().modelColumn() >= 0)
         edit->setText(column_name(columns, partition->contentsText().modelColumn()));
 
-    QComboBox *snippet_style = new QComboBox;
-    snippet_style->setToolTip("Snippet Style");
-    snippet_style->addItem("Normal",     RWFacet::Normal);
-    snippet_style->addItem("Read Aloud", RWFacet::Read_Aloud);
-    snippet_style->addItem("Message",    RWFacet::Handout);
-    snippet_style->addItem("Flavor",     RWFacet::Flavor);
-    snippet_style->addItem("Callout",    RWFacet::Callout);
-    snippet_style->setCurrentIndex(partition->snippetStyle());
-    connect(snippet_style, QOverload<int>::of(&QComboBox::currentIndexChanged), [=] { set_style(snippet_style, partition); } );
+    QWidget *options = create_option_button(partition);
 
     QHBoxLayout *textlayout = new QHBoxLayout;
     textlayout->addWidget(reveal);
     textlayout->addWidget(edit);
-    textlayout->addWidget(snippet_style);
+    textlayout->addWidget(options);
     layout->addLayout(textlayout);
 
 #ifdef ADD_SNIPPET
@@ -535,15 +529,8 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
             edit->setText(column_name(columns, facet->contentsText().modelColumn()));
         }
     }
-    QComboBox *snippet_style = new QComboBox;
-    snippet_style->setToolTip("Snippet Style");
-    snippet_style->addItem("Normal",     RWFacet::Normal);
-    snippet_style->addItem("Read Aloud", RWFacet::Read_Aloud);
-    snippet_style->addItem("Message",    RWFacet::Handout);
-    snippet_style->addItem("Flavor",     RWFacet::Flavor);
-    snippet_style->addItem("Callout",    RWFacet::Callout);
-    snippet_style->setCurrentIndex(facet->snippetStyle());
-    connect(snippet_style, QOverload<int>::of(&QComboBox::currentIndexChanged), [=] { set_style(snippet_style, facet); } );
+
+    QWidget *options_button = create_option_button(facet);
 
     // Create a row containing all these widgets
     QHBoxLayout *boxl = new QHBoxLayout;
@@ -556,7 +543,7 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
     if (combo) boxl->addWidget(combo);
     if (number) boxl->addWidget(number);
     if (edit_widget) boxl->addWidget(edit_widget);
-    if (snippet_style) boxl->addWidget(snippet_style);
+    if (options_button) boxl->addWidget(options_button);
 
     QWidget *box = new QWidget;
     box->setProperty("facet", QVariant::fromValue((void*)facet));
@@ -565,8 +552,65 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
     return box;
 }
 
-
-void RWCategoryWidget::set_style(QComboBox *combo, RWBaseItem *facet)
+template<typename T>
+QActionGroup *RWCategoryWidget::create_enum_actions(const QString &section_name, T current_value, QMenu *menu, QMap<QString,QString> &rename)
 {
-    facet->setSnippetStyle(combo->currentData().value<RWFacet::SnippetStyle>());
+    // Windows doesn't support menu->addSection, so emulate it outself.
+    menu->addSeparator();
+    QAction *title = new QAction(section_name, menu);
+    title->setEnabled(false);
+    menu->addAction(title);
+
+    QActionGroup *group = new QActionGroup(menu);
+    QMetaEnum meta = QMetaEnum::fromType<T>();
+    for (int idx=0; idx<meta.keyCount(); idx++)
+    {
+        QString label = QString(meta.valueToKey(idx)).replace("_", " ");
+        QAction *action = new QAction(rename.value(label,label), group);
+        action->setCheckable(true);
+        T value = T(meta.value(idx));
+        action->setData(value);
+        menu->addAction(action);
+        if (value == current_value) action->setChecked(true);
+    }
+    return group;
+}
+
+
+QWidget *RWCategoryWidget::create_option_button(RWBaseItem *item)
+{
+    // Add button to bring up the options menu for the snippet
+    QMenu *options_menu = new QMenu(this);
+
+    // SUB-MENU for the snippet style
+    QMap<QString,QString> style_remap{ {"Handout", "Message"} };
+    QActionGroup *styles = create_enum_actions<RWFacet::SnippetStyle>("Snippet Style", item->snippetStyle(), options_menu, style_remap);
+    // For SnippetStyle, RWFacet::Handout needs to use the label "Message"
+    foreach (QAction *action, styles->actions())
+        if (action->text() == "Handout") action->setText("Message");
+    connect(styles, &QActionGroup::triggered, [=] {
+        if (QAction *act = styles->checkedAction())
+            item->setSnippetStyle(act->data().value<RWFacet::SnippetStyle>());
+    } );
+
+    QMap<QString,QString> veracity_remap{{"Truth", "True"}, {"Partial", "Partially True"}, {"Lie", "Untrue"}};
+    QActionGroup *veracity = create_enum_actions<RWFacet::SnippetVeracity>("Truth Level", item->snippetVeracity(), options_menu, veracity_remap);
+    connect(veracity, &QActionGroup::triggered, [=] {
+        if (QAction *act = veracity->checkedAction())
+            item->setSnippetVeracity(act->data().value<RWFacet::SnippetVeracity>());
+    } );
+
+#if 0
+    // Crashes RW on import
+    QActionGroup *purpose = create_enum_actions<RWFacet::SnippetPurpose>("Purpose", item->snippetPurpose(), options_menu);
+    connect(purpose, &QActionGroup::triggered, [=] {
+        if (QAction *act = purpose->checkedAction())
+            item->setSnippetPurpose(act->data().value<RWFacet::SnippetPurpose>());
+    } );
+#endif
+
+    //QPushButton *options_button = new QPushButton(style()->standardIcon(QStyle::SP_CommandLink), QString());
+    QPushButton *options_button = new QPushButton("Options");
+    options_button->setMenu(options_menu);
+    return options_button;
 }

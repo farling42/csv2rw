@@ -40,11 +40,17 @@ public:
 
     enum SnippetStyle { Normal, Read_Aloud, Handout, Flavor, Callout };
     Q_ENUM(SnippetStyle)
+    enum SnippetVeracity { Truth, Partial, Lie };
+    Q_ENUM(SnippetVeracity)
+    enum SnippetPurpose { Story_Only, Directions_Only, Both };
+    Q_ENUM(SnippetPurpose)
 
 public Q_SLOTS:
     void setIsRevealed(bool is_revealed) { p_revealed = is_revealed; }
     void setSnippetStyleInt(int style) { p_snippet_style = (SnippetStyle)style; }
     void setSnippetStyle(SnippetStyle style) { p_snippet_style = style; }
+    void setSnippetVeracity(SnippetVeracity veracity) { p_snippet_veracity = veracity; }
+    void setSnippetPurpose(SnippetPurpose purpose) { p_snippet_purpose = purpose; }
 
 public:
     // Attributes from the structure definition
@@ -54,6 +60,8 @@ public:
     QString uuid() const { return p_uuid; }
     QString signature() const { return p_signature; }
     SnippetStyle snippetStyle() const { return p_snippet_style; }
+    SnippetVeracity snippetVeracity () const { return p_snippet_veracity; }
+    SnippetPurpose snippetPurpose() const { return p_snippet_purpose; }
 
     // More information
     virtual bool canBeGenerated() const;
@@ -92,6 +100,8 @@ protected:
     virtual void writeChildrenToStructure(QXmlStreamWriter *writer);
     virtual void writeChildrenToContents(QXmlStreamWriter *writer, const QModelIndex &index);
     SnippetStyle p_snippet_style;
+    SnippetVeracity p_snippet_veracity;
+    SnippetPurpose p_snippet_purpose;
 
 private:
     QXmlStreamAttributes p_attributes;

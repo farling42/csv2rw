@@ -27,7 +27,9 @@ class RWCategory;
 class RWFacet;
 class RWPartition;
 class QAbstractItemModel;
+class QActionGroup;
 class QComboBox;
+class QMenu;
 
 class RWCategoryWidget : public QFrame
 {
@@ -52,7 +54,9 @@ private:
     RWCategory *p_category;
     QWidget *p_first_section;
     void add_rwalias(RWAlias *alias);
-    void set_style(QComboBox *combo, RWBaseItem *facet);
+    QWidget *create_option_button(RWBaseItem *Item);
+    template<typename T>
+    QActionGroup *create_enum_actions(const QString &section_name, T current_value, QMenu *menu, QMap<QString,QString> &rename);
 };
 
 #endif // RWCATEGORYWIDGET_H
