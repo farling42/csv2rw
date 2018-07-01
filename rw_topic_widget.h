@@ -1,5 +1,5 @@
-#ifndef RWCATEGORYWIDGET_H
-#define RWCATEGORYWIDGET_H
+#ifndef RW_TOPIC_WIDGET_H
+#define RW_TOPIC_WIDGET_H
 
 /*
 CSV2RW
@@ -24,22 +24,26 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 class RWAlias;
 class RWStructureItem;
 class RWCategory;
+class RWContentsItem;
 class RWFacet;
 class RWPartition;
+class RWSection;
+class RWSnippet;
+class RWTopic;
 class QAbstractItemModel;
 class QActionGroup;
 class QComboBox;
 class QMenu;
 
-class RWCategoryWidget : public QFrame
+class RWTopicWidget : public QFrame
 {
     Q_OBJECT
-    QWidget *add_partition(QList<int> sections, QAbstractItemModel *columns, RWPartition *partition);
-    QWidget *add_facet(QAbstractItemModel *columns, RWFacet *facet);
+    QWidget *add_section(QList<int> sections, QAbstractItemModel *columns, RWSection *section);
+    QWidget *add_snippet(QAbstractItemModel *columns, RWSnippet *snippet);
 
 public:
-    explicit RWCategoryWidget(RWCategory *category, QAbstractItemModel *columns, bool include_sections = true, QWidget *parent = 0);
-    RWCategory *category() const { return p_category; }
+    explicit RWTopicWidget(RWTopic *topic, QAbstractItemModel *columns, bool include_sections = true, QWidget *parent = 0);
+    RWTopic *topic() const { return p_topic; }
 signals:
 
 public slots:
@@ -51,12 +55,12 @@ private slots:
 
 private:
     QAbstractItemModel *p_columns;
-    RWCategory *p_category;
+    RWTopic *p_topic;
     QWidget *p_first_section;
     void add_rwalias(RWAlias *alias);
-    QWidget *create_option_button(RWStructureItem *Item);
+    QWidget *create_option_button(RWContentsItem *Item);
     template<typename T>
     QActionGroup *create_enum_actions(const QString &section_name, T current_value, QMenu *menu, QMap<QString,QString> &rename);
 };
 
-#endif // RWCATEGORYWIDGET_H
+#endif // RW_TOPIC_WIDGET_H

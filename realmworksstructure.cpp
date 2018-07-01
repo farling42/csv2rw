@@ -25,6 +25,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QCoreApplication>
 #include <QSortFilterProxyModel>
 
+#include "rw_topic.h"
+
 #define SHOW_XML
 
 RealmWorksStructure::RealmWorksStructure()
@@ -159,9 +161,9 @@ RWStructureItem *RealmWorksStructure::read_element(QXmlStreamReader *reader, RWS
  */
 
 void RealmWorksStructure::writeExportFile(QIODevice *device,
-                                          RWCategory *category,
+                                          RWTopic *topic,
                                           QAbstractItemModel *model,
-                                          QList<RWCategory*> parent_categories)
+                                          QList<RWTopic*> parent_topics)
 {
     QProgressDialog progress;
     progress.setModal(true);
@@ -225,7 +227,7 @@ void RealmWorksStructure::writeExportFile(QIODevice *device,
         // Progress is across all rows of the base model
         progress.setMaximum(model->rowCount());
 
-        writeParentToStructure(progress, writer, category, model, parent_categories);
+        writeParentToStructure(progress, writer, topic, model, parent_topics);
         writer->writeEndElement(); // contents
     }
     writer->writeEndElement(); // export
@@ -245,10 +247,10 @@ void RealmWorksStructure::writeExportFile(QIODevice *device,
  * @param parent_category
  */
 void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress, QXmlStreamWriter *writer,
-                                                 RWCategory *category, QAbstractItemModel *model,
-                                                 QList<RWCategory*> parent_categories)
+                                                 RWTopic *topic, QAbstractItemModel *model,
+                                                 QList<RWTopic*> parent_topics)
 {
-    if (parent_categories.isEmpty())
+    if (parent_topics.isEmpty())
     {
         // No parent topic - so write out the table as individual topics
         int maxrow = model->rowCount();
@@ -257,15 +259,15 @@ void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress, QXml
             progress.setValue(progress.value()+1);
             qApp->processEvents();  // for progress dialog
 
-            category->writeToContents(writer, model->index(row, 0));
+            topic->writeToContents(writer, model->index(row, 0));
         }
     }
-    else if (parent_categories.first()->namefield().modelColumn() < 0)
+    else if (parent_topics.first()->namefield().modelColumn() < 0)
     {
         // The parent has a FIXED STRING
-        parent_categories.first()->writeStartToContents(writer, model->index(0,0));
+        parent_topics.first()->writeStartToContents(writer, model->index(0,0));
         // Maybe more children to write
-        writeParentToStructure(progress, writer, category, model, parent_categories.mid(1));
+        writeParentToStructure(progress, writer, topic, model, parent_topics.mid(1));
         writer->writeEndElement();
     }
     else
@@ -273,7 +275,7 @@ void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress, QXml
         // The parent identifies a COLUMN to use to generate a parent for each unique entry
         // in that column.
         QSet<QString> parent_set;
-        int parent_column = parent_categories.first()->namefield().modelColumn();
+        int parent_column = parent_topics.first()->namefield().modelColumn();
         for (int row=0; row<model->rowCount(); row++)
         {
             QString name = model->index(row, parent_column).data().toString();
@@ -297,8 +299,8 @@ void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress, QXml
             // Find the rows which match the parent's name
             proxy.setFilterFixedString(name);
 
-            parent_categories.first()->writeStartToContents(writer, proxy.index(0,0));
-            writeParentToStructure(progress, writer, category, &proxy, parent_categories.mid(1));
+            parent_topics.first()->writeStartToContents(writer, proxy.index(0,0));
+            writeParentToStructure(progress, writer, topic, &proxy, parent_topics.mid(1));
             writer->writeEndElement();
         }
     }

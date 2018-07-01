@@ -71,3 +71,8 @@ QString RWDomain::tagId(const QString &tag_name) const
     }
     return QString();
 }
+
+RWContentsItem *RWDomain::createContentsItem(RWContentsItem *parent)
+{
+    return new RWContentsItem(this, parent);
+}

@@ -18,57 +18,19 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include "rw_partition.h"
 #include "rw_facet.h"
+#include "rw_section.h"
 #include <QXmlStreamWriter>
 #include <QMetaEnum>
 
-static QMetaEnum snip_style_enum = QMetaEnum::fromType<RWPartition::SnippetStyle>();
+
+static QMetaEnum snip_style_enum = QMetaEnum::fromType<RWContentsItem::SnippetStyle>();
 
 RWPartition::RWPartition(QXmlStreamReader *stream, QObject *parent) :
     RWStructureItem(stream, parent)
 {
 }
 
-void RWPartition::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index)
+RWContentsItem *RWPartition::createContentsItem(RWContentsItem *parent)
 {
-    writer->writeStartElement("section");
-    if (!id().isEmpty()) writer->writeAttribute("partition_id", id());
-
-    // writeChildren has to be done in 2 passes
-    //writeChildrenToContents(writer, index);
-
-    // A section has 1+ snippets (which come before the contents (if any)
-    QList<RWFacet*> child_facets = childItems<RWFacet*>();
-    foreach (RWFacet *facet, child_facets)
-    {
-        facet->writeToContents(writer, index);
-    }
-
-    // It may have some text directly on it, not stored in a facet
-    const QString user_text = contentsText().valueString(index);
-    if (!user_text.isEmpty())
-    {
-        bool bold = false;
-
-        writer->writeStartElement("snippet");
-        {
-            writer->writeAttribute("type", "Multi_Line");
-            // no facet_id
-            if (p_snippet_style != Normal) writer->writeAttribute("style", snip_style_enum.valueToKey(p_snippet_style));
-            if (isRevealed()) writer->writeAttribute("is_revealed", "true");
-            QString text;
-            foreach (const QString &para, user_text.split("\n\n"))
-                text.append(xmlParagraph(xmlSpan(para, bold)));
-            writer->writeTextElement("contents", text);
-        }
-        writer->writeEndElement(); // snippet
-    }
-
-    // And it may have sub-sections, after the snippet/content (if any)
-    QList<RWPartition*> child_partitions = childItems<RWPartition*>();
-    foreach (RWPartition *partition, child_partitions)
-    {
-        partition->writeToContents(writer, index);
-    }
-
-    writer->writeEndElement();  //section
+    return new RWSection(this, parent);
 }

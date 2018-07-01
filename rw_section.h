@@ -1,5 +1,5 @@
-#ifndef RW_PARTITION_H
-#define RW_PARTITION_H
+#ifndef RW_SECTION_H
+#define RW_SECTION_H
 
 /*
 CSV2RW
@@ -19,20 +19,19 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "rw_structure_item.h"
+#include "rw_contents_item.h"
 
 class QXmlStreamWriter;
 class RWFacet;
-class RWSection;
+class RWPartition;
 
-class RWPartition : public RWStructureItem
+class RWSection : public RWContentsItem
 {
     Q_OBJECT
 public:
-    RWPartition(QXmlStreamReader *stream, QObject *parent = 0);
-
-protected:
-    virtual RWContentsItem *createContentsItem(RWContentsItem *parent);
+    RWSection(RWPartition *partition, RWContentsItem *parent);
+    virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index);
+    const RWPartition *const partition;
 };
 
-#endif // RWPARTITION_H
+#endif // RW_SECTION_H

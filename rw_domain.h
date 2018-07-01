@@ -34,6 +34,8 @@ public:
     static RWDomain *getDomainByName(const QString &domain_id);
     QStringList tagNames() const;
     QString tagId(const QString &tag_name) const;
+protected:
+    virtual RWContentsItem *createContentsItem(RWContentsItem *parent);
 };
 
 #endif // RW_DOMAIN_H

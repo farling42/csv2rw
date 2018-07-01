@@ -17,6 +17,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "rw_structure_item.h"
+
+#include "rw_contents_item.h"
 #include <QXmlStreamWriter>
 #include <QModelIndex>
 #include <QDebug>
@@ -27,9 +29,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 RWStructureItem::RWStructureItem(QXmlStreamReader *reader, QObject *parent, bool ignore_for_contents) :
     QObject(parent),
-    p_snippet_style(Normal),
-    p_snippet_veracity(Truth),
-    p_snippet_purpose(Story_Only),
     p_ignore_for_contents(ignore_for_contents)
 {
     // Extract common data from this XML element
@@ -75,44 +74,29 @@ void RWStructureItem::writeChildrenToStructure(QXmlStreamWriter *writer)
     }
 }
 
-void RWStructureItem::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index)
-{
-    // Special case: never put text_override into the contents section
-    if (p_ignore_for_contents) return;
-
-    if (p_structure_element == "overlay")
-    {
-        // "<overlay>" can appear in domain_global, facet_global, partition_globaland category_global elements,
-        // but there is no clear indication what they are used for!
-        return;
-    }
-    writer->writeStartElement(p_structure_element);
-
-    if (!id().isEmpty()) writer->writeAttribute(p_structure_element + "_id", id());   // e.g. partition_id, not the same as <element>_id
-
-    //QString user_text = p_text.valueString(index);
-    //if (!user_text.isEmpty()) writer->writeCharacters(user_text);
-    writeChildrenToContents(writer, index);
-    writer->writeEndElement();
-}
-
-void RWStructureItem::writeChildrenToContents(QXmlStreamWriter *writer, const QModelIndex &index)
-{
-    QList<RWStructureItem*> child_items = childItems<RWStructureItem*>();
-    foreach (RWStructureItem *child, child_items)
-    {
-        // Don't write children which are of type RWCategory
-        if (qobject_cast<RWCategory*>(child) == 0)
-            child->writeToContents(writer, index);
-    }
-}
-
 void RWStructureItem::writeExportTag(QXmlStreamWriter *writer)
 {
     writer->writeStartElement("tag_assign");
     writer->writeAttribute("tag_id", "Tag_1");
     writer->writeEndElement();
 }
+
+RWContentsItem *RWStructureItem::createContentsTree(RWContentsItem *parent)
+{
+    //qDebug() << "createContentsTree for" << name();
+    RWContentsItem *result = createContentsItem(parent);
+    for (RWStructureItem *child : childItems<RWStructureItem*>())
+    {
+        child->createContentsTree(result);
+    }
+    return result;
+}
+
+RWContentsItem *RWStructureItem::createContentsItem(RWContentsItem *parent)
+{
+    return new RWContentsItem(this, parent);
+}
+
 
 /**
  * @brief RWBaseItem::canBeGenerated
@@ -144,55 +128,6 @@ QDebug operator<<(QDebug stream, const RWStructureItem &item)
     return stream;
 }
 
-
-QString RWStructureItem::xmlParagraph(const QString &text, TextClass text_class, int margin)
-{
-    switch (text_class)
-    {
-    case RWDefault:
-        return "<p class=\"RWDefault\">" + text + "</p>";
-    case RWEnumerated:
-        return "<p class=\"RWEnumerated\">" + text + "</p>";
-    case RWSnippet:
-        return "<p class=\"RWSnippet\" style=\"margin:" + QString::number(margin) + "pt 0pt 0pt 0pt;text-align:left;text-indent:0pt\">" + text + "</p>";
-    }
-    return QString();
-}
-
-QString RWStructureItem::xmlSpan(const QString &text, bool bold, bool italic, bool line_through, bool underline)
-{
-    // text-decoration - space separated list
-    QStringList decorations;
-    if (underline) decorations.append("underline");
-    if (line_through) decorations.append("line-through");
-    // Styles - semi-colon separated list
-    QStringList styles;
-    if (!decorations.isEmpty()) styles.append("text-decoration:" + decorations.join(' '));
-    if (bold) styles.append("font-weight:bold");
-    if (italic) styles.append("font-style:italic");
-
-    QString style;
-    if (!styles.isEmpty())
-    {
-        style = " style=\"" + styles.join(';') + "\"";
-    }
-
-    const QString start_rwsnippet(QString("<span class=\"RWSnippet\"%1>").arg(style));
-
-    // Subscript   uses <sub> ... </sub>
-    // Superscript uses <sup> ... </sup>
-    QString buffer = text;
-
-    // Prevent "<" being interpreted as the start of an element, but not if the entire field looks like XML/HTML
-    if (!buffer.startsWith('<') || !buffer.endsWith('>'))
-    {
-        buffer.replace("<", "&lt;");
-    }
-
-    // Parse for possible URLs, remembering style for future text
-    const QString url_replacement("<a class=\"RWLink\" style=\"color:#000000;text-decoration:none\" href=\"\\1\" title=\"\\1\"><span class=\"RWLink\">\\1</span></a></span>" + start_rwsnippet);
-    return start_rwsnippet + buffer.replace(url_regexp, url_replacement) + "</span>";
-}
 
 RWStructureItem *RWStructureItem::childElement(const QString &element_name) const
 {

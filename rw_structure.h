@@ -26,6 +26,8 @@ class RWStructure : public RWStructureItem
     Q_OBJECT
 public:
     RWStructure(QXmlStreamReader *stream, QObject *parent = 0);
+protected:
+    virtual RWContentsItem *createContentsItem(RWContentsItem *parent);
 };
 
 #endif // RWSTRUCTURE_H

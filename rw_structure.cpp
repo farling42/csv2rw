@@ -32,3 +32,8 @@ RWStructure::RWStructure(QXmlStreamReader *stream, QObject *parent) :
     RWStructureItem(stream, parent)
 {
 }
+
+RWContentsItem *RWStructure::createContentsItem(RWContentsItem *parent)
+{
+    return new RWContentsItem(this, parent);
+}

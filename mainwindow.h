@@ -30,7 +30,7 @@ class CsvModel;
 class FileDetails;
 class QStringListModel;
 class ParentCategoryWidget;
-class RWCategoryWidget;
+class RWTopicWidget;
 
 class MainWindow : public QMainWindow
 {
@@ -62,7 +62,7 @@ private:
     CsvModel *csv_full_model;
     QStringListModel *header_model;
     RealmWorksStructure rw_structure;
-    RWCategoryWidget *category_widget;
+    RWTopicWidget *category_widget;
     QList<ParentCategoryWidget*> parents;
     FileDetails *file_details;
 };

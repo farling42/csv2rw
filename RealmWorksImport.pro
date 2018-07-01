@@ -32,7 +32,6 @@ SOURCES += main.cpp\
     rw_category.cpp \
     rw_partition.cpp \
     rw_facet.cpp \
-    rwcategorywidget.cpp \
     fieldlineedit.cpp \
     rw_structure.cpp \
     fieldcombobox.cpp \
@@ -42,7 +41,11 @@ SOURCES += main.cpp\
     parentcategorywidget.cpp \
     filedetails.cpp \
     rw_structure_item.cpp \
-    rw_contents_item.cpp
+    rw_contents_item.cpp \
+    rw_section.cpp \
+    rw_snippet.cpp \
+    rw_topic.cpp \
+    rw_topic_widget.cpp
 
 HEADERS  += mainwindow.h \
     csvmodel.h \
@@ -51,7 +54,6 @@ HEADERS  += mainwindow.h \
     rw_category.h \
     rw_partition.h \
     rw_facet.h \
-    rwcategorywidget.h \
     fieldlineedit.h \
     rw_structure.h \
     fieldcombobox.h \
@@ -63,7 +65,11 @@ HEADERS  += mainwindow.h \
     parentcategorywidget.h \
     filedetails.h \
     rw_structure_item.h \
-    rw_contents_item.h
+    rw_contents_item.h \
+    rw_section.h \
+    rw_snippet.h \
+    rw_topic.h \
+    rw_topic_widget.h
 
 FORMS    += mainwindow.ui \
     filedetails.ui

@@ -6,7 +6,8 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QPushButton>
-#include "rwcategorywidget.h"
+#include "rw_topic.h"
+#include "rw_topic_widget.h"
 #include "realmworksstructure.h"
 
 ParentCategoryWidget::ParentCategoryWidget(RealmWorksStructure *structure, QAbstractItemModel *columns, int indent, QWidget *parent) :
@@ -47,9 +48,9 @@ ParentCategoryWidget::ParentCategoryWidget(RealmWorksStructure *structure, QAbst
 }
 
 
-RWCategory *ParentCategoryWidget::category() const
+RWTopic *ParentCategoryWidget::topic() const
 {
-    return category_widget ? category_widget->category() : 0;
+    return category_widget ? category_widget->topic() : 0;
 }
 
 void ParentCategoryWidget::select_category(const QString &selection)
@@ -70,7 +71,8 @@ void ParentCategoryWidget::select_category(const QString &selection)
         category_area->removeWidget(category_widget);
         category_widget->deleteLater();
     }
-    category_widget = new RWCategoryWidget(new_category, header_model, /*include_sections*/ false);
+    RWTopic *topic = qobject_cast<RWTopic*>(new_category->createContentsTree());
+    category_widget = new RWTopicWidget(topic, header_model, /*include_sections*/ false); // TODO - create a hierarchy of RWContentItems
     category_area->addWidget(category_widget);
 }
 

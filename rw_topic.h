@@ -1,5 +1,5 @@
-#ifndef RW_CATEGORY_H
-#define RW_CATEGORY_H
+#ifndef RW_TOPIC_H
+#define RW_TOPIC_H
 
 /*
 CSV2RW
@@ -19,27 +19,39 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "rw_structure_item.h"
+#include "rw_contents_item.h"
 
 class QXmlStreamWriter;
 class RWAlias;
+class RWCategory;
 class RWPartition;
-class RWTopic;
 
-class RWCategory : public RWStructureItem
+class RWTopic : public RWContentsItem
 {
     Q_OBJECT
 
 public:
-    RWCategory(QXmlStreamReader *stream, QObject *parent = 0);
-    virtual void postLoad();
+    RWTopic(RWCategory *item, RWContentsItem *parent);
+
+    virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index);
+    virtual void writeStartToContents(QXmlStreamWriter*, const QModelIndex &index);
+
+    virtual bool canBeGenerated() const;
+
     QList<RWAlias*> aliases;
+    const RWCategory *const category;
 
 public:
+    DataField &namefield()   { return p_name; }
+    DataField &prefix() { return p_prefix; }
+    DataField &suffix() { return p_suffix; }
+
     static void setDefaultName(const QString &name);
 
-protected:
-    virtual RWContentsItem *createContentsItem(RWContentsItem *parent);
+private:
+    DataField p_name;
+    DataField p_prefix;
+    DataField p_suffix;
 };
 
-#endif // RWCATEGORY_H
+#endif // RW_TOPIC_H

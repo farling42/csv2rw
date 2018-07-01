@@ -25,60 +25,27 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #undef DEBUG_XML
 
-RWContentsItem::RWContentsItem(QXmlStreamReader *reader, QObject *parent, bool ignore_for_contents) :
+RWContentsItem::RWContentsItem(RWStructureItem *item, RWContentsItem *parent) :
     QObject(parent),
+    structure(item),
     p_snippet_style(Normal),
     p_snippet_veracity(Truth),
-    p_snippet_purpose(Story_Only),
-    p_ignore_for_contents(ignore_for_contents)
+    p_snippet_purpose(Story_Only)
 {
     // Extract common data from this XML element
-    p_structure_element = reader->name().toString();
-    p_global = reader->name().endsWith("_global");
-    p_attributes = reader->attributes();
-    p_namespace_uri = reader->namespaceUri().toString();
+//    p_attributes = reader->attributes();  // TODO
 
-    if (p_global)
-    {
-        p_structure_element = p_structure_element.remove("_global");
-        p_uuid = p_attributes.value("global_uuid").toString();
-    }
-    else
-    {
-        p_uuid = p_attributes.value("original_uuid").toString();
-    }
-    p_name = p_attributes.value("name").toString();
-    p_id = p_attributes.value(p_structure_element + "_id").toString();
-    p_signature = p_attributes.value("signature").toString();
-    p_revealed = p_attributes.value("is_revealed") == "true";
+    p_revealed = item->attributes().value("is_revealed") == "true";
 
 #ifdef DEBUG_XML
     qDebug() << *this;
 #endif
 }
 
-void RWContentsItem::writeToStructure(QXmlStreamWriter *writer)
-{
-    writer->writeStartElement(p_global ? p_structure_element + "_global" : p_structure_element);
-    writer->writeAttributes(p_attributes);
-    writeChildrenToStructure(writer);
-    if (!p_structure_text.isEmpty()) writer->writeCharacters(p_structure_text);
-    writer->writeEndElement();
-}
-
-void RWContentsItem::writeChildrenToStructure(QXmlStreamWriter *writer)
-{
-    QList<RWContentsItem*> child_items = childItems<RWContentsItem*>();
-    foreach (RWContentsItem *child, child_items)
-    {
-        child->writeToStructure(writer);
-    }
-}
-
 void RWContentsItem::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index)
 {
     // Special case: never put text_override into the contents section
-    if (p_ignore_for_contents) return;
+    if (structure->ignoreForContents()) return;
 
     if (p_structure_element == "overlay")
     {
@@ -88,7 +55,7 @@ void RWContentsItem::writeToContents(QXmlStreamWriter *writer, const QModelIndex
     }
     writer->writeStartElement(p_structure_element);
 
-    if (!id().isEmpty()) writer->writeAttribute(p_structure_element + "_id", id());   // e.g. partition_id, not the same as <element>_id
+    if (!structure->id().isEmpty()) writer->writeAttribute(p_structure_element + "_id", structure->id());   // e.g. partition_id, not the same as <element>_id
 
     //QString user_text = p_text.valueString(index);
     //if (!user_text.isEmpty()) writer->writeCharacters(user_text);
@@ -131,12 +98,7 @@ bool RWContentsItem::canBeGenerated() const
 QDebug operator<<(QDebug stream, const RWContentsItem &item)
 {
     stream.noquote().nospace() << item.metaObject()->className() << "(" << item.p_structure_element;
-    if (item.p_global) stream.noquote().nospace() << "_global";
     stream.noquote().nospace() << " : ";
-    if (!item.p_name.isEmpty()) stream.noquote().nospace() << item.p_name;
-    if (!item.p_id.isEmpty()) stream.noquote().nospace() << ", id=" + item.p_id;
-    if (!item.p_uuid.isEmpty()) stream.noquote().nospace() << ", uuid=" + item.p_uuid;
-    if (!item.p_signature.isEmpty()) stream.noquote().nospace() << ", signature=" + item.p_signature;
     QString text = item.p_contents_text.valueString();
     if (!text.isEmpty()) stream.noquote().nospace() << ":: value=\"" + text + "\"";
     stream.nospace() << ")";

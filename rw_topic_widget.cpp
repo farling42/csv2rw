@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "rwcategorywidget.h"
+#include "rw_topic_widget.h"
 
 #include <QAbstractItemModel>
 #include <QActionGroup>
@@ -42,6 +42,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "rw_domain.h"
 #include "rw_facet.h"
 #include "rw_partition.h"
+#include "rw_section.h"
+#include "rw_snippet.h"
+#include "rw_topic.h"
 
 static QMetaEnum case_matching_enum   = QMetaEnum::fromType<RWAlias::CaseMatching>();
 static QMetaEnum match_priority_enum  = QMetaEnum::fromType<RWAlias::MatchPriority>();
@@ -53,17 +56,17 @@ static inline QString column_name(QAbstractItemModel *model, int column)
 }
 
 /**
- * @brief RWCategoryWidget::RWCategoryWidget
+ * @brief RWTopicWidget::RWTopicWidget
  *
  * Creates the widget which shows the entire structure of this particular category.
  *
  * @param category
  * @param parent
  */
-RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *columns, bool include_sections, QWidget *parent) :
+RWTopicWidget::RWTopicWidget(RWTopic *topic, QAbstractItemModel *columns, bool include_sections, QWidget *parent) :
     QFrame(parent),
     p_columns(columns),
-    p_category(category)
+    p_topic(topic)
 {
     RWStructureItem *description;
     setFrameStyle(QFrame::Panel | QFrame::Sunken);
@@ -72,9 +75,9 @@ RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *col
 
     // Start with the title (+ prefix + suffix)
     QRadioButton  *reveal = new QRadioButton(QString());
-    FieldLineEdit *name   = new FieldLineEdit(category->namefield());
-    FieldLineEdit *prefix = new FieldLineEdit(category->prefix());
-    FieldLineEdit *suffix = new FieldLineEdit(category->suffix());
+    FieldLineEdit *name   = new FieldLineEdit(topic->namefield());
+    FieldLineEdit *prefix = new FieldLineEdit(topic->prefix());
+    FieldLineEdit *suffix = new FieldLineEdit(topic->suffix());
     QPushButton   *addName = new QPushButton("+Name");
 
     addName->setToolTip("Adds a True Name/Other Name\n"
@@ -84,25 +87,25 @@ RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *col
     // Should the category be marked as revealed
     reveal->setAutoExclusive(false);
     reveal->setToolTip("revealed?");
-    connect(reveal, &QRadioButton::toggled, category, &RWCategory::setIsRevealed);
+    connect(reveal, &QRadioButton::toggled, topic, &RWContentsItem::setIsRevealed);
 
     name->setPlaceholderText("<name>");
-    description = category->childElement("description");
-    name->setToolTip(description ? description->structureText() : category->name());
-    if (category->namefield().modelColumn() >= 0)
-        name->setText(column_name(columns, category->namefield().modelColumn()));
+    description = topic->category->childElement("description");     // TODO - probably need to find the local version
+    name->setToolTip(description ? description->structureText() : topic->category->name());
+    if (topic->namefield().modelColumn() >= 0)
+        name->setText(column_name(columns, topic->namefield().modelColumn()));
 
     prefix->setPlaceholderText("<prefix>");
     prefix->setToolTip("prefix");
-    if (category->prefix().modelColumn() >= 0)
-        prefix->setText(column_name(columns, category->prefix().modelColumn()));
+    if (topic->prefix().modelColumn() >= 0)
+        prefix->setText(column_name(columns, topic->prefix().modelColumn()));
 
     suffix->setPlaceholderText("<suffix>");
     suffix->setToolTip("suffix");
-    if (category->suffix().modelColumn() >= 0)
-        suffix->setText(column_name(columns, category->suffix().modelColumn()));
+    if (topic->suffix().modelColumn() >= 0)
+        suffix->setText(column_name(columns, topic->suffix().modelColumn()));
 
-    connect(addName, &QPushButton::clicked, this, &RWCategoryWidget::add_name);
+    connect(addName, &QPushButton::clicked, this, &RWTopicWidget::add_name);
 
     QBoxLayout *title = new QHBoxLayout;
     title->addWidget(reveal,  0);
@@ -118,11 +121,11 @@ RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *col
         // Now deal with the sections
         QList<int> sections;
         sections.append(1);
-        QList<RWPartition*> child_items = category->childItems<RWPartition*>();
+        QList<RWSection*> child_items = topic->childItems<RWSection*>();
         p_first_section = 0;
-        foreach (RWPartition *child, child_items)
+        foreach (RWSection *child, child_items)
         {
-            QWidget *sec = add_partition(sections, columns, child);
+            QWidget *sec = add_section(sections, columns, child);
             if (p_first_section == 0) p_first_section = sec;
             layout->addWidget(sec);
             sections.last()++;
@@ -132,14 +135,14 @@ RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *col
     setLayout(layout);
 
     // Maybe they've switched to a category with some name entries already present.
-    foreach (RWAlias *alias, p_category->aliases)
+    foreach (RWAlias *alias, p_topic->aliases)
         add_rwalias(alias);
 }
 
 
-void RWCategoryWidget::add_rwalias(RWAlias *alias)
+void RWTopicWidget::add_rwalias(RWAlias *alias)
 {
-    bool is_true_name = (p_category->aliases.first() == alias);
+    bool is_true_name = (p_topic->aliases.first() == alias);
 
     alias->setIsTrueName(is_true_name);
 
@@ -170,7 +173,7 @@ void RWCategoryWidget::add_rwalias(RWAlias *alias)
     connect(show_in_nav,    &QCheckBox::toggled,    alias, &RWAlias::setShowInNav);
     connect(case_matching,  QOverload<int>::of(&QComboBox::activated), alias, &RWAlias::setCaseMatchingInt);
     connect(match_priority, QOverload<int>::of(&QComboBox::activated), alias, &RWAlias::setMatchPriorityInt);
-    connect(delete_name,    &QPushButton::clicked,  this,  &RWCategoryWidget::remove_name);
+    connect(delete_name,    &QPushButton::clicked,  this,  &RWTopicWidget::remove_name);
     // Don't allow deleting a True Name until all Other Names have been removed.
     if (is_true_name) delete_name->setEnabled(false);
 
@@ -214,15 +217,15 @@ void RWCategoryWidget::add_rwalias(RWAlias *alias)
         top_layout->addLayout(row);
 }
 
-void RWCategoryWidget::add_name()
+void RWTopicWidget::add_name()
 {
     RWAlias *alias = new RWAlias;
-    p_category->aliases.append(alias);
+    p_topic->aliases.append(alias);
     add_rwalias(alias);
 }
 
 
-void RWCategoryWidget::remove_name()
+void RWTopicWidget::remove_name()
 {
     QPushButton *button = qobject_cast<QPushButton*>(sender());
     if (button == 0) return;
@@ -232,7 +235,7 @@ void RWCategoryWidget::remove_name()
     if (row == 0 || alias == 0) return;
 
     // Remove alias from the structure
-    p_category->aliases.removeAll(alias);
+    p_topic->aliases.removeAll(alias);
     delete alias;
 
     // Remove widget from the window
@@ -252,7 +255,7 @@ void RWCategoryWidget::remove_name()
 }
 
 
-void RWCategoryWidget::do_insert()
+void RWTopicWidget::do_insert()
 {
     QPushButton *button = qobject_cast<QPushButton*>(sender());
     if (button == 0) return;
@@ -260,7 +263,7 @@ void RWCategoryWidget::do_insert()
     if (layout == 0) return;
 
     // Add an additional contents field
-    FieldLineEdit *edit = new FieldLineEdit(p_category->contentsText());
+    FieldLineEdit *edit = new FieldLineEdit(p_topic->contentsText());
     edit->setToolTip("contents");
     edit->setPlaceholderText("<generic>");
     //edit->setText(column_name(columns, p_category->modelColumnForText()));
@@ -282,7 +285,7 @@ static QString section_string(QList<int> sections)
     return result;
 }
 
-QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel *columns, RWPartition *partition)
+QWidget *RWTopicWidget::add_section(QList<int> sections, QAbstractItemModel *columns, RWSection *section)
 {
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setContentsMargins(0,/*top*/9,0,0);
@@ -291,36 +294,36 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
     title->setFrameStyle(QFrame::Panel | QFrame::Raised);
     title->setLineWidth(2);
     title->setMargin(3);
-    title->setText(QString("%1  %2").arg(section_string(sections)).arg(partition->name()));
-    RWStructureItem *description = partition->childElement("description");
-    title->setToolTip(description ? description->structureText() : partition->id());
+    title->setText(QString("%1  %2").arg(section_string(sections)).arg(section->partition->name()));
+    RWStructureItem *description = section->partition->childElement("description");
+    title->setToolTip(description ? description->structureText() : section->partition->id());
     layout->addWidget(title);
 
     QFont bold_font = title->font();
     bold_font.setBold(true);
     title->setFont(bold_font);
 
-    QList<RWFacet*> child_facets = partition->childItems<RWFacet*>();
-    foreach (RWFacet *facet, child_facets)
+    QList<RWSnippet*> child_snippets = section->childItems<RWSnippet*>();
+    foreach (RWSnippet *snippet, child_snippets)
     {
-        layout->addWidget(add_facet(columns, facet));
+        layout->addWidget(add_snippet(columns, snippet));
     }
 
     // Finally a generic text box (the contents + reveal)
     QRadioButton *reveal = new QRadioButton(QString());
     reveal->setAutoExclusive(false);
     reveal->setToolTip("revealed?");
-    reveal->setChecked(partition->isRevealed());
-    connect(reveal, &QRadioButton::toggled, partition, &RWFacet::setIsRevealed);
+    reveal->setChecked(section->isRevealed());
+    connect(reveal, &QRadioButton::toggled, section, &RWContentsItem::setIsRevealed);
 
-    FieldMultiLineEdit *edit = new FieldMultiLineEdit(partition->contentsText());
+    FieldMultiLineEdit *edit = new FieldMultiLineEdit(section->contentsText());
     edit->setToolTip("contents");
-    RWStructureItem *purpose = partition->childElement("purpose");
+    RWStructureItem *purpose = section->partition->childElement("purpose");
     edit->setPlaceholderText(purpose ? purpose->structureText() : "<purpose>");
-    if (partition->contentsText().modelColumn() >= 0)
-        edit->setText(column_name(columns, partition->contentsText().modelColumn()));
+    if (section->contentsText().modelColumn() >= 0)
+        edit->setText(column_name(columns, section->contentsText().modelColumn()));
 
-    QWidget *options = create_option_button(partition);
+    QWidget *options = create_option_button(section);
 
     QHBoxLayout *textlayout = new QHBoxLayout;
     textlayout->addWidget(reveal);
@@ -331,7 +334,7 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
 #ifdef ADD_SNIPPET
     // Add a button to allow a second <contents> section to be added.
     QPushButton *insert_button = new QPushButton("+");
-    connect(insert_button, &QPushButton::clicked, this, &RWCategoryWidget::do_insert);
+    connect(insert_button, &QPushButton::clicked, this, &RWTopicWidget::do_insert);
     insert_button->setProperty("where", QVariant::fromValue(layout));
     layout->addWidget(insert_button);
 #endif
@@ -339,10 +342,10 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
     // Then display the sub-partitions
     QWidget *first_sub = 0;
     sections.append(1);
-    QList<RWPartition*> child_partitions = partition->childItems<RWPartition*>();
-    foreach (RWPartition *child, child_partitions)
+    QList<RWSection*> child_sections = section->childItems<RWSection*>();
+    foreach (RWSection *child, child_sections)
     {
-        QWidget *sub_part = add_partition (sections, columns, child);
+        QWidget *sub_part = add_section (sections, columns, child);
         if (first_sub == 0) first_sub = sub_part;
         layout->addWidget(sub_part);
         sections.last()++;
@@ -354,7 +357,7 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
     return frame;
 }
 
-QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet)
+QWidget *RWTopicWidget::add_snippet(QAbstractItemModel *columns, RWSnippet *snippet)
 {
     QRadioButton *reveal = 0;
     QLabel *label = 0;
@@ -369,7 +372,9 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
     reveal = new QRadioButton(QString());
     reveal->setAutoExclusive(false);
     reveal->setToolTip("revealed?");
-    connect(reveal, &QRadioButton::toggled, facet, &RWFacet::setIsRevealed);
+    connect(reveal, &QRadioButton::toggled, snippet, &RWContentsItem::setIsRevealed);
+
+    const RWFacet *facet = snippet->facet;
 
     // Maybe a field-name to start the line
     if (facet->snippetType() == RWFacet::Labeled_Text ||
@@ -393,9 +398,9 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
     // Maybe a tag selector
     if (facet->snippetType() == RWFacet::Hybrid_Tag)
     {
-        combo = new FieldComboBox(facet->tags(), RWDomain::getDomainById(facet->attributes().value("domain_id").toString()));
-        if (facet->tags().modelColumn() >= 0)
-            combo->setIndexString(column_name(columns, facet->tags().modelColumn()));
+        combo = new FieldComboBox(snippet->tags(), RWDomain::getDomainById(facet->attributes().value("domain_id").toString()));
+        if (snippet->tags().modelColumn() >= 0)
+            combo->setIndexString(column_name(columns, snippet->tags().modelColumn()));
     }
 
     // Maybe a FILENAME entry field
@@ -411,7 +416,7 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
             facet->snippetType() == RWFacet::Foreign)
     {
         // A field in which to choose the field for the data (e.g. image) file to be loaded
-        filename = new FieldLineEdit(facet->filename());
+        filename = new FieldLineEdit(snippet->filename());
         filename->setPlaceholderText(facet->name());
         filename->setToolTip(tr("File containing asset"));
         // Change the background colour
@@ -420,15 +425,15 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
         filename->setPalette(p);
         filename->setBackgroundRole(QPalette::Button);
         filename->setMaximumWidth(100);
-        if (facet->filename().modelColumn() >= 0)
+        if (snippet->filename().modelColumn() >= 0)
         {
-            filename->setText(column_name(columns, facet->filename().modelColumn()));
+            filename->setText(column_name(columns, snippet->filename().modelColumn()));
         }
     }
 
     if (facet->snippetType() == RWFacet::Date_Game || facet->snippetType() == RWFacet::Date_Range)
     {
-        start_date = new FieldLineEdit(facet->startDate());
+        start_date = new FieldLineEdit(snippet->startDate());
         start_date->setToolTip((facet->snippetType() == RWFacet::Date_Game) ? "Date" : "Start Date");
         start_date->setPlaceholderText(facet->name());
         // Change the background colour
@@ -437,15 +442,15 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
         start_date->setPalette(p);
         start_date->setBackgroundRole(QPalette::Button);
         start_date->setMaximumWidth(100);
-        if (facet->startDate().modelColumn() >= 0)
+        if (snippet->startDate().modelColumn() >= 0)
         {
-            start_date->setText(column_name(columns, facet->startDate().modelColumn()));
+            start_date->setText(column_name(columns, snippet->startDate().modelColumn()));
         }
 
         // A second field is required to finish the range
         if (facet->snippetType() == RWFacet::Date_Range)
         {
-            finish_date = new FieldLineEdit(facet->finishDate());
+            finish_date = new FieldLineEdit(snippet->finishDate());
             finish_date->setToolTip("Finish Date");
             finish_date->setPlaceholderText(facet->name());
             // Change the background colour
@@ -454,15 +459,15 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
             finish_date->setPalette(p);
             finish_date->setBackgroundRole(QPalette::Button);
             finish_date->setMaximumWidth(100);
-            if (facet->finishDate().modelColumn() >= 0)
+            if (snippet->finishDate().modelColumn() >= 0)
             {
-                finish_date->setText(column_name(columns, facet->finishDate().modelColumn()));
+                finish_date->setText(column_name(columns, snippet->finishDate().modelColumn()));
             }
         }
     }
     if (facet->snippetType() == RWFacet::Numeric)
     {
-        number = new FieldLineEdit(facet->number());
+        number = new FieldLineEdit(snippet->number());
         number->setMaximumWidth(100);
         number->setToolTip(tr("Numeric value"));
         // Change the background colour
@@ -471,20 +476,20 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
         number->setPalette(p);
         number->setBackgroundRole(QPalette::Button);
         number->setPlaceholderText(facet->name());
-        if (facet->number().modelColumn() >= 0)
+        if (snippet->number().modelColumn() >= 0)
         {
-            number->setText(column_name(columns, facet->number().modelColumn()));
+            number->setText(column_name(columns, snippet->number().modelColumn()));
         }
     }
 
     // Now the text entry field
     if (facet->snippetType() == RWFacet::Multi_Line)
     {
-        FieldMultiLineEdit *edit = new FieldMultiLineEdit(facet->contentsText());
+        FieldMultiLineEdit *edit = new FieldMultiLineEdit(snippet->contentsText());
         edit_widget = edit;
 
         // Use the <description> child as a tool tip, if available
-        RWStructureItem *description = facet->childElement("description");
+        RWContentsItem *description = snippet->childElement("description");
         edit->setToolTip(description ? description->structureText() : facet->uuid());
         if (facet->snippetType() == RWFacet::Hybrid_Tag)
         {
@@ -494,18 +499,18 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
         {
             edit->setPlaceholderText(facet->name());
         }
-        if (facet->contentsText().modelColumn() >= 0)
+        if (snippet->contentsText().modelColumn() >= 0)
         {
-            edit->setText(column_name(columns, facet->contentsText().modelColumn()));
+            edit->setText(column_name(columns, snippet->contentsText().modelColumn()));
         }
     }
     else
     {
-        FieldLineEdit *edit = new FieldLineEdit(facet->contentsText());
+        FieldLineEdit *edit = new FieldLineEdit(snippet->contentsText());
         edit_widget = edit;
 
         // Use the <description> child as a tool tip, if available
-        RWStructureItem *description = facet->childElement("description");
+        RWContentsItem *description = snippet->childElement("description");
         edit->setToolTip(description ? description->structureText() : facet->uuid());
         if (facet->snippetType() == RWFacet::Hybrid_Tag ||
                 facet->snippetType() == RWFacet::Numeric ||
@@ -526,14 +531,14 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
         {
             edit->setPlaceholderText(facet->name());
         }
-        if (facet->contentsText().modelColumn() >= 0)
+        if (snippet->contentsText().modelColumn() >= 0)
         {
-            edit->setText(column_name(columns, facet->contentsText().modelColumn()));
+            edit->setText(column_name(columns, snippet->contentsText().modelColumn()));
         }
     }
 
     // Finally some selectable options for this snippet
-    QWidget *options_button = create_option_button(facet);
+    QWidget *options_button = create_option_button(snippet);
 
     //
     // Create a row containing all these widgets
@@ -559,7 +564,7 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
 }
 
 template<typename T>
-QActionGroup *RWCategoryWidget::create_enum_actions(const QString &section_name, T current_value, QMenu *menu, QMap<QString,QString> &rename)
+QActionGroup *RWTopicWidget::create_enum_actions(const QString &section_name, T current_value, QMenu *menu, QMap<QString,QString> &rename)
 {
     // Windows doesn't support menu->addSection, so emulate it outself.
     menu->addSeparator();
@@ -583,36 +588,36 @@ QActionGroup *RWCategoryWidget::create_enum_actions(const QString &section_name,
 }
 
 
-QWidget *RWCategoryWidget::create_option_button(RWStructureItem *item)
+QWidget *RWTopicWidget::create_option_button(RWContentsItem *item)
 {
     // Add button to bring up the options menu for the snippet
     QMenu *options_menu = new QMenu(this);
 
     // SUB-MENU for the snippet style
     QMap<QString,QString> style_remap{ {"Handout", "Message"} };
-    QActionGroup *styles = create_enum_actions<RWFacet::SnippetStyle>("Snippet Style", item->snippetStyle(), options_menu, style_remap);
+    QActionGroup *styles = create_enum_actions<RWContentsItem::SnippetStyle>("Snippet Style", item->snippetStyle(), options_menu, style_remap);
     // For SnippetStyle, RWFacet::Handout needs to use the label "Message"
     foreach (QAction *action, styles->actions())
         if (action->text() == "Handout") action->setText("Message");
     connect(styles, &QActionGroup::triggered, [=] {
         if (QAction *act = styles->checkedAction())
-            item->setSnippetStyle(act->data().value<RWFacet::SnippetStyle>());
+            item->setSnippetStyle(act->data().value<RWContentsItem::SnippetStyle>());
     } );
 
     QMap<QString,QString> veracity_remap{{"Truth", "True"}, {"Partial", "Partially True"}, {"Lie", "Untrue"}};
-    QActionGroup *veracity = create_enum_actions<RWFacet::SnippetVeracity>("Truth Level", item->snippetVeracity(), options_menu, veracity_remap);
+    QActionGroup *veracity = create_enum_actions<RWContentsItem::SnippetVeracity>("Truth Level", item->snippetVeracity(), options_menu, veracity_remap);
     connect(veracity, &QActionGroup::triggered, [=] {
         if (QAction *act = veracity->checkedAction())
-            item->setSnippetVeracity(act->data().value<RWFacet::SnippetVeracity>());
+            item->setSnippetVeracity(act->data().value<RWContentsItem::SnippetVeracity>());
     } );
 
 #if 0
     // Crashes RW on import
     QMap<QString,QString> purpose_remap;
-    QActionGroup *purpose = create_enum_actions<RWFacet::SnippetPurpose>("Purpose", item->snippetPurpose(), options_menu, purpose_remap);
+    QActionGroup *purpose = create_enum_actions<RWContentsItem::SnippetPurpose>("Purpose", item->snippetPurpose(), options_menu, purpose_remap);
     connect(purpose, &QActionGroup::triggered, [=] {
         if (QAction *act = purpose->checkedAction())
-            item->setSnippetPurpose(act->data().value<RWFacet::SnippetPurpose>());
+            item->setSnippetPurpose(act->data().value<RWContentsItem::SnippetPurpose>());
     } );
 #endif
 

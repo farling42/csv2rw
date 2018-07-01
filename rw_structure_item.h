@@ -23,8 +23,11 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QXmlStreamReader>
 #include "datafield.h"
 
+#include "rw_contents_item.h"   // TODO - remove later
+
 class QModelIndex;
 class QXmlStreamWriter;
+class RWContentsItem;
 
 class RWStructureItem : public QObject
 {
@@ -32,26 +35,8 @@ class RWStructureItem : public QObject
     Q_PROPERTY(QString structureElement READ structureElement)
     Q_PROPERTY(bool ignoreForContents READ ignoreForContents WRITE setIgnoreForContents)
 
-    Q_PROPERTY(bool revealed          READ isRevealed        WRITE setIsRevealed)
-    Q_PROPERTY(SnippetStyle snippetStyle READ snippetStyle WRITE setSnippetStyle)
-    // SnippetStyle should be in RWFacet, but it is used by RWPartition
-
 public:
     RWStructureItem(QXmlStreamReader *stream, QObject *parent = 0, bool ignore_for_contents = false);
-
-    enum SnippetStyle { Normal, Read_Aloud, Handout, Flavor, Callout };
-    Q_ENUM(SnippetStyle)
-    enum SnippetVeracity { Truth, Partial, Lie };
-    Q_ENUM(SnippetVeracity)
-    enum SnippetPurpose { Story_Only, Directions_Only, Both };
-    Q_ENUM(SnippetPurpose)
-
-public Q_SLOTS:
-    void setIsRevealed(bool is_revealed) { p_revealed = is_revealed; }
-    void setSnippetStyleInt(int style) { p_snippet_style = (SnippetStyle)style; }
-    void setSnippetStyle(SnippetStyle style) { p_snippet_style = style; }
-    void setSnippetVeracity(SnippetVeracity veracity) { p_snippet_veracity = veracity; }
-    void setSnippetPurpose(SnippetPurpose purpose) { p_snippet_purpose = purpose; }
 
 public:
     // Attributes from the structure definition
@@ -64,33 +49,18 @@ public:
     void setIgnoreForContents(bool flag) { p_ignore_for_contents = flag; }
     bool ignoreForContents() const { return p_ignore_for_contents; }
 
-    SnippetStyle snippetStyle() const { return p_snippet_style; }
-    SnippetVeracity snippetVeracity () const { return p_snippet_veracity; }
-    SnippetPurpose snippetPurpose() const { return p_snippet_purpose; }
-
     // More information
     virtual bool canBeGenerated() const;
-    DataField &contentsText() { return p_contents_text; }
     QString structureText() { return p_structure_text; }
     void setStructureText(const QString &text) { p_structure_text = text; }
 
     virtual void writeToStructure(QXmlStreamWriter*);
-    virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index);
     virtual void postLoad(void) {}
-
-    bool isRevealed() const { return p_revealed; }
-    QString isRevealedString() const { return p_revealed ? "true" : "false"; }
 
     QString structureElement() const { return p_structure_element; }
 
     QString namespaceUri() const { return p_namespace_uri; }
     const QXmlStreamAttributes &attributes() const { return p_attributes; }
-
-    enum TextClass { RWDefault, RWSnippet, RWEnumerated };
-    static QString xmlParagraph(const QString &contentsText, TextClass text_class = RWDefault, int margin = 0);
-    static QString xmlSpan(const QString &contentsText,
-                           bool bold = false, bool italic = false,
-                           bool line_through = false, bool underline = false);
 
     template<typename T>
     inline QList<T> childItems() const { return findChildren<T>(QString(), Qt::FindDirectChildrenOnly); }
@@ -98,12 +68,11 @@ public:
     RWStructureItem *childElement(const QString &element_name) const;
     void writeExportTag(QXmlStreamWriter *writer);
 
+    RWContentsItem *createContentsTree(RWContentsItem *parent = 0);
+
 protected:
     virtual void writeChildrenToStructure(QXmlStreamWriter *writer);
-    virtual void writeChildrenToContents(QXmlStreamWriter *writer, const QModelIndex &index);
-    SnippetStyle p_snippet_style;
-    SnippetVeracity p_snippet_veracity;
-    SnippetPurpose p_snippet_purpose;
+    virtual RWContentsItem *createContentsItem(RWContentsItem *parent);
 
 private:
     QXmlStreamAttributes p_attributes;

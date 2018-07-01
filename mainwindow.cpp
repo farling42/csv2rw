@@ -27,7 +27,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QSortFilterProxyModel>
 #include <QStringListModel>
 #include <QSettings>
-#include <rwcategorywidget.h>
+#include <rw_topic_widget.h>
+
+#include "rw_topic.h"
 
 #include "filedetails.h"
 #include "realmworksstructure.h"
@@ -171,7 +173,8 @@ void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selectio
 
     //qDebug() << "Selected category" << choice->name();
 
-    category_widget = new RWCategoryWidget(choice, header_model);
+    RWTopic *topic = qobject_cast<RWTopic*>(choice->createContentsTree());
+    category_widget = new RWTopicWidget(topic, header_model);   // TODO - build a hierarchy of TOPIC items
     ui->categoryScrollArea->setWidget(category_widget);
 }
 
@@ -184,7 +187,7 @@ void MainWindow::on_generateButton_clicked()
     ui->generateButton->setEnabled(false);
 
     // Check that the topic has been configured correctly.
-    if (!category_widget->category()->canBeGenerated())
+    if (!category_widget->topic()->canBeGenerated())
     {
         QMessageBox::critical(this, tr("Incomplete Data"),
                               tr("The topic/article needs to have a field allocated to the name."));
@@ -193,17 +196,18 @@ void MainWindow::on_generateButton_clicked()
     }
 
     // Check that if a parent has been specified, that it has a name
-    QSet<RWCategory*> used_categories;
-    used_categories.insert(category_widget->category());
+    QSet<RWTopic*> used_topics;
+    used_topics.insert(category_widget->topic());
     foreach (ParentCategoryWidget *widget, parents)
     {
-        if (!widget->category()->namefield().isDefined())
+        if (!widget->topic()->namefield().isDefined())
         {
             QMessageBox::critical(this, tr("Incomplete Parent"),
                                   tr("The parent topic/article needs a name."));
             ui->generateButton->setEnabled(true);
             return;
         }
+#if 0
         if (used_categories.contains(widget->category()))
         {
             QMessageBox::critical(this, tr("Bad Parent Category"),
@@ -211,7 +215,8 @@ void MainWindow::on_generateButton_clicked()
             ui->generateButton->setEnabled(true);
             return;
         }
-        used_categories.insert(widget->category());
+#endif
+        used_topics.insert(widget->topic());
     }
 
     // Prompt for output filename
@@ -243,10 +248,10 @@ void MainWindow::on_generateButton_clicked()
 
     settings.setValue(OUTPUT_DIRECTORY_PARAM, QFileInfo(file).absolutePath());
 
-    QList<RWCategory*> parent_cats;
+    QList<RWTopic*> parent_topics;
     foreach (ParentCategoryWidget *widget, parents)
-        parent_cats.append(widget->category());
-    rw_structure.writeExportFile(&file, category_widget->category(), csv_full_model, parent_cats);
+        parent_topics.append(widget->topic());
+    rw_structure.writeExportFile(&file, category_widget->topic(), csv_full_model, parent_topics);
     file.close();
 
     // Enable button again (so that we know it is finished

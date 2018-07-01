@@ -22,6 +22,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "rw_structure_item.h"
 
 class QXmlStreamWriter;
+class RWSnippet;    // TODO - remove
 
 class RWFacet : public RWStructureItem
 {
@@ -38,31 +39,16 @@ public:
     Q_ENUM(SnippetType)
 
     RWFacet(QXmlStreamReader *stream, QObject *parent = 0);
-    virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index);
 
     SnippetType  snippetType()  const { return p_snippet_type;  }
-    DataField &tags()      { return p_tags; }
-    DataField &gmDirections() { return p_gm_directions; }
-    DataField &labelText() { return p_label_text; }
-    DataField &filename() { return p_filename; }
-    DataField &startDate() { return p_start_date; }
-    DataField &finishDate() { return p_finish_date; }
-    DataField &number() { return p_number; }
+
+protected:
+    virtual RWContentsItem *createContentsItem(RWContentsItem *parent);
 
 public slots:
 
 private:
-    void write_asset(QXmlStreamWriter *writer, const QString &filename);
-    void write_ext_object(QXmlStreamWriter *writer, const QString &exttype, const QString &filename);
-    void write_smart_image(QXmlStreamWriter *writer, const QString &filename);
-    DataField p_tags;
-    DataField p_gm_directions;
     SnippetType p_snippet_type;
-    DataField p_label_text;   // for Labeled_Text fields
-    DataField p_filename;
-    DataField p_start_date;
-    DataField p_finish_date;
-    DataField p_number;
 };
 
-#endif // RWFACET_H
+#endif // RW_FACET_H
