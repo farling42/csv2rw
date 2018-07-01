@@ -441,21 +441,23 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
         {
             start_date->setText(column_name(columns, facet->startDate().modelColumn()));
         }
-    }
-    if (facet->snippetType() == RWFacet::Date_Range)
-    {
-        finish_date = new FieldLineEdit(facet->finishDate());
-        finish_date->setToolTip("Finish Date");
-        finish_date->setPlaceholderText(facet->name());
-        // Change the background colour
-        QPalette p = finish_date->palette();
-        p.setBrush(QPalette::Base, p.button());
-        finish_date->setPalette(p);
-        finish_date->setBackgroundRole(QPalette::Button);
-        finish_date->setMaximumWidth(100);
-        if (facet->finishDate().modelColumn() >= 0)
+
+        // A second field is required to finish the range
+        if (facet->snippetType() == RWFacet::Date_Range)
         {
-            finish_date->setText(column_name(columns, facet->finishDate().modelColumn()));
+            finish_date = new FieldLineEdit(facet->finishDate());
+            finish_date->setToolTip("Finish Date");
+            finish_date->setPlaceholderText(facet->name());
+            // Change the background colour
+            QPalette p = finish_date->palette();
+            p.setBrush(QPalette::Base, p.button());
+            finish_date->setPalette(p);
+            finish_date->setBackgroundRole(QPalette::Button);
+            finish_date->setMaximumWidth(100);
+            if (facet->finishDate().modelColumn() >= 0)
+            {
+                finish_date->setText(column_name(columns, facet->finishDate().modelColumn()));
+            }
         }
     }
     if (facet->snippetType() == RWFacet::Numeric)
@@ -530,9 +532,12 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
         }
     }
 
+    // Finally some selectable options for this snippet
     QWidget *options_button = create_option_button(facet);
 
+    //
     // Create a row containing all these widgets
+    //
     QHBoxLayout *boxl = new QHBoxLayout;
     boxl->setContentsMargins(0,0,0,0);
     if (reveal) boxl->addWidget(reveal);
@@ -545,6 +550,7 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
     if (edit_widget) boxl->addWidget(edit_widget);
     if (options_button) boxl->addWidget(options_button);
 
+    // And the actual widget to contain the row's layout
     QWidget *box = new QWidget;
     box->setProperty("facet", QVariant::fromValue((void*)facet));
     box->setLayout(boxl);
@@ -602,7 +608,8 @@ QWidget *RWCategoryWidget::create_option_button(RWBaseItem *item)
 
 #if 0
     // Crashes RW on import
-    QActionGroup *purpose = create_enum_actions<RWFacet::SnippetPurpose>("Purpose", item->snippetPurpose(), options_menu);
+    QMap<QString,QString> purpose_remap;
+    QActionGroup *purpose = create_enum_actions<RWFacet::SnippetPurpose>("Purpose", item->snippetPurpose(), options_menu, purpose_remap);
     connect(purpose, &QActionGroup::triggered, [=] {
         if (QAction *act = purpose->checkedAction())
             item->setSnippetPurpose(act->data().value<RWFacet::SnippetPurpose>());
