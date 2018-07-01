@@ -32,13 +32,13 @@ RealmWorksStructure::RealmWorksStructure()
 
 }
 
-static void dump_tree(int indent, RWBaseItem *parent)
+static void dump_tree(int indent, RWStructureItem *parent)
 {
     QString indentation(indent, QChar(QChar::Space));
 
     qDebug().noquote().nospace() << indentation << *parent;
-    QList<RWBaseItem*> child_items = parent->childItems<RWBaseItem*>();
-    foreach (RWBaseItem *child, child_items)
+    QList<RWStructureItem*> child_items = parent->childItems<RWStructureItem*>();
+    foreach (RWStructureItem *child, child_items)
     {
         dump_tree(indent +3, child);
     }
@@ -71,15 +71,15 @@ void RealmWorksStructure::loadFile(QIODevice *device)
     //dump_tree (0, export_element);
 
     // Now find the partitions and domains in the structure
-    RWBaseItem *main_structure = export_element->findChild<RWStructure*>(QString(), Qt::FindDirectChildrenOnly);
+    RWStructureItem *main_structure = export_element->findChild<RWStructure*>(QString(), Qt::FindDirectChildrenOnly);
     categories = main_structure->childItems<RWCategory*>();
     domains = main_structure->childItems<RWDomain*>();
     //qDebug() << "File has" << categories.count() << "categories and" << domains.count() << "domains";
 }
 
-RWBaseItem *RealmWorksStructure::read_element(QXmlStreamReader *reader, RWBaseItem *parent)
+RWStructureItem *RealmWorksStructure::read_element(QXmlStreamReader *reader, RWStructureItem *parent)
 {
-    RWBaseItem *element = 0;
+    RWStructureItem *element = 0;
     if (reader->name().startsWith("structure"))
         element = new RWStructure(reader, parent);
     else if (reader->name().startsWith("category"))
@@ -91,7 +91,7 @@ RWBaseItem *RealmWorksStructure::read_element(QXmlStreamReader *reader, RWBaseIt
     else if (reader->name().startsWith("partition"))
         element = new RWPartition(reader, parent);
     else if (reader->name().startsWith("text_override"))
-        element = new RWBaseItem(reader, parent, /*ignore_for_contents*/ true);
+        element = new RWStructureItem(reader, parent, /*ignore_for_contents*/ true);
     else if (reader->name().startsWith("export") ||
              reader->name().startsWith("tag") ||
              reader->name().startsWith("definition") ||
@@ -105,11 +105,11 @@ RWBaseItem *RealmWorksStructure::read_element(QXmlStreamReader *reader, RWBaseIt
              reader->name().startsWith("credits") ||
              reader->name().startsWith("summary") ||
              reader->name().startsWith("purpose") )
-        element = new RWBaseItem(reader, parent);
+        element = new RWStructureItem(reader, parent);
     else
     {
         qWarning() << "read_element: unknown element type:" << reader->name();
-        element = new RWBaseItem(reader, parent);
+        element = new RWStructureItem(reader, parent);
     }
 
     // Now read the rest of this element

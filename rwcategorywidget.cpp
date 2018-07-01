@@ -65,7 +65,7 @@ RWCategoryWidget::RWCategoryWidget(RWCategory *category, QAbstractItemModel *col
     p_columns(columns),
     p_category(category)
 {
-    RWBaseItem *description;
+    RWStructureItem *description;
     setFrameStyle(QFrame::Panel | QFrame::Sunken);
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setContentsMargins(0,0,0,0);
@@ -292,7 +292,7 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
     title->setLineWidth(2);
     title->setMargin(3);
     title->setText(QString("%1  %2").arg(section_string(sections)).arg(partition->name()));
-    RWBaseItem *description = partition->childElement("description");
+    RWStructureItem *description = partition->childElement("description");
     title->setToolTip(description ? description->structureText() : partition->id());
     layout->addWidget(title);
 
@@ -315,7 +315,7 @@ QWidget *RWCategoryWidget::add_partition(QList<int> sections, QAbstractItemModel
 
     FieldMultiLineEdit *edit = new FieldMultiLineEdit(partition->contentsText());
     edit->setToolTip("contents");
-    RWBaseItem *purpose = partition->childElement("purpose");
+    RWStructureItem *purpose = partition->childElement("purpose");
     edit->setPlaceholderText(purpose ? purpose->structureText() : "<purpose>");
     if (partition->contentsText().modelColumn() >= 0)
         edit->setText(column_name(columns, partition->contentsText().modelColumn()));
@@ -484,7 +484,7 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
         edit_widget = edit;
 
         // Use the <description> child as a tool tip, if available
-        RWBaseItem *description = facet->childElement("description");
+        RWStructureItem *description = facet->childElement("description");
         edit->setToolTip(description ? description->structureText() : facet->uuid());
         if (facet->snippetType() == RWFacet::Hybrid_Tag)
         {
@@ -505,7 +505,7 @@ QWidget *RWCategoryWidget::add_facet(QAbstractItemModel *columns, RWFacet *facet
         edit_widget = edit;
 
         // Use the <description> child as a tool tip, if available
-        RWBaseItem *description = facet->childElement("description");
+        RWStructureItem *description = facet->childElement("description");
         edit->setToolTip(description ? description->structureText() : facet->uuid());
         if (facet->snippetType() == RWFacet::Hybrid_Tag ||
                 facet->snippetType() == RWFacet::Numeric ||
@@ -583,7 +583,7 @@ QActionGroup *RWCategoryWidget::create_enum_actions(const QString &section_name,
 }
 
 
-QWidget *RWCategoryWidget::create_option_button(RWBaseItem *item)
+QWidget *RWCategoryWidget::create_option_button(RWStructureItem *item)
 {
     // Add button to bring up the options menu for the snippet
     QMenu *options_menu = new QMenu(this);

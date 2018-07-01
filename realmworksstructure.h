@@ -45,7 +45,7 @@ public Q_SLOTS:
 
     int format_version;
     int game_system_id;
-    RWBaseItem *export_element;
+    RWStructureItem *export_element;
     QList<RWCategory*> categories;
     QList<RWDomain*> domains;
 
@@ -63,7 +63,7 @@ public Q_SLOTS:
 
 private:
     QString namespace_uri;
-    RWBaseItem *read_element(QXmlStreamReader *reader, RWBaseItem *parent);
+    RWStructureItem *read_element(QXmlStreamReader *reader, RWStructureItem *parent);
     void writeParentToStructure(QProgressDialog &progress, QXmlStreamWriter *writer, RWCategory *category, QAbstractItemModel *model, QList<RWCategory*> parent_category);
 };
 

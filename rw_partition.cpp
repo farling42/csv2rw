@@ -24,7 +24,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 static QMetaEnum snip_style_enum = QMetaEnum::fromType<RWPartition::SnippetStyle>();
 
 RWPartition::RWPartition(QXmlStreamReader *stream, QObject *parent) :
-    RWBaseItem(stream, parent)
+    RWStructureItem(stream, parent)
 {
 }
 

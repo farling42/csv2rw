@@ -29,6 +29,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
 RWStructure::RWStructure(QXmlStreamReader *stream, QObject *parent) :
-    RWBaseItem(stream, parent)
+    RWStructureItem(stream, parent)
 {
 }

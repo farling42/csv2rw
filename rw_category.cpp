@@ -28,15 +28,15 @@ static int topic_id = 1;
 static QString g_default_name = "no-name";
 
 RWCategory::RWCategory(QXmlStreamReader *stream, QObject *parent) :
-    RWBaseItem(stream, parent)
+    RWStructureItem(stream, parent)
 {
 }
 
 void RWCategory::postLoad()
 {
     // Mark any child Description or Summary child elements as NOT for output in CONTENTS
-    QList<RWBaseItem*> child_items = childItems<RWBaseItem*>();
-    foreach (RWBaseItem *child, child_items)
+    QList<RWStructureItem*> child_items = childItems<RWStructureItem*>();
+    foreach (RWStructureItem *child, child_items)
     {
         if (child->structureElement() == "description" || child->structureElement() == "summary")
         {

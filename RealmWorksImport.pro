@@ -29,7 +29,6 @@ SOURCES += main.cpp\
     csvmodel.cpp \
     realmworksstructure.cpp \
     rw_domain.cpp \
-    rw_base_item.cpp \
     rw_category.cpp \
     rw_partition.cpp \
     rw_facet.cpp \
@@ -41,13 +40,14 @@ SOURCES += main.cpp\
     performxsltranslation.cpp \
     rw_alias.cpp \
     parentcategorywidget.cpp \
-    filedetails.cpp
+    filedetails.cpp \
+    rw_structure_item.cpp \
+    rw_contents_item.cpp
 
 HEADERS  += mainwindow.h \
     csvmodel.h \
     realmworksstructure.h \
     rw_domain.h \
-    rw_base_item.h \
     rw_category.h \
     rw_partition.h \
     rw_facet.h \
@@ -61,7 +61,9 @@ HEADERS  += mainwindow.h \
     performxsltranslation.h \
     rw_alias.h \
     parentcategorywidget.h \
-    filedetails.h
+    filedetails.h \
+    rw_structure_item.h \
+    rw_contents_item.h
 
 FORMS    += mainwindow.ui \
     filedetails.ui

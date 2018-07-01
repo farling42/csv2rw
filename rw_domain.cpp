@@ -24,7 +24,7 @@ static QMap<QString,RWDomain*> all_domains_by_id;
 static QMap<QString,RWDomain*> all_domains_by_name;
 
 RWDomain::RWDomain(QXmlStreamReader *stream, QObject *parent) :
-    RWBaseItem(stream, parent)
+    RWStructureItem(stream, parent)
 {
     all_domains_by_id.insert(id(), this);
     all_domains_by_name.insert(name(), this);
@@ -47,8 +47,8 @@ RWDomain *RWDomain::getDomainByName(const QString &domain_id)
 QStringList RWDomain::tagNames() const
 {
     QStringList result;
-    QList<RWBaseItem*> tags = childItems<RWBaseItem*>();
-    foreach (RWBaseItem *tag, tags)
+    QList<RWStructureItem*> tags = childItems<RWStructureItem*>();
+    foreach (RWStructureItem *tag, tags)
     {
         if (tag->structureElement().startsWith("tag"))
         {
@@ -60,8 +60,8 @@ QStringList RWDomain::tagNames() const
 
 QString RWDomain::tagId(const QString &tag_name) const
 {
-    QList<RWBaseItem*> tags = childItems<RWBaseItem*>();
-    foreach (RWBaseItem *tag, tags)
+    QList<RWStructureItem*> tags = childItems<RWStructureItem*>();
+    foreach (RWStructureItem *tag, tags)
     {
         if (tag->structureElement().startsWith("tag") &&
                 tag->name().compare(tag_name, Qt::CaseInsensitive) == 0)

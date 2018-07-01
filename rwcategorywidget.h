@@ -22,7 +22,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QFrame>
 
 class RWAlias;
-class RWBaseItem;
+class RWStructureItem;
 class RWCategory;
 class RWFacet;
 class RWPartition;
@@ -54,7 +54,7 @@ private:
     RWCategory *p_category;
     QWidget *p_first_section;
     void add_rwalias(RWAlias *alias);
-    QWidget *create_option_button(RWBaseItem *Item);
+    QWidget *create_option_button(RWStructureItem *Item);
     template<typename T>
     QActionGroup *create_enum_actions(const QString &section_name, T current_value, QMenu *menu, QMap<QString,QString> &rename);
 };

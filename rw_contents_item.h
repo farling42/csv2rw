@@ -1,5 +1,5 @@
-#ifndef RW_BASE_ITEM_H
-#define RW_BASE_ITEM_H
+#ifndef RW_CONTENTS_ITEM_H
+#define RW_CONTENTS_ITEM_H
 
 /*
 CSV2RW
@@ -26,17 +26,18 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 class QModelIndex;
 class QXmlStreamWriter;
 
-class RWBaseItem : public QObject
+class RWContentsItem : public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString structureElement READ structureElement)
-    Q_PROPERTY(bool revealed          READ isRevealed        WRITE setIsRevealed)
     Q_PROPERTY(bool ignoreForContents READ ignoreForContents WRITE setIgnoreForContents)
+
+    Q_PROPERTY(bool revealed          READ isRevealed        WRITE setIsRevealed)
     Q_PROPERTY(SnippetStyle snippetStyle READ snippetStyle WRITE setSnippetStyle)
     // SnippetStyle should be in RWFacet, but it is used by RWPartition
 
 public:
-    RWBaseItem(QXmlStreamReader *stream, QObject *parent = 0, bool ignore_for_contents = false);
+    RWContentsItem(QXmlStreamReader *stream, QObject *parent = 0, bool ignore_for_contents = false);
 
     enum SnippetStyle { Normal, Read_Aloud, Handout, Flavor, Callout };
     Q_ENUM(SnippetStyle)
@@ -93,7 +94,7 @@ public:
     template<typename T>
     inline QList<T> childItems() const { return findChildren<T>(QString(), Qt::FindDirectChildrenOnly); }
 
-    RWBaseItem *childElement(const QString &element_name) const;
+    RWContentsItem *childElement(const QString &element_name) const;
     void writeExportTag(QXmlStreamWriter *writer);
 
 protected:
@@ -116,9 +117,9 @@ private:
     QString p_uuid;       // global_uuid or original_uuid
     QString p_signature;  // only when global == false
     bool p_ignore_for_contents;
-    friend QDebug operator<<(QDebug stream, const RWBaseItem&);
+    friend QDebug operator<<(QDebug stream, const RWContentsItem&);
 };
 
-QDebug operator<<(QDebug stream, const RWBaseItem&);
+QDebug operator<<(QDebug stream, const RWContentsItem&);
 
 #endif // RW_BASE_ITEM_H

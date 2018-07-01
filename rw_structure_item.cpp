@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "rw_base_item.h"
+#include "rw_structure_item.h"
 #include <QXmlStreamWriter>
 #include <QModelIndex>
 #include <QDebug>
@@ -25,7 +25,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #undef DEBUG_XML
 
-RWBaseItem::RWBaseItem(QXmlStreamReader *reader, QObject *parent, bool ignore_for_contents) :
+RWStructureItem::RWStructureItem(QXmlStreamReader *reader, QObject *parent, bool ignore_for_contents) :
     QObject(parent),
     p_snippet_style(Normal),
     p_snippet_veracity(Truth),
@@ -57,7 +57,7 @@ RWBaseItem::RWBaseItem(QXmlStreamReader *reader, QObject *parent, bool ignore_fo
 #endif
 }
 
-void RWBaseItem::writeToStructure(QXmlStreamWriter *writer)
+void RWStructureItem::writeToStructure(QXmlStreamWriter *writer)
 {
     writer->writeStartElement(p_global ? p_structure_element + "_global" : p_structure_element);
     writer->writeAttributes(p_attributes);
@@ -66,16 +66,16 @@ void RWBaseItem::writeToStructure(QXmlStreamWriter *writer)
     writer->writeEndElement();
 }
 
-void RWBaseItem::writeChildrenToStructure(QXmlStreamWriter *writer)
+void RWStructureItem::writeChildrenToStructure(QXmlStreamWriter *writer)
 {
-    QList<RWBaseItem*> child_items = childItems<RWBaseItem*>();
-    foreach (RWBaseItem *child, child_items)
+    QList<RWStructureItem*> child_items = childItems<RWStructureItem*>();
+    foreach (RWStructureItem *child, child_items)
     {
         child->writeToStructure(writer);
     }
 }
 
-void RWBaseItem::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index)
+void RWStructureItem::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index)
 {
     // Special case: never put text_override into the contents section
     if (p_ignore_for_contents) return;
@@ -96,10 +96,10 @@ void RWBaseItem::writeToContents(QXmlStreamWriter *writer, const QModelIndex &in
     writer->writeEndElement();
 }
 
-void RWBaseItem::writeChildrenToContents(QXmlStreamWriter *writer, const QModelIndex &index)
+void RWStructureItem::writeChildrenToContents(QXmlStreamWriter *writer, const QModelIndex &index)
 {
-    QList<RWBaseItem*> child_items = childItems<RWBaseItem*>();
-    foreach (RWBaseItem *child, child_items)
+    QList<RWStructureItem*> child_items = childItems<RWStructureItem*>();
+    foreach (RWStructureItem *child, child_items)
     {
         // Don't write children which are of type RWCategory
         if (qobject_cast<RWCategory*>(child) == 0)
@@ -107,7 +107,7 @@ void RWBaseItem::writeChildrenToContents(QXmlStreamWriter *writer, const QModelI
     }
 }
 
-void RWBaseItem::writeExportTag(QXmlStreamWriter *writer)
+void RWStructureItem::writeExportTag(QXmlStreamWriter *writer)
 {
     writer->writeStartElement("tag_assign");
     writer->writeAttribute("tag_id", "Tag_1");
@@ -118,17 +118,17 @@ void RWBaseItem::writeExportTag(QXmlStreamWriter *writer)
  * @brief RWBaseItem::canBeGenerated
  * @return true if this element has all the data required for the GENERATE to be a success.
  */
-bool RWBaseItem::canBeGenerated() const
+bool RWStructureItem::canBeGenerated() const
 {
-    QList<RWBaseItem*> list = findChildren<RWBaseItem*>();
-    foreach (RWBaseItem *item, list)
+    QList<RWStructureItem*> list = findChildren<RWStructureItem*>();
+    foreach (RWStructureItem *item, list)
     {
         if (!item->canBeGenerated()) return false;
     }
     return true;
 }
 
-QDebug operator<<(QDebug stream, const RWBaseItem &item)
+QDebug operator<<(QDebug stream, const RWStructureItem &item)
 {
     stream.noquote().nospace() << item.metaObject()->className() << "(" << item.p_structure_element;
     if (item.p_global) stream.noquote().nospace() << "_global";
@@ -145,7 +145,7 @@ QDebug operator<<(QDebug stream, const RWBaseItem &item)
 }
 
 
-QString RWBaseItem::xmlParagraph(const QString &text, TextClass text_class, int margin)
+QString RWStructureItem::xmlParagraph(const QString &text, TextClass text_class, int margin)
 {
     switch (text_class)
     {
@@ -159,7 +159,7 @@ QString RWBaseItem::xmlParagraph(const QString &text, TextClass text_class, int 
     return QString();
 }
 
-QString RWBaseItem::xmlSpan(const QString &text, bool bold, bool italic, bool line_through, bool underline)
+QString RWStructureItem::xmlSpan(const QString &text, bool bold, bool italic, bool line_through, bool underline)
 {
     // text-decoration - space separated list
     QStringList decorations;
@@ -194,11 +194,11 @@ QString RWBaseItem::xmlSpan(const QString &text, bool bold, bool italic, bool li
     return start_rwsnippet + buffer.replace(url_regexp, url_replacement) + "</span>";
 }
 
-RWBaseItem *RWBaseItem::childElement(const QString &element_name) const
+RWStructureItem *RWStructureItem::childElement(const QString &element_name) const
 {
     foreach (QObject *child, children())
     {
-        RWBaseItem *item = qobject_cast<RWBaseItem*>(child);
+        RWStructureItem *item = qobject_cast<RWStructureItem*>(child);
         if (item && item->structureElement() == element_name)
             return item;
     }

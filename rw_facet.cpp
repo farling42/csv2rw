@@ -37,7 +37,7 @@ static QMetaEnum snip_purpose_enum = QMetaEnum::fromType<RWFacet::SnippetPurpose
 const int NAME_TYPE_LENGTH = 50;
 
 RWFacet::RWFacet(QXmlStreamReader *stream, QObject *parent) :
-    RWBaseItem(stream, parent),
+    RWStructureItem(stream, parent),
     p_snippet_type(Multi_Line)
 {
     static bool first = true;
