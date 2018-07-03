@@ -45,7 +45,8 @@ SOURCES += main.cpp\
     rw_section.cpp \
     rw_snippet.cpp \
     rw_topic.cpp \
-    rw_topic_widget.cpp
+    rw_topic_widget.cpp \
+    topickey.cpp
 
 HEADERS  += mainwindow.h \
     csvmodel.h \
@@ -69,10 +70,12 @@ HEADERS  += mainwindow.h \
     rw_section.h \
     rw_snippet.h \
     rw_topic.h \
-    rw_topic_widget.h
+    rw_topic_widget.h \
+    topickey.h
 
 FORMS    += mainwindow.ui \
-    filedetails.ui
+    filedetails.ui \
+    topickey.ui
 
 TRANSLATIONS += csv2rw_en.ts
 

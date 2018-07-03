@@ -32,7 +32,8 @@ static QString g_default_name = "no-name";
 
 RWTopic::RWTopic(RWCategory *item, RWContentsItem *parent) :
     RWContentsItem(item, parent),
-    category(item)
+    category(item),
+    p_key_column(-1)
 {
 }
 
@@ -49,8 +50,12 @@ bool RWTopic::canBeGenerated() const
 
 void RWTopic::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index)
 {
-    writeStartToContents(writer, index);
-    writer->writeEndElement();  // </topic>
+    // Don't put topics into the file if they don't match the filter
+    if (keyColumn() < 0 || index.sibling(index.row(), keyColumn()).data().toString() == keyValue())
+    {
+        writeStartToContents(writer, index);
+        writer->writeEndElement();  // </topic>
+    }
 }
 
 

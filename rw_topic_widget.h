@@ -52,11 +52,13 @@ private slots:
     void do_insert();
     void add_name();
     void remove_name();
+    void show_key();
 
 private:
     QAbstractItemModel *p_columns;
     RWTopic *p_topic;
     QWidget *p_first_section;
+    QWidget *p_key;
     void add_rwalias(RWAlias *alias);
     QWidget *create_option_button(RWContentsItem *Item);
     template<typename T>

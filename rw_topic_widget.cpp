@@ -45,10 +45,12 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "rw_section.h"
 #include "rw_snippet.h"
 #include "rw_topic.h"
+#include "topickey.h"
 
 static QMetaEnum case_matching_enum   = QMetaEnum::fromType<RWAlias::CaseMatching>();
 static QMetaEnum match_priority_enum  = QMetaEnum::fromType<RWAlias::MatchPriority>();
 
+static QString default_key_tooltip("Choose a subset of CSV rows.\nChoose which rows of the table will be used to create one of these topics");
 
 static inline QString column_name(QAbstractItemModel *model, int column)
 {
@@ -75,6 +77,7 @@ RWTopicWidget::RWTopicWidget(RWTopic *topic, QAbstractItemModel *columns, bool i
 
     // Start with the title (+ prefix + suffix)
     QRadioButton  *reveal = new QRadioButton(QString());
+    QPushButton   *key    = new QPushButton(style()->standardIcon(QStyle::SP_MessageBoxQuestion), QString());
     FieldLineEdit *name   = new FieldLineEdit(topic->namefield());
     FieldLineEdit *prefix = new FieldLineEdit(topic->prefix());
     FieldLineEdit *suffix = new FieldLineEdit(topic->suffix());
@@ -88,6 +91,10 @@ RWTopicWidget::RWTopicWidget(RWTopic *topic, QAbstractItemModel *columns, bool i
     reveal->setAutoExclusive(false);
     reveal->setToolTip("revealed?");
     connect(reveal, &QRadioButton::toggled, topic, &RWContentsItem::setIsRevealed);
+
+    key->setToolTip(default_key_tooltip);
+    connect(key, &QPushButton::clicked, this, &RWTopicWidget::show_key);
+    p_key = key;
 
     name->setPlaceholderText("<name>");
     description = topic->category->childElement("description");     // TODO - probably need to find the local version
@@ -109,6 +116,7 @@ RWTopicWidget::RWTopicWidget(RWTopic *topic, QAbstractItemModel *columns, bool i
 
     QBoxLayout *title = new QHBoxLayout;
     title->addWidget(reveal,  0);
+    title->addWidget(key,     0);
     title->addWidget(name,    2);
     title->addWidget(prefix,  1);
     title->addWidget(suffix,  1);
@@ -252,6 +260,28 @@ void RWTopicWidget::remove_name()
     }
     delete row;
     top_layout->invalidate();
+}
+
+void RWTopicWidget::show_key()
+{
+    static TopicKey *key_dialog = 0;
+    if (key_dialog == 0)
+    {
+        key_dialog = new TopicKey(parentWidget());
+    }
+    key_dialog->setSelectedColumn(p_topic->keyColumn());
+    key_dialog->setSelectedValue(p_topic->keyValue());
+    if (key_dialog->exec() == QDialog::Accepted)
+    {
+        p_topic->setKeyColumn(key_dialog->selectedColumn());
+        p_topic->setKeyValue(key_dialog->selectedValue());
+        qDebug() << "show_key: column" << p_topic->keyColumn() << p_topic->keyValue();
+
+        if (p_topic->keyColumn() < 0)
+            p_key->setToolTip(default_key_tooltip);
+        else
+            p_key->setToolTip(QString("This topic will be created for rows where:\n%1 = '%2'").arg(p_columns->index(p_topic->keyColumn(), 0).data().toString()).arg(p_topic->keyValue()));
+    }
 }
 
 

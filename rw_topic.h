@@ -47,11 +47,19 @@ public:
     DataField &suffix() { return p_suffix; }
 
     static void setDefaultName(const QString &name);
+    int keyColumn() const { return p_key_column; }
+    QString keyValue() const { return p_key_column >= 0 ? p_key_value : QString(); }
+
+public slots:
+    void setKeyColumn(int column) { p_key_column = column; }
+    void setKeyValue(const QString &value) { p_key_value = value; }
 
 private:
     DataField p_name;
     DataField p_prefix;
     DataField p_suffix;
+    int p_key_column;
+    QString p_key_value;
 };
 
 #endif // RW_TOPIC_H

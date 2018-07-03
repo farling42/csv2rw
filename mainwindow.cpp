@@ -35,6 +35,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "realmworksstructure.h"
 #include "performxsltranslation.h"
 #include "parentcategorywidget.h"
+#include "topickey.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -120,6 +121,7 @@ void MainWindow::on_loadCsvButton_pressed()
     header_model->setStringList(headers);
     //qDebug() << "Model size: " << csv_full_model->rowCount() << "rows and" << csv_full_model->columnCount() << "columns";
     ui->generateButton->setEnabled(rw_structure.categories.size() > 0);
+    TopicKey::setModel(csv_full_model);
 }
 
 
