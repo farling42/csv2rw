@@ -59,7 +59,7 @@ static QString to_gregorian(const QString &from)
 }
 
 
-void RWSnippet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index)
+void RWSnippet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index) const
 {
     Q_UNUSED(index);
     bool bold = false;
@@ -235,7 +235,7 @@ void RWSnippet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
     writer->writeEndElement();  // snippet
 }
 
-void RWSnippet::write_asset(QXmlStreamWriter *writer, const QString &asset)
+void RWSnippet::write_asset(QXmlStreamWriter *writer, const QString &asset) const
 {
     QFile file(asset);
     QUrl url(asset);
@@ -325,7 +325,7 @@ void RWSnippet::write_asset(QXmlStreamWriter *writer, const QString &asset)
  * @param exttype one of Foreign, Statblock, Portfolio, Picture, Rich_Text, PDF, Audio, Video, HTML
  * @param filename
  */
-void RWSnippet::write_ext_object(QXmlStreamWriter *writer, const QString &exttype, const QString &asset)
+void RWSnippet::write_ext_object(QXmlStreamWriter *writer, const QString &exttype, const QString &asset) const
 {
     writer->writeStartElement("ext_object");
     writer->writeAttribute("name", QFileInfo(asset).fileName().right(NAME_TYPE_LENGTH));
@@ -334,7 +334,7 @@ void RWSnippet::write_ext_object(QXmlStreamWriter *writer, const QString &exttyp
     writer->writeEndElement();
 }
 
-void RWSnippet::write_smart_image(QXmlStreamWriter *writer, const QString &asset)
+void RWSnippet::write_smart_image(QXmlStreamWriter *writer, const QString &asset) const
 {
     writer->writeStartElement("smart_image");
     writer->writeAttribute("name", QFileInfo(asset).fileName().right(NAME_TYPE_LENGTH));

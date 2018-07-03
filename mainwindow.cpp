@@ -178,8 +178,22 @@ void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selectio
     if (!p_all_topics.contains(selection))
         p_all_topics.insert(selection, qobject_cast<RWTopic*>(choice->createContentsTree()));
 
-    topic_widget = new RWTopicWidget(p_all_topics.value(selection), header_model);   // TODO - build a hierarchy of TOPIC items
+    current_topic = p_all_topics.value(selection);
+    topic_widget = new RWTopicWidget(current_topic, header_model);   // TODO - build a hierarchy of TOPIC items
     ui->categoryScrollArea->setWidget(topic_widget);
+
+    // Set up the parents (if any)
+    while (!parents.isEmpty())
+        parents.takeLast()->deleteLater();
+
+    for (RWTopic *parent : current_topic->parents)
+    {
+        if (parents.size() > 0) parents.last()->setCanDelete(false);
+        ParentCategoryWidget *widget = new ParentCategoryWidget(&rw_structure, header_model, parents.count() * 20, parent);
+        connect(widget, &ParentCategoryWidget::deleteRequested, this, &MainWindow::delete_parent);
+        parents.append(widget);
+        ui->parentWidget->layout()->addWidget(widget);
+    }
 }
 
 
@@ -255,8 +269,9 @@ void MainWindow::on_generateButton_clicked()
     QList<RWTopic*> parent_topics;
     foreach (ParentCategoryWidget *widget, parents)
         parent_topics.append(widget->topic());
+
     // TODO - parent_topics is specific to each RWTopic
-    rw_structure.writeExportFile(&file, p_all_topics.values(), csv_full_model, parent_topics);
+    rw_structure.writeExportFile(&file, p_all_topics.values(), csv_full_model);
     file.close();
 
     // Enable button again (so that we know it is finished
@@ -288,10 +303,21 @@ void MainWindow::on_convertOP_triggered()
 void MainWindow::on_addParent_clicked()
 {
     if (parents.size() > 0) parents.last()->setCanDelete(false);
-    ParentCategoryWidget *widget = new ParentCategoryWidget(&rw_structure, header_model, parents.count() * 20);
+    ParentCategoryWidget *widget = new ParentCategoryWidget(&rw_structure, header_model, parents.count() * 20, nullptr);
     connect(widget, &ParentCategoryWidget::deleteRequested, this, &MainWindow::delete_parent);
+    connect(widget, &ParentCategoryWidget::categoryChanged, this, &MainWindow::parent_topics_changed);
     parents.append(widget);
+    current_topic->parents.append(widget->topic());
     ui->parentWidget->layout()->addWidget(widget);
+}
+
+void MainWindow::parent_topics_changed()
+{
+    current_topic->parents.clear();
+    for (ParentCategoryWidget *parent : parents)
+    {
+        current_topic->parents.append(parent->topic());
+    }
 }
 
 /**
@@ -301,5 +327,6 @@ void MainWindow::on_addParent_clicked()
 void MainWindow::delete_parent()
 {
     parents.takeLast()->deleteLater();
+    current_topic->parents.takeLast()->deleteLater();
     if (parents.size() > 0) parents.last()->setCanDelete(true);
 }

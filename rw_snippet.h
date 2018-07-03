@@ -30,7 +30,7 @@ class RWSnippet : public RWContentsItem
 
 public:
     RWSnippet(RWFacet *item, RWContentsItem *parent);
-    virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index);
+    virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index) const;
 
     DataField &tags()      { return p_tags; }
     DataField &gmDirections() { return p_gm_directions; }
@@ -40,14 +40,22 @@ public:
     DataField &finishDate() { return p_finish_date; }
     DataField &number() { return p_number; }
 
+    const DataField &tags()      const { return p_tags; }
+    const DataField &gmDirections() const { return p_gm_directions; }
+    const DataField &labelText() const { return p_label_text; }
+    const DataField &filename() const { return p_filename; }
+    const DataField &startDate() const { return p_start_date; }
+    const DataField &finishDate() const { return p_finish_date; }
+    const DataField &number() const { return p_number; }
+
     const RWFacet *const facet;
 
 public slots:
 
 private:
-    void write_asset(QXmlStreamWriter *writer, const QString &filename);
-    void write_ext_object(QXmlStreamWriter *writer, const QString &exttype, const QString &filename);
-    void write_smart_image(QXmlStreamWriter *writer, const QString &filename);
+    void write_asset(QXmlStreamWriter *writer, const QString &filename) const;
+    void write_ext_object(QXmlStreamWriter *writer, const QString &exttype, const QString &filename) const;
+    void write_smart_image(QXmlStreamWriter *writer, const QString &filename) const;
     DataField p_tags;
     DataField p_gm_directions;
     DataField p_label_text;   // for Labeled_Text fields

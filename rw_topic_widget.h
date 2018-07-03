@@ -34,6 +34,7 @@ class QAbstractItemModel;
 class QActionGroup;
 class QComboBox;
 class QMenu;
+class QPushButton;
 
 class RWTopicWidget : public QFrame
 {
@@ -58,7 +59,7 @@ private:
     QAbstractItemModel *p_columns;
     RWTopic *p_topic;
     QWidget *p_first_section;
-    QWidget *p_key;
+    QPushButton *p_key;
     void add_rwalias(RWAlias *alias);
     void set_key_tooltip();
     QWidget *create_option_button(RWContentsItem *Item);

@@ -48,7 +48,7 @@ bool RWTopic::canBeGenerated() const
     //return p_name.modelColumn() >= 0 && RWBaseItem::canBeGenerated();
 }
 
-void RWTopic::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index)
+void RWTopic::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index) const
 {
     // Don't put topics into the file if they don't match the filter
     if (keyColumn() < 0 || index.sibling(index.row(), keyColumn()).data().toString() == keyValue())
@@ -59,7 +59,7 @@ void RWTopic::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
 }
 
 
-void RWTopic::writeStartToContents(QXmlStreamWriter *writer, const QModelIndex &index)
+void RWTopic::writeStartToContents(QXmlStreamWriter *writer, const QModelIndex &index) const
 {
     writer->writeStartElement("topic");
     {

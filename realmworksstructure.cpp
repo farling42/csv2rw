@@ -162,8 +162,7 @@ RWStructureItem *RealmWorksStructure::read_element(QXmlStreamReader *reader, RWS
 
 void RealmWorksStructure::writeExportFile(QIODevice *device,
                                           const QList<RWTopic*> &body_topics,
-                                          const QAbstractItemModel *model,
-                                          const QList<RWTopic*> &parent_topics)
+                                          const QAbstractItemModel *model)
 {
     QProgressDialog progress;
     progress.setModal(true);
@@ -244,7 +243,14 @@ void RealmWorksStructure::writeExportFile(QIODevice *device,
         // Progress is across all rows of the base model
         progress.setMaximum(model->rowCount());
 
-        writeParentToStructure(progress, writer, body_topics, model, parent_topics);
+        for (RWTopic *topic : body_topics)
+        {
+            if (topic->namefield().modelColumn() >= 0)
+            {
+                writeParentToStructure(progress, writer, topic, model, topic->parents);
+            }
+        }
+
         writer->writeEndElement(); // contents
     }
     writer->writeEndElement(); // export
@@ -265,7 +271,7 @@ void RealmWorksStructure::writeExportFile(QIODevice *device,
  */
 void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress,
                                                  QXmlStreamWriter *writer,
-                                                 const QList<RWTopic*> &body_topics,
+                                                 const RWTopic* body_topic,
                                                  const QAbstractItemModel *model,
                                                  const QList<RWTopic*> &parent_topics)
 {
@@ -273,21 +279,13 @@ void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress,
     {
         // No parent topic - so write out the table as individual topics
         int maxrow = model->rowCount();
-        // Go through all the supplied topics,
-        // ignore any topics that don't have a column configured for the name.
-        for (RWTopic *topic : body_topics)
+        progress.setLabelText(body_topic->structure->name());
+        for (int row = 0 ; row < maxrow ; row++)
         {
-            if (topic->namefield().modelColumn() >= 0)
-            {
-                progress.setLabelText(topic->structure->name());
-                for (int row = 0 ; row < maxrow ; row++)
-                {
-                    progress.setValue(row);
-                    qApp->processEvents();  // for progress dialog
+            progress.setValue(row);
+            qApp->processEvents();  // for progress dialog
 
-                    topic->writeToContents(writer, model->index(row, 0));
-                }
-            }
+            body_topic->writeToContents(writer, model->index(row, 0));
         }
     }
     else if (parent_topics.first()->namefield().modelColumn() < 0)
@@ -295,7 +293,7 @@ void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress,
         // The parent has a FIXED STRING
         parent_topics.first()->writeStartToContents(writer, model->index(0,0));
         // Maybe more children to write
-        writeParentToStructure(progress, writer, body_topics, model, parent_topics.mid(1));
+        writeParentToStructure(progress, writer, body_topic, model, parent_topics.mid(1));
         writer->writeEndElement();
     }
     else
@@ -328,7 +326,7 @@ void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress,
             proxy.setFilterFixedString(name);
 
             parent_topics.first()->writeStartToContents(writer, proxy.index(0,0));
-            writeParentToStructure(progress, writer, body_topics, &proxy, parent_topics.mid(1));
+            writeParentToStructure(progress, writer, body_topic, &proxy, parent_topics.mid(1));
             writer->writeEndElement();
         }
     }

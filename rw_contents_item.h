@@ -64,10 +64,11 @@ public:
     // More information
     virtual bool canBeGenerated() const;
     DataField &contentsText() { return p_contents_text; }
-    QString structureText() { return p_structure_text; }
+    const DataField &contentsText() const { return p_contents_text; }
+    QString structureText() const { return p_structure_text; }
     void setStructureText(const QString &text) { p_structure_text = text; }
 
-    virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index);
+    virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index) const;
     virtual void postLoad(void) {}
 
     bool isRevealed() const { return p_revealed; }
@@ -87,10 +88,10 @@ public:
     inline QList<T> childItems() const { return findChildren<T>(QString(), Qt::FindDirectChildrenOnly); }
 
     RWContentsItem *childElement(const QString &element_name) const;
-    void writeExportTag(QXmlStreamWriter *writer);
+    void writeExportTag(QXmlStreamWriter *writer) const;
 
 //protected:  // TODO - reinstate later
-    virtual void writeChildrenToContents(QXmlStreamWriter *writer, const QModelIndex &index);
+    virtual void writeChildrenToContents(QXmlStreamWriter *writer, const QModelIndex &index) const;
     SnippetStyle p_snippet_style;
     SnippetVeracity p_snippet_veracity;
     SnippetPurpose p_snippet_purpose;

@@ -41,8 +41,7 @@ public Q_SLOTS:
     void loadFile(QIODevice*);
     void writeExportFile(QIODevice*,
                          const QList<RWTopic*> &body_topics,
-                         const QAbstractItemModel *model,
-                         const QList<RWTopic*> &parent_topics);
+                         const QAbstractItemModel *model);
 
     int format_version;
     int game_system_id;
@@ -66,7 +65,7 @@ private:
     QString namespace_uri;
     RWStructureItem *read_element(QXmlStreamReader *reader, RWStructureItem *parent);
     void writeParentToStructure(QProgressDialog &progress, QXmlStreamWriter *writer,
-                                const QList<RWTopic*> &body_topics,
+                                const RWTopic* body_topic,
                                 const QAbstractItemModel *model,
                                 const QList<RWTopic*> &parent_topics);
 };

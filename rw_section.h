@@ -30,7 +30,7 @@ class RWSection : public RWContentsItem
     Q_OBJECT
 public:
     RWSection(RWPartition *partition, RWContentsItem *parent);
-    virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index);
+    virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index) const;
     const RWPartition *const partition;
 };
 

@@ -10,11 +10,12 @@
 #include "rw_topic_widget.h"
 #include "realmworksstructure.h"
 
-ParentCategoryWidget::ParentCategoryWidget(RealmWorksStructure *structure, QAbstractItemModel *columns, int indent, QWidget *parent) :
+ParentCategoryWidget::ParentCategoryWidget(RealmWorksStructure *structure, QAbstractItemModel *columns, int indent, RWTopic *topic, QWidget *parent) :
     QFrame(parent),
     structure(structure),
     category_widget(0),
-    header_model(columns)
+    header_model(columns),
+    ignore_select(false)
 {
     //setFrameStyle(QFrame::Panel | QFrame::Sunken);
 
@@ -36,6 +37,9 @@ ParentCategoryWidget::ParentCategoryWidget(RealmWorksStructure *structure, QAbst
     connect(delete_button, &QPushButton::clicked, this, &ParentCategoryWidget::deleteRequested);
     connect(combo, QOverload<const QString&>::of(&QComboBox::currentIndexChanged), this, &ParentCategoryWidget::select_category);
 
+    // Prevent slot from triggering if we are adding an explicit topic
+    ignore_select = (topic != nullptr);
+
     // Set up the list of available categories
     QStringList cats;
     foreach (RWCategory *category, structure->categories)
@@ -45,6 +49,15 @@ ParentCategoryWidget::ParentCategoryWidget(RealmWorksStructure *structure, QAbst
     cats.sort();
     combo->clear();
     combo->addItems(cats);
+
+    if (topic)
+    {
+        qDebug() << "adding topic" << topic->structure->name();
+        combo->setCurrentText(topic->structure->name());
+        category_widget = new RWTopicWidget(topic, header_model, /*include_sections*/ false); // TODO - create a hierarchy of RWContentItems
+        category_area->addWidget(category_widget);
+    }
+    ignore_select = false;
 }
 
 
@@ -55,6 +68,8 @@ RWTopic *ParentCategoryWidget::topic() const
 
 void ParentCategoryWidget::select_category(const QString &selection)
 {
+    if (ignore_select) return;
+
     RWCategory *new_category = 0;
     foreach (RWCategory *category, structure->categories)
     {
@@ -72,10 +87,11 @@ void ParentCategoryWidget::select_category(const QString &selection)
         category_widget->deleteLater();
     }
     RWTopic *topic = qobject_cast<RWTopic*>(new_category->createContentsTree());
-    category_widget = new RWTopicWidget(topic, header_model, /*include_sections*/ false); // TODO - create a hierarchy of RWContentItems
+    category_widget = new RWTopicWidget(topic, header_model, /*include_sections*/ false);
     category_area->addWidget(category_widget);
-}
 
+    emit categoryChanged();
+}
 
 void ParentCategoryWidget::setCanDelete(bool v)
 {

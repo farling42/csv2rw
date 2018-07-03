@@ -66,7 +66,8 @@ static inline QString column_name(QAbstractItemModel *model, int column)
 RWTopicWidget::RWTopicWidget(RWTopic *topic, QAbstractItemModel *columns, bool include_sections, QWidget *parent) :
     QFrame(parent),
     p_columns(columns),
-    p_topic(topic)
+    p_topic(topic),
+    p_key(nullptr)
 {
     RWStructureItem *description;
     setFrameStyle(QFrame::Panel | QFrame::Sunken);
@@ -75,7 +76,7 @@ RWTopicWidget::RWTopicWidget(RWTopic *topic, QAbstractItemModel *columns, bool i
 
     // Start with the title (+ prefix + suffix)
     QRadioButton  *reveal = new QRadioButton(QString());
-    QPushButton   *key    = new QPushButton(style()->standardIcon(QStyle::SP_MessageBoxQuestion), QString());
+    if (include_sections) p_key = new QPushButton(style()->standardIcon(QStyle::SP_MessageBoxQuestion), QString());
     FieldLineEdit *name   = new FieldLineEdit(topic->namefield());
     FieldLineEdit *prefix = new FieldLineEdit(topic->prefix());
     FieldLineEdit *suffix = new FieldLineEdit(topic->suffix());
@@ -90,9 +91,11 @@ RWTopicWidget::RWTopicWidget(RWTopic *topic, QAbstractItemModel *columns, bool i
     reveal->setToolTip("revealed?");
     connect(reveal, &QRadioButton::toggled, topic, &RWContentsItem::setIsRevealed);
 
-    connect(key, &QPushButton::clicked, this, &RWTopicWidget::show_key);
-    p_key = key;
-    set_key_tooltip();
+    if (p_key)
+    {
+        connect(p_key, &QPushButton::clicked, this, &RWTopicWidget::show_key);
+        set_key_tooltip();
+    }
 
     name->setPlaceholderText("<name>");
     description = topic->category->childElement("description");     // TODO - probably need to find the local version
@@ -114,7 +117,7 @@ RWTopicWidget::RWTopicWidget(RWTopic *topic, QAbstractItemModel *columns, bool i
 
     QBoxLayout *title = new QHBoxLayout;
     title->addWidget(reveal,  0);
-    title->addWidget(key,     0);
+    if (p_key) title->addWidget(p_key,   0);
     title->addWidget(name,    2);
     title->addWidget(prefix,  1);
     title->addWidget(suffix,  1);
@@ -225,6 +228,8 @@ void RWTopicWidget::add_rwalias(RWAlias *alias)
 
 void RWTopicWidget::set_key_tooltip()
 {
+    if (p_key == nullptr) return;
+
     if (p_topic->keyColumn() < 0)
         p_key->setToolTip("Choose a subset of CSV rows.\nChoose which rows of the table will be used to create one of these topics");
     else

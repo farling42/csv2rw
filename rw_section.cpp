@@ -31,7 +31,7 @@ RWSection::RWSection(RWPartition *partition, RWContentsItem *parent) :
 {
 }
 
-void RWSection::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index)
+void RWSection::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index) const
 {
     writer->writeStartElement("section");
     if (!structure->id().isEmpty()) writer->writeAttribute("partition_id", structure->id());

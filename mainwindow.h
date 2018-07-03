@@ -56,6 +56,7 @@ private slots:
     void on_convertOP_triggered();
     void on_addParent_clicked();
     void delete_parent();
+    void parent_topics_changed();
 
 private:
     Ui::MainWindow *ui;
@@ -63,6 +64,7 @@ private:
     QStringListModel *header_model;
     RealmWorksStructure rw_structure;
     RWTopicWidget *topic_widget;
+    RWTopic *current_topic;
     QList<ParentCategoryWidget*> parents;
     FileDetails *file_details;
     QMap<QString, RWTopic*> p_all_topics;

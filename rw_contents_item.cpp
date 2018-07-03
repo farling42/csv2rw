@@ -42,7 +42,7 @@ RWContentsItem::RWContentsItem(RWStructureItem *item, RWContentsItem *parent) :
 #endif
 }
 
-void RWContentsItem::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index)
+void RWContentsItem::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index) const
 {
     // Special case: never put text_override into the contents section
     if (structure->ignoreForContents()) return;
@@ -63,7 +63,7 @@ void RWContentsItem::writeToContents(QXmlStreamWriter *writer, const QModelIndex
     writer->writeEndElement();
 }
 
-void RWContentsItem::writeChildrenToContents(QXmlStreamWriter *writer, const QModelIndex &index)
+void RWContentsItem::writeChildrenToContents(QXmlStreamWriter *writer, const QModelIndex &index) const
 {
     QList<RWContentsItem*> child_items = childItems<RWContentsItem*>();
     foreach (RWContentsItem *child, child_items)
@@ -74,7 +74,7 @@ void RWContentsItem::writeChildrenToContents(QXmlStreamWriter *writer, const QMo
     }
 }
 
-void RWContentsItem::writeExportTag(QXmlStreamWriter *writer)
+void RWContentsItem::writeExportTag(QXmlStreamWriter *writer) const
 {
     writer->writeStartElement("tag_assign");
     writer->writeAttribute("tag_id", "Tag_1");

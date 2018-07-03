@@ -15,11 +15,13 @@ class ParentCategoryWidget : public QFrame
 {
     Q_OBJECT
 public:
-    explicit ParentCategoryWidget(RealmWorksStructure *structure, QAbstractItemModel *columns, int indent, QWidget *parent = nullptr);
+    explicit ParentCategoryWidget(RealmWorksStructure *structure, QAbstractItemModel *columns, int indent, RWTopic *topic, QWidget *parent = nullptr);
     RWTopic *topic() const;
 
+    void setTopic(RWTopic *topic);
 signals:
     void deleteRequested();
+    void categoryChanged();
 
 public slots:
     void setCanDelete(bool);
@@ -34,6 +36,7 @@ private:
     QPushButton *delete_button;
     RWTopicWidget *category_widget;
     QAbstractItemModel *header_model;
+    bool ignore_select;
 };
 
 #endif // PARENTCATEGORYWIDGET_H

@@ -33,13 +33,15 @@ class RWTopic : public RWContentsItem
 public:
     RWTopic(RWCategory *item, RWContentsItem *parent);
 
-    virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index);
-    virtual void writeStartToContents(QXmlStreamWriter*, const QModelIndex &index);
+    virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index) const;
+    virtual void writeStartToContents(QXmlStreamWriter*, const QModelIndex &index) const;
 
     virtual bool canBeGenerated() const;
 
     QList<RWAlias*> aliases;
     const RWCategory *const category;
+
+    QList<RWTopic*> parents;
 
 public:
     DataField &namefield()   { return p_name; }
