@@ -330,8 +330,6 @@ void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress,
         proxy.setSourceModel(const_cast<QAbstractItemModel*>(model));
         proxy.setFilterKeyColumn(parent_column);
 
-        qDebug() << "child keys =" << parent_names;
-
         // TODO - iterate across unique values in the column
         foreach (const QString &name, parent_names)
         {
