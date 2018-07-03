@@ -60,6 +60,7 @@ private:
     QWidget *p_first_section;
     QWidget *p_key;
     void add_rwalias(RWAlias *alias);
+    void set_key_tooltip();
     QWidget *create_option_button(RWContentsItem *Item);
     template<typename T>
     QActionGroup *create_enum_actions(const QString &section_name, T current_value, QMenu *menu, QMap<QString,QString> &rename);

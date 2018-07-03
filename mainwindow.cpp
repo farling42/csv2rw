@@ -40,7 +40,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    category_widget(0)
+    topic_widget(0)
 {
     ui->setupUi(this);
 
@@ -175,9 +175,11 @@ void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selectio
 
     //qDebug() << "Selected category" << choice->name();
 
-    RWTopic *topic = qobject_cast<RWTopic*>(choice->createContentsTree());
-    category_widget = new RWTopicWidget(topic, header_model);   // TODO - build a hierarchy of TOPIC items
-    ui->categoryScrollArea->setWidget(category_widget);
+    if (!p_all_topics.contains(selection))
+        p_all_topics.insert(selection, qobject_cast<RWTopic*>(choice->createContentsTree()));
+
+    topic_widget = new RWTopicWidget(p_all_topics.value(selection), header_model);   // TODO - build a hierarchy of TOPIC items
+    ui->categoryScrollArea->setWidget(topic_widget);
 }
 
 
@@ -189,7 +191,7 @@ void MainWindow::on_generateButton_clicked()
     ui->generateButton->setEnabled(false);
 
     // Check that the topic has been configured correctly.
-    if (!category_widget->topic()->canBeGenerated())
+    if (!topic_widget->topic()->canBeGenerated())
     {
         QMessageBox::critical(this, tr("Incomplete Data"),
                               tr("The topic/article needs to have a field allocated to the name."));
@@ -199,7 +201,7 @@ void MainWindow::on_generateButton_clicked()
 
     // Check that if a parent has been specified, that it has a name
     QSet<RWTopic*> used_topics;
-    used_topics.insert(category_widget->topic());
+    used_topics.insert(topic_widget->topic());
     foreach (ParentCategoryWidget *widget, parents)
     {
         if (!widget->topic()->namefield().isDefined())
@@ -253,7 +255,8 @@ void MainWindow::on_generateButton_clicked()
     QList<RWTopic*> parent_topics;
     foreach (ParentCategoryWidget *widget, parents)
         parent_topics.append(widget->topic());
-    rw_structure.writeExportFile(&file, category_widget->topic(), csv_full_model, parent_topics);
+    // TODO - parent_topics is specific to each RWTopic
+    rw_structure.writeExportFile(&file, p_all_topics.values(), csv_full_model, parent_topics);
     file.close();
 
     // Enable button again (so that we know it is finished

@@ -62,9 +62,10 @@ private:
     CsvModel *csv_full_model;
     QStringListModel *header_model;
     RealmWorksStructure rw_structure;
-    RWTopicWidget *category_widget;
+    RWTopicWidget *topic_widget;
     QList<ParentCategoryWidget*> parents;
     FileDetails *file_details;
+    QMap<QString, RWTopic*> p_all_topics;
 };
 
 #endif // MAINWINDOW_H

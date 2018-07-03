@@ -161,9 +161,9 @@ RWStructureItem *RealmWorksStructure::read_element(QXmlStreamReader *reader, RWS
  */
 
 void RealmWorksStructure::writeExportFile(QIODevice *device,
-                                          RWTopic *topic,
-                                          QAbstractItemModel *model,
-                                          QList<RWTopic*> parent_topics)
+                                          const QList<RWTopic*> &body_topics,
+                                          const QAbstractItemModel *model,
+                                          const QList<RWTopic*> &parent_topics)
 {
     QProgressDialog progress;
     progress.setModal(true);
@@ -227,7 +227,7 @@ void RealmWorksStructure::writeExportFile(QIODevice *device,
         // Progress is across all rows of the base model
         progress.setMaximum(model->rowCount());
 
-        writeParentToStructure(progress, writer, topic, model, parent_topics);
+        writeParentToStructure(progress, writer, body_topics, model, parent_topics);
         writer->writeEndElement(); // contents
     }
     writer->writeEndElement(); // export
@@ -246,9 +246,11 @@ void RealmWorksStructure::writeExportFile(QIODevice *device,
  * @param model
  * @param parent_category
  */
-void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress, QXmlStreamWriter *writer,
-                                                 RWTopic *topic, QAbstractItemModel *model,
-                                                 QList<RWTopic*> parent_topics)
+void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress,
+                                                 QXmlStreamWriter *writer,
+                                                 const QList<RWTopic*> &body_topics,
+                                                 const QAbstractItemModel *model,
+                                                 const QList<RWTopic*> &parent_topics)
 {
     if (parent_topics.isEmpty())
     {
@@ -259,7 +261,13 @@ void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress, QXml
             progress.setValue(progress.value()+1);
             qApp->processEvents();  // for progress dialog
 
-            topic->writeToContents(writer, model->index(row, 0));
+            // Go through all the supplied topics,
+            // ignore any topics that don't have a column configured for the name.
+            for (RWTopic *topic : body_topics)
+                if (topic->namefield().modelColumn() >= 0)
+                    topic->writeToContents(writer, model->index(row, 0));
+                else
+                    qDebug() << "not writing topic" << topic;
         }
     }
     else if (parent_topics.first()->namefield().modelColumn() < 0)
@@ -267,7 +275,7 @@ void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress, QXml
         // The parent has a FIXED STRING
         parent_topics.first()->writeStartToContents(writer, model->index(0,0));
         // Maybe more children to write
-        writeParentToStructure(progress, writer, topic, model, parent_topics.mid(1));
+        writeParentToStructure(progress, writer, body_topics, model, parent_topics.mid(1));
         writer->writeEndElement();
     }
     else
@@ -290,7 +298,7 @@ void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress, QXml
         std::sort(parent_names.begin(), parent_names.end());
 
         QSortFilterProxyModel proxy;
-        proxy.setSourceModel(model);
+        proxy.setSourceModel(const_cast<QAbstractItemModel*>(model));
         proxy.setFilterKeyColumn(parent_column);
 
         // TODO - iterate across unique values in the column
@@ -300,7 +308,7 @@ void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress, QXml
             proxy.setFilterFixedString(name);
 
             parent_topics.first()->writeStartToContents(writer, proxy.index(0,0));
-            writeParentToStructure(progress, writer, topic, &proxy, parent_topics.mid(1));
+            writeParentToStructure(progress, writer, body_topics, &proxy, parent_topics.mid(1));
             writer->writeEndElement();
         }
     }

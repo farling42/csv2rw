@@ -50,8 +50,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 static QMetaEnum case_matching_enum   = QMetaEnum::fromType<RWAlias::CaseMatching>();
 static QMetaEnum match_priority_enum  = QMetaEnum::fromType<RWAlias::MatchPriority>();
 
-static QString default_key_tooltip("Choose a subset of CSV rows.\nChoose which rows of the table will be used to create one of these topics");
-
 static inline QString column_name(QAbstractItemModel *model, int column)
 {
     return model->index(column, 0).data().toString();
@@ -92,9 +90,9 @@ RWTopicWidget::RWTopicWidget(RWTopic *topic, QAbstractItemModel *columns, bool i
     reveal->setToolTip("revealed?");
     connect(reveal, &QRadioButton::toggled, topic, &RWContentsItem::setIsRevealed);
 
-    key->setToolTip(default_key_tooltip);
     connect(key, &QPushButton::clicked, this, &RWTopicWidget::show_key);
     p_key = key;
+    set_key_tooltip();
 
     name->setPlaceholderText("<name>");
     description = topic->category->childElement("description");     // TODO - probably need to find the local version
@@ -225,6 +223,14 @@ void RWTopicWidget::add_rwalias(RWAlias *alias)
         top_layout->addLayout(row);
 }
 
+void RWTopicWidget::set_key_tooltip()
+{
+    if (p_topic->keyColumn() < 0)
+        p_key->setToolTip("Choose a subset of CSV rows.\nChoose which rows of the table will be used to create one of these topics");
+    else
+        p_key->setToolTip(QString("This topic will be created for rows where:\n%1 = '%2'").arg(p_columns->index(p_topic->keyColumn(), 0).data().toString()).arg(p_topic->keyValue()));
+}
+
 void RWTopicWidget::add_name()
 {
     RWAlias *alias = new RWAlias;
@@ -277,10 +283,7 @@ void RWTopicWidget::show_key()
         p_topic->setKeyValue(key_dialog->selectedValue());
         qDebug() << "show_key: column" << p_topic->keyColumn() << p_topic->keyValue();
 
-        if (p_topic->keyColumn() < 0)
-            p_key->setToolTip(default_key_tooltip);
-        else
-            p_key->setToolTip(QString("This topic will be created for rows where:\n%1 = '%2'").arg(p_columns->index(p_topic->keyColumn(), 0).data().toString()).arg(p_topic->keyValue()));
+        set_key_tooltip();
     }
 }
 
