@@ -256,18 +256,21 @@ void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress,
     {
         // No parent topic - so write out the table as individual topics
         int maxrow = model->rowCount();
-        for (int row = 0 ; row < maxrow ; row++)
+        // Go through all the supplied topics,
+        // ignore any topics that don't have a column configured for the name.
+        for (RWTopic *topic : body_topics)
         {
-            progress.setValue(progress.value()+1);
-            qApp->processEvents();  // for progress dialog
+            if (topic->namefield().modelColumn() >= 0)
+            {
+                progress.setLabelText(topic->structure->name());
+                for (int row = 0 ; row < maxrow ; row++)
+                {
+                    progress.setValue(row);
+                    qApp->processEvents();  // for progress dialog
 
-            // Go through all the supplied topics,
-            // ignore any topics that don't have a column configured for the name.
-            for (RWTopic *topic : body_topics)
-                if (topic->namefield().modelColumn() >= 0)
                     topic->writeToContents(writer, model->index(row, 0));
-                else
-                    qDebug() << "not writing topic" << topic;
+                }
+            }
         }
     }
     else if (parent_topics.first()->namefield().modelColumn() < 0)
