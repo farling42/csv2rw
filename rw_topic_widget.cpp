@@ -286,8 +286,6 @@ void RWTopicWidget::show_key()
     {
         p_topic->setKeyColumn(key_dialog->selectedColumn());
         p_topic->setKeyValue(key_dialog->selectedValue());
-        qDebug() << "show_key: column" << p_topic->keyColumn() << p_topic->keyValue();
-
         set_key_tooltip();
     }
 }

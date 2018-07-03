@@ -247,7 +247,18 @@ void RealmWorksStructure::writeExportFile(QIODevice *device,
         {
             if (topic->namefield().modelColumn() >= 0)
             {
-                writeParentToStructure(progress, writer, topic, model, topic->parents);
+                if (topic->keyColumn() >= 0)
+                {
+                    QSortFilterProxyModel proxy;
+                    proxy.setSourceModel(const_cast<QAbstractItemModel*>(model));
+                    proxy.setFilterKeyColumn(topic->keyColumn());
+                    proxy.setFilterRegExp('^' + topic->keyValue() + '$');
+                    writeParentToStructure(progress, writer, topic, &proxy, topic->parents);
+                }
+                else
+                {
+                    writeParentToStructure(progress, writer, topic, model, topic->parents);
+                }
             }
         }
 
@@ -319,11 +330,13 @@ void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress,
         proxy.setSourceModel(const_cast<QAbstractItemModel*>(model));
         proxy.setFilterKeyColumn(parent_column);
 
+        qDebug() << "child keys =" << parent_names;
+
         // TODO - iterate across unique values in the column
         foreach (const QString &name, parent_names)
         {
             // Find the rows which match the parent's name
-            proxy.setFilterFixedString(name);
+            proxy.setFilterRegExp('^' + name + '$');
 
             parent_topics.first()->writeStartToContents(writer, proxy.index(0,0));
             writeParentToStructure(progress, writer, body_topic, &proxy, parent_topics.mid(1));

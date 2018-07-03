@@ -52,7 +52,6 @@ ParentCategoryWidget::ParentCategoryWidget(RealmWorksStructure *structure, QAbst
 
     if (topic)
     {
-        qDebug() << "adding topic" << topic->structure->name();
         combo->setCurrentText(topic->structure->name());
         category_widget = new RWTopicWidget(topic, header_model, /*include_sections*/ false); // TODO - create a hierarchy of RWContentItems
         category_area->addWidget(category_widget);
