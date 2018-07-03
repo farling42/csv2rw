@@ -212,7 +212,24 @@ void RealmWorksStructure::writeExportFile(QIODevice *device,
                 writer->writeAttribute("max_domain_count", QString::number(domains.count()));
                 writer->writeAttribute("max_category_count", QString::number(categories.count()));
                 writer->writeAttribute("plot_count", "0");
-                writer->writeAttribute("topic_count", QString::number(model->rowCount()));
+
+                // Get count of number of topics which will be generated
+                int topic_count = 0;
+                for (RWTopic *topic : body_topics)
+                {
+                    if (topic->namefield().modelColumn() >= 0)
+                    {
+                        if (topic->keyColumn() < 0)
+                            topic_count += model->rowCount(); // all entries will be added
+                        else
+                            topic_count += model->match(/*start*/ model->index(0,topic->keyColumn()),
+                                                  /*role*/  Qt::DisplayRole,
+                                                  /*value*/ topic->keyValue(),
+                                                  /*hits*/  -1,
+                                                  /*match*/ Qt::MatchFixedString|Qt::MatchCaseSensitive).size();
+                    }
+                }
+                writer->writeAttribute("topic_count", QString::number(topic_count));
             }
             writer->writeEndElement();  // content_summary
         }
