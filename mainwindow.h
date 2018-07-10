@@ -45,6 +45,7 @@ public:
 public Q_SLOTS:
     void fileLoad();
     void fileSave();
+    void fileSaveAs();
     void fileQuit();
     void on_loadCsvButton_pressed();
     void on_loadStructureButton_pressed();
@@ -52,11 +53,12 @@ public Q_SLOTS:
 
 private slots:
     void on_generateButton_clicked();
-    void on_helpButton_clicked();
+    void showBriefHelp();
     void on_convertOP_triggered();
     void on_addParent_clicked();
     void delete_parent();
     void parent_topics_changed();
+    void showAbout();
 
 private:
     Ui::MainWindow *ui;

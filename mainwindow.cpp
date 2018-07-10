@@ -44,6 +44,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    setWindowTitle(QString("%1   v%2").arg(windowTitle()).arg(qApp->applicationVersion()));
+
     csv_full_model = new CsvModel(this);
     // Set up the full CSV view
     QAbstractProxyModel *proxy = new QSortFilterProxyModel;
@@ -66,6 +68,22 @@ MainWindow::MainWindow(QWidget *parent) :
     file_details = new FileDetails(&rw_structure, this);
     connect(ui->fileDetails, &QPushButton::pressed, file_details, &QDialog::show);
     ui->fileDetails->setEnabled(false);
+
+    // Standard shortcuts
+    ui->actionLoad->setShortcut(QKeySequence(tr("Ctrl+O")));
+    ui->actionSave->setShortcut(QKeySequence::Save);
+    ui->actionSave_AS->setShortcut(QKeySequence::SaveAs);
+    ui->actionQuit->setShortcut(QKeySequence::Quit);
+    //ui->actionBriefHelp->setShortcut();
+    //ui->actionAbout_CSV2RW->setShortcut();
+
+    // Connect menu options
+    connect(ui->actionLoad, &QAction::triggered, this, &MainWindow::fileLoad);
+    connect(ui->actionSave, &QAction::triggered, this, &MainWindow::fileSave);
+    connect(ui->actionSave_AS, &QAction::triggered, this, &MainWindow::fileSaveAs);
+    connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::fileQuit);
+    connect(ui->actionBriefHelp, &QAction::triggered, this, &MainWindow::showBriefHelp);
+    connect(ui->actionAbout_CSV2RW, &QAction::triggered, this, &MainWindow::showAbout);
 }
 
 MainWindow::~MainWindow()
@@ -75,17 +93,23 @@ MainWindow::~MainWindow()
 
 void MainWindow::fileLoad()
 {
-
+    qDebug() << "load file";
 }
 
 void MainWindow::fileSave()
 {
+    qDebug() << "save file";
+}
 
+void MainWindow::fileSaveAs()
+{
+    qDebug() << "save file as";
 }
 
 void MainWindow::fileQuit()
 {
-
+    qDebug() << "quit";
+    qApp->quit();
 }
 
 void MainWindow::on_loadCsvButton_pressed()
@@ -278,7 +302,7 @@ void MainWindow::on_generateButton_clicked()
     ui->generateButton->setEnabled(true);
 }
 
-void MainWindow::on_helpButton_clicked()
+void MainWindow::showBriefHelp()
 {
     static QString help_text = tr("There are various steps to converting your CSV data into a Realm Works® import file\n\n"
             "Step 1: Use the 'Load 'CSV' button to choose the file containing your data in CSV file format. The first line in the file should contain the header for each column.\n\n"
@@ -318,6 +342,14 @@ void MainWindow::parent_topics_changed()
     {
         current_topic->parents.append(parent->topic());
     }
+}
+
+void MainWindow::showAbout()
+{
+    static QString about_text = tr("CSV to Realm Works®\n\n"
+                                   "Copyright (C) 2017-2018 Martin Smith\n\n"
+                                   "Version %1").arg(qApp->applicationVersion());
+    QMessageBox::information(this, tr("About"), about_text);
 }
 
 /**
