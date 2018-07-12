@@ -19,11 +19,21 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "csvmodel.h"
 #include <QtCore/QDebug>
 #include <QtCore/QFile>
+#include <QtCore/QLocale>
+#include <windows.h>
 
 CsvModel::CsvModel(QObject *parent)
     : QAbstractItemModel(parent),
     p_csv_separator(',')
 {
+    // Determine the CSV separator character from the locale:
+    // Ideally QLocale would provide this (see QTBUG-17097)
+    char output[4];
+    if (GetLocaleInfo(GetThreadLocale(), LOCALE_SLIST, (wchar_t*)output, 4))
+    {
+        qDebug() << "Windows LOCALE_SLIST =" << output;
+        p_csv_separator = output[0];
+    }
 }
 
 QVariant CsvModel::headerData(int section, Qt::Orientation orientation, int role) const
