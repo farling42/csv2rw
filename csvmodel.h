@@ -27,6 +27,7 @@ class QTextStream;
 class CsvModel : public QAbstractItemModel
 {
     Q_OBJECT
+    Q_PROPERTY(QChar csvSeparator READ fieldSeparator WRITE setSeparator)
 
 public:
     explicit CsvModel(QObject *parent = 0);
@@ -45,14 +46,17 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
 
     void readCSV(QFile &);
+    QChar fieldSeparator() const { return is_regional ? QChar() : p_csv_separator; }
 
-    void setCSVseparator(QChar);
+public slots:
+    void setSeparator(const QChar&);
 
 private:
     QStringList readRowFromCSV(QTextStream &);
     QChar p_csv_separator;
     QStringList headers;
     QList<QStringList> lines;
+    bool is_regional;
 };
 
 #endif // CSVMODEL_H

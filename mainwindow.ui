@@ -485,7 +485,18 @@
     <addaction name="separator"/>
     <addaction name="actionAbout_CSV2RW"/>
    </widget>
+   <widget class="QMenu" name="menuOptions">
+    <property name="title">
+     <string>Options</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="actionCSV_field_separator"/>
+    <addaction name="actionUse_Comma"/>
+    <addaction name="actionUse_Semicolon"/>
+    <addaction name="actionUse_Windows_List_Separator"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuOptions"/>
    <addaction name="menuHelp"/>
   </widget>
   <action name="actionLoad">
@@ -530,6 +541,50 @@
    </property>
    <property name="menuRole">
     <enum>QAction::AboutRole</enum>
+   </property>
+  </action>
+  <action name="actionUse_Comma">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Use Comma</string>
+   </property>
+   <property name="toolTip">
+    <string>Use a comma as the field separator in CSV files</string>
+   </property>
+   <property name="whatsThis">
+    <string/>
+   </property>
+  </action>
+  <action name="actionUse_Windows_List_Separator">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Use Windows List Separator</string>
+   </property>
+   <property name="toolTip">
+    <string>Use the Windows Regional List Separator as the CSV field separator</string>
+   </property>
+  </action>
+  <action name="actionCSV_field_separator">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
+   <property name="text">
+    <string>CSV field separator</string>
+   </property>
+  </action>
+  <action name="actionUse_Semicolon">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Use Semicolon</string>
+   </property>
+   <property name="toolTip">
+    <string>Use a semicolon as the field separator in CSV files</string>
    </property>
   </action>
  </widget>

@@ -47,6 +47,21 @@ MainWindow::MainWindow(QWidget *parent) :
     setWindowTitle(QString("%1   v%2").arg(windowTitle()).arg(qApp->applicationVersion()));
 
     csv_full_model = new CsvModel(this);
+    QActionGroup *separators = new QActionGroup(this);
+    separators->addAction(ui->actionUse_Comma);
+    separators->addAction(ui->actionUse_Semicolon);
+    separators->addAction(ui->actionUse_Windows_List_Separator);
+    connect(ui->actionUse_Comma,     QAction::triggered, [=] { csv_full_model->setSeparator(','); });
+    connect(ui->actionUse_Semicolon, QAction::triggered, [=] { csv_full_model->setSeparator(';'); });
+    connect(ui->actionUse_Windows_List_Separator, QAction::triggered, [=] { csv_full_model->setSeparator(QChar()); });
+    QChar sep = csv_full_model->fieldSeparator();
+    if (sep.isNull())
+        ui->actionUse_Windows_List_Separator->setChecked(true);
+    else if (sep == ',')
+        ui->actionUse_Comma->setChecked(true);
+    else if (sep == ';')
+        ui->actionUse_Semicolon->setChecked(true);
+
     // Set up the full CSV view
     QAbstractProxyModel *proxy = new QSortFilterProxyModel;
     proxy->setSourceModel(csv_full_model);

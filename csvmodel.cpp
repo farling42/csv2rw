@@ -20,20 +20,16 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QtCore/QDebug>
 #include <QtCore/QFile>
 #include <QtCore/QLocale>
+#include <QtCore/QSettings>
 #include <windows.h>
 
+const QString REGIONAL_SEPARATOR_SETTING("csvUseRegionalSeparator");
+
 CsvModel::CsvModel(QObject *parent)
-    : QAbstractItemModel(parent),
-    p_csv_separator(',')
+    : QAbstractItemModel(parent)
 {
-    // Determine the CSV separator character from the locale:
-    // Ideally QLocale would provide this (see QTBUG-17097)
-    char output[4];
-    if (GetLocaleInfo(GetThreadLocale(), LOCALE_SLIST, (wchar_t*)output, 4))
-    {
-        qDebug() << "Windows LOCALE_SLIST =" << output;
-        p_csv_separator = output[0];
-    }
+    QSettings settings;
+    setSeparator(settings.value(REGIONAL_SEPARATOR_SETTING, /*default*/ QChar()).toChar());
 }
 
 QVariant CsvModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -125,9 +121,34 @@ void CsvModel::readCSV(QFile &file)
     endResetModel();
 }
 
-void CsvModel::setCSVseparator(QChar separator)
+/**
+ * @brief CsvModel::setSeparator
+ * If \a sep is null, then the windows default list separator will be used.
+ * @param sep
+ */
+void CsvModel::setSeparator(const QChar &sep)
 {
-    p_csv_separator = separator;
+    is_regional = sep.isNull();
+
+    if (is_regional)
+    {
+        // Determine the CSV separator character from the locale:
+        // Ideally QLocale would provide this (see QTBUG-17097)
+        char output[4];
+        if (GetLocaleInfo(GetThreadLocale(), LOCALE_SLIST, (wchar_t*)output, 4))
+        {
+            //qDebug() << "Windows LOCALE_SLIST =" << output;
+            p_csv_separator = output[0];
+        }
+    }
+    else
+    {
+        p_csv_separator = sep;
+    }
+    //qDebug() << "CSV separator set to" << p_csv_separator;
+
+    QSettings settings;
+    settings.setValue(REGIONAL_SEPARATOR_SETTING, sep);
 }
 
 
