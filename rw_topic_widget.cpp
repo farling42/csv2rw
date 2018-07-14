@@ -130,11 +130,10 @@ RWTopicWidget::RWTopicWidget(RWTopic *topic, QAbstractItemModel *columns, bool i
         // Now deal with the sections
         QList<int> sections;
         sections.append(1);
-        QList<RWSection*> child_items = topic->childItems<RWSection*>();
         p_first_section = 0;
-        foreach (RWSection *child, child_items)
+        for (auto section: topic->childItems<RWSection*>())
         {
-            QWidget *sec = add_section(sections, columns, child);
+            QWidget *sec = add_section(sections, columns, section);
             if (p_first_section == 0) p_first_section = sec;
             layout->addWidget(sec);
             sections.last()++;
@@ -144,7 +143,7 @@ RWTopicWidget::RWTopicWidget(RWTopic *topic, QAbstractItemModel *columns, bool i
     setLayout(layout);
 
     // Maybe they've switched to a category with some name entries already present.
-    foreach (RWAlias *alias, p_topic->aliases)
+    for (auto alias: p_topic->aliases)
         add_rwalias(alias);
 }
 
@@ -339,8 +338,7 @@ QWidget *RWTopicWidget::add_section(QList<int> sections, QAbstractItemModel *col
     bold_font.setBold(true);
     title->setFont(bold_font);
 
-    QList<RWSnippet*> child_snippets = section->childItems<RWSnippet*>();
-    foreach (RWSnippet *snippet, child_snippets)
+    for (auto snippet: section->childItems<RWSnippet*>())
     {
         layout->addWidget(add_snippet(columns, snippet));
     }
@@ -378,8 +376,7 @@ QWidget *RWTopicWidget::add_section(QList<int> sections, QAbstractItemModel *col
     // Then display the sub-partitions
     QWidget *first_sub = 0;
     sections.append(1);
-    QList<RWSection*> child_sections = section->childItems<RWSection*>();
-    foreach (RWSection *child, child_sections)
+    for (auto child: section->childItems<RWSection*>())
     {
         QWidget *sub_part = add_section (sections, columns, child);
         if (first_sub == 0) first_sub = sub_part;
@@ -633,7 +630,7 @@ QWidget *RWTopicWidget::create_option_button(RWContentsItem *item)
     QMap<QString,QString> style_remap{ {"Handout", "Message"} };
     QActionGroup *styles = create_enum_actions<RWContentsItem::SnippetStyle>("Snippet Style", item->snippetStyle(), options_menu, style_remap);
     // For SnippetStyle, RWFacet::Handout needs to use the label "Message"
-    foreach (QAction *action, styles->actions())
+    for (auto action: styles->actions())
         if (action->text() == "Handout") action->setText("Message");
     connect(styles, &QActionGroup::triggered, [=] {
         if (QAction *act = styles->checkedAction())

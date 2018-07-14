@@ -78,7 +78,7 @@ void RWTopic::writeStartToContents(QXmlStreamWriter *writer, const QModelIndex &
         // but only generate aliases for those entries that have a non-empty string.
         // This allows a user to specify several different aliases in the GUI each using a different set of attributes,
         // and then use a different CSV column for each particular alias.
-        foreach (RWAlias *alias, aliases)
+        for (auto alias: aliases)
         {
             alias->writeToContents(writer, index);
         }

@@ -65,12 +65,10 @@ void RWContentsItem::writeToContents(QXmlStreamWriter *writer, const QModelIndex
 
 void RWContentsItem::writeChildrenToContents(QXmlStreamWriter *writer, const QModelIndex &index) const
 {
-    QList<RWContentsItem*> child_items = childItems<RWContentsItem*>();
-    foreach (RWContentsItem *child, child_items)
+    // Get only the content items (ignore all RWCategory children)
+    for (auto item: childItems<RWContentsItem*>())
     {
-        // Don't write children which are of type RWCategory
-        if (qobject_cast<RWCategory*>(child) == 0)
-            child->writeToContents(writer, index);
+        item->writeToContents(writer, index);
     }
 }
 
@@ -87,8 +85,7 @@ void RWContentsItem::writeExportTag(QXmlStreamWriter *writer) const
  */
 bool RWContentsItem::canBeGenerated() const
 {
-    QList<RWContentsItem*> list = findChildren<RWContentsItem*>();
-    foreach (RWContentsItem *item, list)
+    for (auto item: findChildren<RWContentsItem*>())
     {
         if (!item->canBeGenerated()) return false;
     }
@@ -158,7 +155,7 @@ QString RWContentsItem::xmlSpan(const QString &text, bool bold, bool italic, boo
 
 RWContentsItem *RWContentsItem::childElement(const QString &element_name) const
 {
-    foreach (QObject *child, children())
+    for (auto child: children())
     {
         RWContentsItem *item = qobject_cast<RWContentsItem*>(child);
         if (item && item->structureElement() == element_name)

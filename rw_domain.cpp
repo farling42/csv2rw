@@ -47,8 +47,7 @@ RWDomain *RWDomain::getDomainByName(const QString &domain_id)
 QStringList RWDomain::tagNames() const
 {
     QStringList result;
-    QList<RWStructureItem*> tags = childItems<RWStructureItem*>();
-    foreach (RWStructureItem *tag, tags)
+    for (auto tag: childItems<RWStructureItem*>())
     {
         if (tag->structureElement().startsWith("tag"))
         {
@@ -60,8 +59,7 @@ QStringList RWDomain::tagNames() const
 
 QString RWDomain::tagId(const QString &tag_name) const
 {
-    QList<RWStructureItem*> tags = childItems<RWStructureItem*>();
-    foreach (RWStructureItem *tag, tags)
+    for (auto tag: childItems<RWStructureItem*>())
     {
         if (tag->structureElement().startsWith("tag") &&
                 tag->name().compare(tag_name, Qt::CaseInsensitive) == 0)

@@ -42,7 +42,7 @@ ParentCategoryWidget::ParentCategoryWidget(RealmWorksStructure *structure, QAbst
 
     // Set up the list of available categories
     QStringList cats;
-    foreach (RWCategory *category, structure->categories)
+    for (auto category: structure->categories)
     {
         cats.append(category->name());
     }
@@ -70,7 +70,7 @@ void ParentCategoryWidget::select_category(const QString &selection)
     if (ignore_select) return;
 
     RWCategory *new_category = 0;
-    foreach (RWCategory *category, structure->categories)
+    for (auto category: structure->categories)
     {
         if (category->name() == selection)
         {

@@ -35,8 +35,7 @@ RWCategory::RWCategory(QXmlStreamReader *stream, QObject *parent) :
 void RWCategory::postLoad()
 {
     // Mark any child Description or Summary child elements as NOT for output in CONTENTS
-    QList<RWStructureItem*> child_items = childItems<RWStructureItem*>();
-    foreach (RWStructureItem *child, child_items)
+    for (auto child: childItems<RWStructureItem*>())
     {
         if (child->structureElement() == "description" || child->structureElement() == "summary")
         {

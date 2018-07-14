@@ -67,8 +67,7 @@ void RWStructureItem::writeToStructure(QXmlStreamWriter *writer)
 
 void RWStructureItem::writeChildrenToStructure(QXmlStreamWriter *writer)
 {
-    QList<RWStructureItem*> child_items = childItems<RWStructureItem*>();
-    foreach (RWStructureItem *child, child_items)
+    for (auto child: childItems<RWStructureItem*>())
     {
         child->writeToStructure(writer);
     }
@@ -85,7 +84,7 @@ RWContentsItem *RWStructureItem::createContentsTree(RWContentsItem *parent)
 {
     //qDebug() << "createContentsTree for" << name();
     RWContentsItem *result = createContentsItem(parent);
-    for (RWStructureItem *child : childItems<RWStructureItem*>())
+    for (auto child: childItems<RWStructureItem*>())
     {
         child->createContentsTree(result);
     }
@@ -104,8 +103,7 @@ RWContentsItem *RWStructureItem::createContentsItem(RWContentsItem *parent)
  */
 bool RWStructureItem::canBeGenerated() const
 {
-    QList<RWStructureItem*> list = findChildren<RWStructureItem*>();
-    foreach (RWStructureItem *item, list)
+    for (auto item: findChildren<RWStructureItem*>())
     {
         if (!item->canBeGenerated()) return false;
     }
@@ -131,7 +129,7 @@ QDebug operator<<(QDebug stream, const RWStructureItem &item)
 
 RWStructureItem *RWStructureItem::childElement(const QString &element_name) const
 {
-    foreach (QObject *child, children())
+    for (auto child: children())
     {
         RWStructureItem *item = qobject_cast<RWStructureItem*>(child);
         if (item && item->structureElement() == element_name)

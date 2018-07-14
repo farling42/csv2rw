@@ -39,8 +39,7 @@ static void dump_tree(int indent, RWStructureItem *parent)
     QString indentation(indent, QChar(QChar::Space));
 
     qDebug().noquote().nospace() << indentation << *parent;
-    QList<RWStructureItem*> child_items = parent->childItems<RWStructureItem*>();
-    foreach (RWStructureItem *child, child_items)
+    for (auto child: parent->childItems<RWStructureItem*>())
     {
         dump_tree(indent +3, child);
     }
@@ -214,7 +213,7 @@ void RealmWorksStructure::writeExportFile(QIODevice *device,
 
                 // Get count of number of topics which will be generated
                 int topic_count = 0;
-                for (RWTopic *topic : body_topics)
+                for (auto topic: body_topics)
                 {
                     if (topic->namefield().modelColumn() >= 0)
                     {
@@ -243,7 +242,7 @@ void RealmWorksStructure::writeExportFile(QIODevice *device,
         // Progress is across all rows of the base model
         progress.setMaximum(model->rowCount());
 
-        for (RWTopic *topic : body_topics)
+        for (auto topic: body_topics)
         {
             if (topic->namefield().modelColumn() >= 0)
             {
@@ -331,7 +330,7 @@ void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress,
         proxy.setFilterKeyColumn(parent_column);
 
         // TODO - iterate across unique values in the column
-        foreach (const QString &name, parent_names)
+        for (auto name: parent_names)
         {
             // Find the rows which match the parent's name
             proxy.setFilterRegExp('^' + name + '$');

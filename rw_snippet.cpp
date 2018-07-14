@@ -113,7 +113,7 @@ void RWSnippet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
             case RWFacet::Labeled_Text:
             {
                 QString text;
-                foreach (const QString &para, user_text.split("\n\n"))
+                for (auto para: user_text.split("\n\n"))
                     text.append(xmlParagraph(xmlSpan(para, bold)));
                 writer->writeTextElement("contents", text);
                 break;
@@ -210,7 +210,7 @@ void RWSnippet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
             RWDomain *domain = RWDomain::getDomainById(domain_id);
             if (domain)
             {
-                foreach (QString tag_name, tag_names.split(","))
+                for (auto tag_name: tag_names.split(","))
                 {
                     QString tag_id = domain->tagId(tag_name.trimmed());
                     if (!tag_id.isEmpty())

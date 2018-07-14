@@ -187,7 +187,7 @@ void MainWindow::on_loadStructureButton_pressed()
 
     // Get the list of category names into a sorted list
     QStringList cats;
-    foreach (RWCategory *category, rw_structure.categories)
+    for (auto category: rw_structure.categories)
     {
         cats.append(category->name());
     }
@@ -202,7 +202,7 @@ void MainWindow::on_loadStructureButton_pressed()
 void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selection)
 {
     RWCategory *choice = 0;
-    foreach (RWCategory *category, rw_structure.categories)
+    for (auto category: rw_structure.categories)
     {
         if (category->name() == selection)
         {
@@ -225,7 +225,7 @@ void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selectio
     while (!parents.isEmpty())
         parents.takeLast()->deleteLater();
 
-    for (RWTopic *parent : current_topic->parents)
+    for (auto parent: current_topic->parents)
     {
         if (parents.size() > 0) parents.last()->setCanDelete(false);
         ParentCategoryWidget *widget = new ParentCategoryWidget(&rw_structure, header_model, parents.count() * 20, parent);
@@ -255,7 +255,7 @@ void MainWindow::on_generateButton_clicked()
     // Check that if a parent has been specified, that it has a name
     QSet<RWTopic*> used_topics;
     used_topics.insert(topic_widget->topic());
-    foreach (ParentCategoryWidget *widget, parents)
+    for (auto widget: parents)
     {
         if (!widget->topic()->namefield().isDefined())
         {
@@ -306,7 +306,7 @@ void MainWindow::on_generateButton_clicked()
     settings.setValue(OUTPUT_DIRECTORY_PARAM, QFileInfo(file).absolutePath());
 
     QList<RWTopic*> parent_topics;
-    foreach (ParentCategoryWidget *widget, parents)
+    for (auto widget: parents)
         parent_topics.append(widget->topic());
 
     // TODO - parent_topics is specific to each RWTopic
@@ -353,7 +353,7 @@ void MainWindow::on_addParent_clicked()
 void MainWindow::parent_topics_changed()
 {
     current_topic->parents.clear();
-    for (ParentCategoryWidget *parent : parents)
+    for (auto parent: parents)
     {
         current_topic->parents.append(parent->topic());
     }

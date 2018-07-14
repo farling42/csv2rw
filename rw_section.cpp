@@ -40,7 +40,7 @@ void RWSection::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
     //writeChildrenToContents(writer, index);
 
     // A section has 1+ snippets (which come before the contents (if any)
-    for (auto snippet : childItems<::RWSnippet*>())
+    for (auto snippet: childItems<::RWSnippet*>())
     {
         snippet->writeToContents(writer, index);
     }
@@ -58,7 +58,7 @@ void RWSection::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
             if (p_snippet_style != RWContentsItem::Normal) writer->writeAttribute("style", snip_style_enum.valueToKey(p_snippet_style));
             if (isRevealed()) writer->writeAttribute("is_revealed", "true");
             QString text;
-            foreach (const QString &para, user_text.split("\n\n"))
+            for (auto para: user_text.split("\n\n"))
                 text.append(xmlParagraph(xmlSpan(para, bold)));
             writer->writeTextElement("contents", text);
         }
@@ -66,10 +66,9 @@ void RWSection::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
     }
 
     // And it may have sub-sections, after the snippet/content (if any)
-    QList<RWSection*> child_partitions = childItems<RWSection*>();
-    foreach (RWSection *partition, child_partitions)
+    for (auto section: childItems<RWSection*>())
     {
-        partition->writeToContents(writer, index);
+        section->writeToContents(writer, index);
     }
 
     writer->writeEndElement();  //section
