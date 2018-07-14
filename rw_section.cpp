@@ -35,6 +35,7 @@ void RWSection::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
 {
     writer->writeStartElement("section");
     if (!structure->id().isEmpty()) writer->writeAttribute("partition_id", structure->id());
+    if (p_start_collapsed) writer->writeAttribute("is_collapsed_by_default", "true");
 
     // writeChildren has to be done in 2 passes
     //writeChildrenToContents(writer, index);

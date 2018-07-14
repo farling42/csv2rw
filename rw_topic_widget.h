@@ -62,7 +62,8 @@ private:
     QPushButton *p_key;
     void add_rwalias(RWAlias *alias);
     void set_key_tooltip();
-    QWidget *create_option_button(RWContentsItem *Item);
+    QWidget *create_section_options(RWContentsItem *Item);
+    QWidget *create_snippet_options(RWContentsItem *Item);
     template<typename T>
     QActionGroup *create_enum_actions(const QString &section_name, T current_value, QMenu *menu, QMap<QString,QString> &rename);
 };

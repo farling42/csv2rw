@@ -325,19 +325,30 @@ QWidget *RWTopicWidget::add_section(QList<int> sections, QAbstractItemModel *col
     QVBoxLayout *layout = new QVBoxLayout;
     layout->setContentsMargins(0,/*top*/9,0,0);
 
-    QLabel *title = new QLabel;
-    title->setFrameStyle(QFrame::Panel | QFrame::Raised);
-    title->setLineWidth(2);
-    title->setMargin(3);
-    title->setText(QString("%1  %2").arg(section_string(sections)).arg(section->partition->name()));
+    // Start with the title bar for the section
+    QFrame *title_frame = new QFrame;
+    title_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
+
+    QHBoxLayout *title_layout = new QHBoxLayout;
+    title_layout->setContentsMargins(0,0,0,0);
+
+    QLabel *title_label = new QLabel;
+    title_label->setLineWidth(2);
+    title_label->setMargin(3);
+    title_label->setText(QString("%1  %2").arg(section_string(sections)).arg(section->partition->name()));
     RWStructureItem *description = section->partition->childElement("description");
-    title->setToolTip(description ? description->structureText() : section->partition->id());
-    layout->addWidget(title);
+    title_label->setToolTip(description ? description->structureText() : section->partition->id());
 
-    QFont bold_font = title->font();
+    title_layout->addWidget(title_label, 1);
+    title_layout->addWidget(create_section_options(section), 0);
+    title_frame->setLayout(title_layout);
+    layout->addWidget(title_frame);
+
+    QFont bold_font = title_label->font();
     bold_font.setBold(true);
-    title->setFont(bold_font);
+    title_label->setFont(bold_font);
 
+    // Now the body of the section
     for (auto snippet: section->childItems<RWSnippet*>())
     {
         layout->addWidget(add_snippet(columns, snippet));
@@ -357,12 +368,10 @@ QWidget *RWTopicWidget::add_section(QList<int> sections, QAbstractItemModel *col
     if (section->contentsText().modelColumn() >= 0)
         edit->setText(column_name(columns, section->contentsText().modelColumn()));
 
-    QWidget *options = create_option_button(section);
-
     QHBoxLayout *textlayout = new QHBoxLayout;
     textlayout->addWidget(reveal);
     textlayout->addWidget(edit);
-    textlayout->addWidget(options);
+    textlayout->addWidget(create_snippet_options(section));
     layout->addLayout(textlayout);
 
 #ifdef ADD_SNIPPET
@@ -571,7 +580,7 @@ QWidget *RWTopicWidget::add_snippet(QAbstractItemModel *columns, RWSnippet *snip
     }
 
     // Finally some selectable options for this snippet
-    QWidget *options_button = create_option_button(snippet);
+    QWidget *options_button = create_snippet_options(snippet);
 
     //
     // Create a row containing all these widgets
@@ -620,8 +629,39 @@ QActionGroup *RWTopicWidget::create_enum_actions(const QString &section_name, T 
     return group;
 }
 
+/**
+ * @brief RWTopicWidget::create_snippet_options
+ * Creates the options drop-down menu button for SECTIONS
+ * @param item
+ * @return
+ */
 
-QWidget *RWTopicWidget::create_option_button(RWContentsItem *item)
+QWidget *RWTopicWidget::create_section_options(RWContentsItem *item)
+{
+    // Add button to bring up the options menu for the snippet
+    QMenu *options_menu = new QMenu(this);
+
+    options_menu->addSeparator();
+    QAction *start_collapsed = options_menu->addAction("Start Collapsed");
+    start_collapsed->setCheckable(true);
+    start_collapsed->setChecked(item->p_start_collapsed);
+    connect(start_collapsed, &QAction::triggered, [=] {
+        item->p_start_collapsed = start_collapsed->isChecked();
+    } );
+
+    //QPushButton *options_button = new QPushButton(style()->standardIcon(QStyle::SP_CommandLink), QString());
+    QPushButton *options_button = new QPushButton("Options");
+    options_button->setMenu(options_menu);
+    return options_button;
+}
+
+/**
+ * @brief RWTopicWidget::create_snippet_options
+ * Creates the options drop-down menu button for SNIPPETS
+ * @param item
+ * @return
+ */
+QWidget *RWTopicWidget::create_snippet_options(RWContentsItem *item)
 {
     // Add button to bring up the options menu for the snippet
     QMenu *options_menu = new QMenu(this);

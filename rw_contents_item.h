@@ -95,6 +95,7 @@ public:
     SnippetStyle p_snippet_style;
     SnippetVeracity p_snippet_veracity;
     SnippetPurpose p_snippet_purpose;
+    bool p_start_collapsed{false};
 
 private:
     //QXmlStreamAttributes p_attributes;
