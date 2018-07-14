@@ -108,4 +108,8 @@ DISTFILES += \
     TODO.txt \
     csv2rw_en.ts \
     ob2rw-xsl1.xslt \
-    config.nsi
+    config.nsi \
+    repair-workshop-icon-png-2884.png
+
+RESOURCES += \
+    rwimport.qrc

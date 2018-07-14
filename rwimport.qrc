@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="cog-icon">repair-workshop-icon-png-2884.png</file>
+    </qresource>
+</RCC>

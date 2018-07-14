@@ -650,7 +650,8 @@ QWidget *RWTopicWidget::create_section_options(RWContentsItem *item)
     } );
 
     //QPushButton *options_button = new QPushButton(style()->standardIcon(QStyle::SP_CommandLink), QString());
-    QPushButton *options_button = new QPushButton("Options");
+    QPushButton *options_button = new QPushButton(QIcon(":cog-icon"), QString());
+    options_button->setFlat(true);
     options_button->setMenu(options_menu);
     return options_button;
 }
@@ -695,7 +696,8 @@ QWidget *RWTopicWidget::create_snippet_options(RWContentsItem *item)
 #endif
 
     //QPushButton *options_button = new QPushButton(style()->standardIcon(QStyle::SP_CommandLink), QString());
-    QPushButton *options_button = new QPushButton("Options");
+    QPushButton *options_button = new QPushButton(QIcon(":cog-icon"), QString());
+    options_button->setFlat(true);
     options_button->setMenu(options_menu);
     return options_button;
 }
