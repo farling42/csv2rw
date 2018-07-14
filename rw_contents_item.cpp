@@ -25,6 +25,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #undef DEBUG_XML
 
+/* This is only here because DataField doesn't have a .c file */
+int DataField::p_column_offset = 0;
+
 RWContentsItem::RWContentsItem(RWStructureItem *item, RWContentsItem *parent) :
     QObject(parent),
     structure(item),

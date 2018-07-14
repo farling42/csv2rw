@@ -33,8 +33,43 @@ RWSection::RWSection(RWPartition *partition, RWContentsItem *parent) :
 
 void RWSection::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index) const
 {
+    if (p_is_multiple && p_first_multiple.modelColumn() >= 0)
+    {
+        if (p_second_multiple.modelColumn() == -1)
+        {
+            // Custom name for the section
+            write_one(writer, "name", p_first_multiple.valueString(index).left(50), index);
+        }
+        else
+        {
+            // Ensure last column is valid
+            int first_column  = p_first_multiple.modelColumn();
+            int second_column = p_second_multiple.modelColumn();
+            int last_column   = p_last_multiple.modelColumn();
+            if (last_column == -1) last_column = index.model()->columnCount();
+            // Handle multiple repetitions of the same section
+            int step = second_column - first_column;
+            for (int column = first_column; column <= last_column; column += step)
+            {
+                DataField::setColumnOffset(column - first_column);
+                QString name = index.sibling(index.row(), column).data().toString();
+                if (name.isEmpty()) break;
+                // Name is an xs:token of 1-50 characters
+                write_one(writer, "name", name.left(50), index);
+            }
+            DataField::setColumnOffset(0);
+        }
+    }
+    else
+    {
+        write_one(writer, "partition_id", structure->id(), index);
+    }
+}
+
+void RWSection::write_one(QXmlStreamWriter *writer, const QString &attr_name, const QString &attr_value, const QModelIndex &index) const
+{
     writer->writeStartElement("section");
-    if (!structure->id().isEmpty()) writer->writeAttribute("partition_id", structure->id());
+    if (!structure->id().isEmpty()) writer->writeAttribute(attr_name, attr_value);
     if (p_start_collapsed) writer->writeAttribute("is_collapsed_by_default", "true");
 
     // writeChildren has to be done in 2 passes

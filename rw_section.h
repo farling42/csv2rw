@@ -32,6 +32,24 @@ public:
     RWSection(RWPartition *partition, RWContentsItem *parent);
     virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index) const;
     const RWPartition *const partition;
+
+    DataField &firstMultiple() { return p_first_multiple; }
+    const DataField &firstMultiple() const { return p_first_multiple; }
+
+    DataField &secondMultiple() { return p_second_multiple; }
+    const DataField &secondMultiple() const { return p_second_multiple; }
+
+    DataField &lastMultiple() { return p_last_multiple; }
+    const DataField &lastMultiple() const { return p_last_multiple; }
+
+//protected:
+    bool p_start_collapsed{false};
+    bool p_is_multiple{false};
+private:
+    virtual void write_one(QXmlStreamWriter*, const QString &attr_name, const QString &attr_value, const QModelIndex &index) const;
+    DataField p_first_multiple;
+    DataField p_second_multiple;
+    DataField p_last_multiple;
 };
 
 #endif // RW_SECTION_H

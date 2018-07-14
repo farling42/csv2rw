@@ -29,13 +29,16 @@ class DataField : public QObject
     Q_PROPERTY(QString fixedText   READ fixedText   WRITE setFixedText)
 
 public:
-    explicit DataField(QObject *parent = 0) : QObject(parent), p_model_column(-1) {}
-    int  modelColumn() const { return p_model_column; }
+    explicit DataField(QObject *parent = 0) : QObject(parent) {}
+
+    static void setColumnOffset(int offset) { p_column_offset = offset; }
+
+    int  modelColumn() const { return p_column_offset + p_model_column; }
     QString fixedText() const { return p_fixed_text; }
     QString valueString(const QModelIndex &index = QModelIndex()) const
     {
         if (p_model_column >= 0)
-            return index.sibling(index.row(), p_model_column).data().toString();
+            return index.sibling(index.row(), modelColumn()).data().toString();
         else
             return p_fixed_text;
     }
@@ -49,8 +52,9 @@ public slots:
     void setFixedText(const QString &text) { p_fixed_text = text; }
 
 private:
-    int p_model_column;
+    int p_model_column{-1};
     QString p_fixed_text;
+    static int p_column_offset;
 };
 
 #endif // DATAFIELD_H

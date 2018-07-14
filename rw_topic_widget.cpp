@@ -329,9 +329,10 @@ QWidget *RWTopicWidget::add_section(QList<int> sections, QAbstractItemModel *col
     QFrame *title_frame = new QFrame;
     title_frame->setFrameStyle(QFrame::Panel | QFrame::Raised);
 
-    QHBoxLayout *title_layout = new QHBoxLayout;
-    title_layout->setContentsMargins(0,0,0,0);
+    QVBoxLayout *title_vlayout = new QVBoxLayout;
+    title_vlayout->setContentsMargins(0,0,0,0);
 
+    // First row is the section title
     QLabel *title_label = new QLabel;
     title_label->setLineWidth(2);
     title_label->setMargin(3);
@@ -339,9 +340,55 @@ QWidget *RWTopicWidget::add_section(QList<int> sections, QAbstractItemModel *col
     RWStructureItem *description = section->partition->childElement("description");
     title_label->setToolTip(description ? description->structureText() : section->partition->id());
 
-    title_layout->addWidget(title_label, 1);
-    title_layout->addWidget(create_section_options(section), 0);
-    title_frame->setLayout(title_layout);
+    // Second row of the title starts hidden
+    FieldLineEdit *first_multiple  = new FieldLineEdit(section->firstMultiple());
+    FieldLineEdit *second_multiple = new FieldLineEdit(section->secondMultiple());
+    FieldLineEdit *last_multiple   = new FieldLineEdit(section->lastMultiple());
+    first_multiple->setPlaceholderText("First Section header");
+    first_multiple->setToolTip("Select the CSV column to use for the first heading");
+    second_multiple->setPlaceholderText("Second Section header");
+    second_multiple->setToolTip("If defined, sets the CSV column for the second heading when creating multiple sections");
+    last_multiple->setPlaceholderText("Last Section header");
+    last_multiple->setToolTip("If defined, sets the last CSV column to be used when creating multiple sections");
+    if (section->firstMultiple().modelColumn() >= 0)
+        first_multiple->setText(column_name(columns, section->firstMultiple().modelColumn()));
+    if (section->secondMultiple().modelColumn() >= 0)
+        second_multiple->setText(column_name(columns, section->secondMultiple().modelColumn()));
+    if (section->lastMultiple().modelColumn() >= 0)
+        last_multiple->setText(column_name(columns, section->lastMultiple().modelColumn()));
+
+    QWidget *multiple_subsection = new QWidget;
+    multiple_subsection->setVisible(section->p_is_multiple);
+
+    // A button to toggle the display of multiple_subsection
+    QPushButton *multiple = new QPushButton("...");
+    multiple->setCheckable(true);
+    multiple->setFlat(true);
+    multiple->setToolTip("Configure custom section header or multiple sections to be created");
+    connect(multiple, &QPushButton::clicked, [=] {
+        section->p_is_multiple = multiple->isChecked();
+        multiple_subsection->setVisible(section->p_is_multiple);
+    } );
+
+    QHBoxLayout *title_hlayout1 = new QHBoxLayout;
+    title_vlayout->setContentsMargins(0,0,0,0);
+    title_hlayout1->addWidget(title_label, 1);
+    title_hlayout1->addWidget(multiple, 0);
+    title_hlayout1->addWidget(create_section_options(section), 0);
+
+    QHBoxLayout *title_hlayout2 = new QHBoxLayout;
+    title_hlayout2->setContentsMargins(0,0,0,0);
+    title_hlayout2->addWidget(new QLabel("Multiple Section Columns:"));
+    title_hlayout2->addWidget(first_multiple);
+    title_hlayout2->addWidget(second_multiple);
+    title_hlayout2->addWidget(last_multiple);
+    title_hlayout2->addStretch();
+    multiple_subsection->setLayout(title_hlayout2);
+
+    title_vlayout->addLayout(title_hlayout1);
+    title_vlayout->addWidget(multiple_subsection);
+
+    title_frame->setLayout(title_vlayout);
     layout->addWidget(title_frame);
 
     QFont bold_font = title_label->font();
@@ -636,12 +683,11 @@ QActionGroup *RWTopicWidget::create_enum_actions(const QString &section_name, T 
  * @return
  */
 
-QWidget *RWTopicWidget::create_section_options(RWContentsItem *item)
+QWidget *RWTopicWidget::create_section_options(RWSection *item)
 {
     // Add button to bring up the options menu for the snippet
     QMenu *options_menu = new QMenu(this);
 
-    options_menu->addSeparator();
     QAction *start_collapsed = options_menu->addAction("Start Collapsed");
     start_collapsed->setCheckable(true);
     start_collapsed->setChecked(item->p_start_collapsed);
@@ -649,7 +695,7 @@ QWidget *RWTopicWidget::create_section_options(RWContentsItem *item)
         item->p_start_collapsed = start_collapsed->isChecked();
     } );
 
-    //QPushButton *options_button = new QPushButton(style()->standardIcon(QStyle::SP_CommandLink), QString());
+    // Create the OPTIONS button
     QPushButton *options_button = new QPushButton(QIcon(":cog-icon"), QString());
     options_button->setFlat(true);
     options_button->setMenu(options_menu);
@@ -695,7 +741,7 @@ QWidget *RWTopicWidget::create_snippet_options(RWContentsItem *item)
     } );
 #endif
 
-    //QPushButton *options_button = new QPushButton(style()->standardIcon(QStyle::SP_CommandLink), QString());
+    // Create the OPTIONS button
     QPushButton *options_button = new QPushButton(QIcon(":cog-icon"), QString());
     options_button->setFlat(true);
     options_button->setMenu(options_menu);
