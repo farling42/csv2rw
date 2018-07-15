@@ -93,10 +93,13 @@ void RWSection::write_one(QXmlStreamWriter *writer, const QString &attr_name, co
     if (!structure->id().isEmpty()) writer->writeAttribute(attr_name, attr_value);
     if (p_start_collapsed) writer->writeAttribute("is_collapsed_by_default", "true");
 
-    // writeChildren has to be done in 2 passes
-    //writeChildrenToContents(writer, index);
+    // First = child sections
+    for (auto section: childItems<RWSection*>())
+    {
+        section->writeToContents(writer, index);
+    }
 
-    // A section has 1+ snippets (which come before the contents (if any)
+    // Second = Snippets
     for (auto snippet: childItems<::RWSnippet*>())
     {
         snippet->writeToContents(writer, index);
@@ -109,12 +112,6 @@ void RWSection::write_one(QXmlStreamWriter *writer, const QString &attr_name, co
     {
         for (int column = contentsText().modelColumn()+1; column <= last_column; column++)
             write_text(writer, index.sibling(index.row(), column).data().toString());
-    }
-
-    // And it may have sub-sections, after the snippet/content (if any)
-    for (auto section: childItems<RWSection*>())
-    {
-        section->writeToContents(writer, index);
     }
 
     writer->writeEndElement();  //section
