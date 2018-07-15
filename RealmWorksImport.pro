@@ -101,9 +101,7 @@ DISTFILES += \
     RELEASE_NOTES.txt \
     TODO.txt \
     csv2rw_en.ts \
-    ob2rw-xsl1.xslt \
-    config.nsi \
-    repair-workshop-icon-png-2884.png
+    ob2rw-xsl1.xslt
 
 RESOURCES += \
     rwimport.qrc

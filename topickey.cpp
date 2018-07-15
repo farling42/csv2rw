@@ -2,6 +2,7 @@
 #include "ui_topickey.h"
 
 #include <QAbstractItemModel>
+#include <QSet>
 
 static QAbstractItemModel *model = 0;
 

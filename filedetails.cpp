@@ -17,6 +17,7 @@ FileDetails::~FileDetails()
 
 void FileDetails::showEvent(QShowEvent *event)
 {
+    Q_UNUSED(event)
     ui->name->setText(rw_structure->details_name);
     ui->version->setText(rw_structure->details_version);
     ui->abbreviation->setText(rw_structure->details_abbrev);
