@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-VERSION = 1.33
+VERSION = 1.34
 
 QT       += core gui network xmlpatterns
 

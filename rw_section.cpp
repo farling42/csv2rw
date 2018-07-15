@@ -66,23 +66,8 @@ void RWSection::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
     }
 }
 
-void RWSection::write_one(QXmlStreamWriter *writer, const QString &attr_name, const QString &attr_value, const QModelIndex &index) const
+void RWSection::write_text(QXmlStreamWriter *writer, const QString &user_text) const
 {
-    writer->writeStartElement("section");
-    if (!structure->id().isEmpty()) writer->writeAttribute(attr_name, attr_value);
-    if (p_start_collapsed) writer->writeAttribute("is_collapsed_by_default", "true");
-
-    // writeChildren has to be done in 2 passes
-    //writeChildrenToContents(writer, index);
-
-    // A section has 1+ snippets (which come before the contents (if any)
-    for (auto snippet: childItems<::RWSnippet*>())
-    {
-        snippet->writeToContents(writer, index);
-    }
-
-    // It may have some text directly on it, not stored in a facet
-    const QString user_text = contentsText().valueString(index);
     if (!user_text.isEmpty())
     {
         bool bold = false;
@@ -99,6 +84,31 @@ void RWSection::write_one(QXmlStreamWriter *writer, const QString &attr_name, co
             writer->writeTextElement("contents", text);
         }
         writer->writeEndElement(); // snippet
+    }
+}
+
+void RWSection::write_one(QXmlStreamWriter *writer, const QString &attr_name, const QString &attr_value, const QModelIndex &index) const
+{
+    writer->writeStartElement("section");
+    if (!structure->id().isEmpty()) writer->writeAttribute(attr_name, attr_value);
+    if (p_start_collapsed) writer->writeAttribute("is_collapsed_by_default", "true");
+
+    // writeChildren has to be done in 2 passes
+    //writeChildrenToContents(writer, index);
+
+    // A section has 1+ snippets (which come before the contents (if any)
+    for (auto snippet: childItems<::RWSnippet*>())
+    {
+        snippet->writeToContents(writer, index);
+    }
+
+    // It may have some text directly on it, not stored in a facet
+    write_text(writer, contentsText().valueString(index));
+    int last_column = lastContents().modelColumn();
+    if (last_column >= 0)
+    {
+        for (int column = contentsText().modelColumn()+1; column <= last_column; column++)
+            write_text(writer, index.sibling(index.row(), column).data().toString());
     }
 
     // And it may have sub-sections, after the snippet/content (if any)

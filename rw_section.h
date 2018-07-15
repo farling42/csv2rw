@@ -42,14 +42,19 @@ public:
     DataField &lastMultiple() { return p_last_multiple; }
     const DataField &lastMultiple() const { return p_last_multiple; }
 
+    DataField &lastContents() { return p_last_contents; }
+    const DataField &lastContents() const { return p_last_contents; }
+
 //protected:
     bool p_start_collapsed{false};
     bool p_is_multiple{false};
 private:
-    virtual void write_one(QXmlStreamWriter*, const QString &attr_name, const QString &attr_value, const QModelIndex &index) const;
+    void write_one(QXmlStreamWriter*, const QString &attr_name, const QString &attr_value, const QModelIndex &index) const;
+    void write_text(QXmlStreamWriter *writer, const QString &user_text) const;
     DataField p_first_multiple;
     DataField p_second_multiple;
     DataField p_last_multiple;
+    DataField p_last_contents;
 };
 
 #endif // RW_SECTION_H

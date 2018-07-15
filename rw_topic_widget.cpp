@@ -401,13 +401,14 @@ QWidget *RWTopicWidget::add_section(QList<int> sections, QAbstractItemModel *col
         layout->addWidget(add_snippet(columns, snippet));
     }
 
-    // Finally a generic text box (the contents + reveal)
+    // a REVEALED button for the CONTENTS
     QRadioButton *reveal = new QRadioButton(QString());
     reveal->setAutoExclusive(false);
     reveal->setToolTip("revealed?");
     reveal->setChecked(section->isRevealed());
     connect(reveal, &QRadioButton::toggled, section, &RWContentsItem::setIsRevealed);
 
+    // A generic TEXT box, allowing one or more snippets to be created as the contents for this section
     FieldMultiLineEdit *edit = new FieldMultiLineEdit(section->contentsText());
     edit->setToolTip("contents");
     RWStructureItem *purpose = section->partition->childElement("purpose");
@@ -415,9 +416,17 @@ QWidget *RWTopicWidget::add_section(QList<int> sections, QAbstractItemModel *col
     if (section->contentsText().modelColumn() >= 0)
         edit->setText(column_name(columns, section->contentsText().modelColumn()));
 
+    // Allow for MULTIPLE content snippets to be created from the same basic facet
+    FieldLineEdit *multi_edit = new FieldLineEdit(section->lastContents());
+    if (section->lastContents().modelColumn() >= 0)
+        multi_edit->setText(column_name(columns, section->lastContents().modelColumn()));
+    multi_edit->setPlaceholderText("Multiple");
+    multi_edit->setToolTip("Leave this blank, unless you want multiple content snippets in which case set it to the LAST column containing the contents");
+
     QHBoxLayout *textlayout = new QHBoxLayout;
-    textlayout->addWidget(reveal);
-    textlayout->addWidget(edit);
+    textlayout->addWidget(reveal, 0);
+    textlayout->addWidget(edit, 1);
+    textlayout->addWidget(multi_edit, 0);
     textlayout->addWidget(create_snippet_options(section));
     layout->addLayout(textlayout);
 
