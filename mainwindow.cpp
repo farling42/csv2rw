@@ -51,9 +51,9 @@ MainWindow::MainWindow(QWidget *parent) :
     separators->addAction(ui->actionUse_Comma);
     separators->addAction(ui->actionUse_Semicolon);
     separators->addAction(ui->actionUse_Windows_List_Separator);
-    connect(ui->actionUse_Comma,     QAction::triggered, [=] { csv_full_model->setSeparator(','); });
-    connect(ui->actionUse_Semicolon, QAction::triggered, [=] { csv_full_model->setSeparator(';'); });
-    connect(ui->actionUse_Windows_List_Separator, QAction::triggered, [=] { csv_full_model->setSeparator(QChar()); });
+    connect(ui->actionUse_Comma,     &QAction::triggered, [=] { csv_full_model->setSeparator(','); });
+    connect(ui->actionUse_Semicolon, &QAction::triggered, [=] { csv_full_model->setSeparator(';'); });
+    connect(ui->actionUse_Windows_List_Separator, &QAction::triggered, [=] { csv_full_model->setSeparator(QChar()); });
     QChar sep = csv_full_model->fieldSeparator();
     if (sep.isNull())
         ui->actionUse_Windows_List_Separator->setChecked(true);

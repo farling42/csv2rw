@@ -73,20 +73,17 @@ void RWStructureItem::writeChildrenToStructure(QXmlStreamWriter *writer)
     }
 }
 
-void RWStructureItem::writeExportTag(QXmlStreamWriter *writer)
-{
-    writer->writeStartElement("tag_assign");
-    writer->writeAttribute("tag_id", "Tag_1");
-    writer->writeEndElement();
-}
-
 RWContentsItem *RWStructureItem::createContentsTree(RWContentsItem *parent)
 {
     //qDebug() << "createContentsTree for" << name();
     RWContentsItem *result = createContentsItem(parent);
     for (auto child: childItems<RWStructureItem*>())
     {
-        child->createContentsTree(result);
+        // Ignore child <category> elements, since they are derived category definitions.
+        if (qobject_cast<RWCategory*>(child) == 0)
+        {
+            child->createContentsTree(result);
+        }
     }
     return result;
 }

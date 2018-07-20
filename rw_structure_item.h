@@ -66,8 +66,6 @@ public:
     inline QList<T> childItems() const { return findChildren<T>(QString(), Qt::FindDirectChildrenOnly); }
 
     RWStructureItem *childElement(const QString &element_name) const;
-    void writeExportTag(QXmlStreamWriter *writer);
-
     RWContentsItem *createContentsTree(RWContentsItem *parent = 0);
 
 protected:
