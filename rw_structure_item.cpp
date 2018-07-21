@@ -18,12 +18,12 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include "rw_structure_item.h"
 
-#include "rw_contents_item.h"
 #include <QXmlStreamWriter>
 #include <QModelIndex>
 #include <QDebug>
+
+#include "rw_contents_item.h"
 #include "rw_category.h"    // to stop iteration into lower RWCategory
-#include "regexp.h"
 
 #undef DEBUG_XML
 
