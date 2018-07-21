@@ -16,7 +16,7 @@ class TopicKey : public QDialog
     Q_PROPERTY(QString selectedValue READ selectedValue WRITE setSelectedValue)
 
 public:
-    explicit TopicKey(QWidget *parent = 0);
+    explicit TopicKey(QWidget *parent = nullptr);
     ~TopicKey();
 
 public:

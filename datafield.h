@@ -29,7 +29,7 @@ class DataField : public QObject
     Q_PROPERTY(QString fixedText   READ fixedText   WRITE setFixedText)
 
 public:
-    explicit DataField(QObject *parent = 0) : QObject(parent) {}
+    explicit DataField(QObject *parent = nullptr) : QObject(parent) {}
 
     static void setColumnOffset(int offset) { p_column_offset = offset; }
 

@@ -50,6 +50,10 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 static QMetaEnum case_matching_enum   = QMetaEnum::fromType<RWAlias::CaseMatching>();
 static QMetaEnum match_priority_enum  = QMetaEnum::fromType<RWAlias::MatchPriority>();
 
+#define INSERT_SECTION_LAYOUT_PROPERTY "insertWhere"
+#define REMOVE_NAME_ALIAS_PROPERTY "alias"
+#define REMOVE_NAME_LAYOUT_PROPERTY "layout"
+
 static inline QString column_name(QAbstractItemModel *model, int column)
 {
     return model->index(column, 0).data().toString();
@@ -130,11 +134,11 @@ RWTopicWidget::RWTopicWidget(RWTopic *topic, QAbstractItemModel *columns, bool i
         // Now deal with the sections
         QList<int> sections;
         sections.append(1);
-        p_first_section = 0;
+        p_first_section = nullptr;
         for (auto section: topic->childItems<RWSection*>())
         {
             QWidget *sec = add_section(sections, columns, section);
-            if (p_first_section == 0) p_first_section = sec;
+            if (p_first_section == nullptr) p_first_section = sec;
             layout->addWidget(sec);
             sections.last()++;
         }
@@ -161,7 +165,7 @@ void RWTopicWidget::add_rwalias(RWAlias *alias)
     QCheckBox     *show_in_nav    = new QCheckBox;
     QComboBox     *case_matching  = new QComboBox;
     QComboBox     *match_priority = new QComboBox;
-    QPushButton   *delete_name    = new QPushButton("X");
+    QPushButton   *delete_name    = new QPushButton(style()->standardIcon(QStyle::SP_LineEditClearButton), "");
 
 #if 0
     // XML uses "Correction" whereas RW uses "Auto Correct"
@@ -204,9 +208,9 @@ void RWTopicWidget::add_rwalias(RWAlias *alias)
 
     // Add everything to the layout
     QHBoxLayout *row = new QHBoxLayout;
-    row->addWidget(revealed, 0);
-    row->addWidget(label,    0);
-    row->addWidget(name,     1);
+    row->addWidget(revealed,       0);
+    row->addWidget(label,          0);
+    row->addWidget(name,           1);  // the only stretched field
     row->addWidget(case_matching,  0);
     row->addWidget(auto_accept,    0);
     row->addWidget(show_in_nav,    0);
@@ -214,8 +218,8 @@ void RWTopicWidget::add_rwalias(RWAlias *alias)
     row->addWidget(delete_name,    0);
 
     // Set properties on the delete button to allow it to do it's work.
-    delete_name->setProperty("alias",  QVariant::fromValue(alias));
-    delete_name->setProperty("layout", QVariant::fromValue(row));
+    delete_name->setProperty(REMOVE_NAME_ALIAS_PROPERTY,  QVariant::fromValue(alias));
+    delete_name->setProperty(REMOVE_NAME_LAYOUT_PROPERTY, QVariant::fromValue(row));
 
     // Insert new name immediately before the FIRST section
     QVBoxLayout *top_layout = qobject_cast<QVBoxLayout*>(layout());
@@ -246,11 +250,11 @@ void RWTopicWidget::add_name()
 void RWTopicWidget::remove_name()
 {
     QPushButton *button = qobject_cast<QPushButton*>(sender());
-    if (button == 0) return;
+    if (button == nullptr) return;
 
-    QBoxLayout *row   = button->property("layout").value<QBoxLayout*>();
-    RWAlias    *alias = button->property("alias").value<RWAlias*>();
-    if (row == 0 || alias == 0) return;
+    QBoxLayout *row   = button->property(REMOVE_NAME_LAYOUT_PROPERTY).value<QBoxLayout*>();
+    RWAlias    *alias = button->property(REMOVE_NAME_ALIAS_PROPERTY).value<RWAlias*>();
+    if (row == nullptr || alias == nullptr) return;
 
     // Remove alias from the structure
     p_topic->aliases.removeAll(alias);
@@ -260,7 +264,7 @@ void RWTopicWidget::remove_name()
     QVBoxLayout *top_layout = qobject_cast<QVBoxLayout*>(layout());
     top_layout->removeItem(row);
     QLayoutItem *child;
-    while ((child = row->takeAt(0)) != 0)
+    while ((child = row->takeAt(0)) != nullptr)
     {
         if (child->widget())
         {
@@ -274,8 +278,8 @@ void RWTopicWidget::remove_name()
 
 void RWTopicWidget::show_key()
 {
-    static TopicKey *key_dialog = 0;
-    if (key_dialog == 0)
+    static TopicKey *key_dialog = nullptr;
+    if (key_dialog == nullptr)
     {
         key_dialog = new TopicKey(parentWidget());
     }
@@ -293,9 +297,9 @@ void RWTopicWidget::show_key()
 void RWTopicWidget::do_insert()
 {
     QPushButton *button = qobject_cast<QPushButton*>(sender());
-    if (button == 0) return;
-    QBoxLayout *layout = button->property("where").value<QBoxLayout*>();
-    if (layout == 0) return;
+    if (button == nullptr) return;
+    QBoxLayout *layout = button->property(INSERT_SECTION_LAYOUT_PROPERTY).value<QBoxLayout*>();
+    if (layout == nullptr) return;
 
     // Add an additional contents field
     FieldLineEdit *edit = new FieldLineEdit(p_topic->contentsText());
@@ -434,17 +438,17 @@ QWidget *RWTopicWidget::add_section(QList<int> sections, QAbstractItemModel *col
     // Add a button to allow a second <contents> section to be added.
     QPushButton *insert_button = new QPushButton("+");
     connect(insert_button, &QPushButton::clicked, this, &RWTopicWidget::do_insert);
-    insert_button->setProperty("where", QVariant::fromValue(layout));
+    insert_button->setProperty(INSERT_LAYOUT_PROPERTY, QVariant::fromValue(layout));
     layout->addWidget(insert_button);
 #endif
 
     // Then display the sub-partitions
-    QWidget *first_sub = 0;
+    QWidget *first_sub = nullptr;
     sections.append(1);
     for (auto child: section->childItems<RWSection*>())
     {
         QWidget *sub_part = add_section (sections, columns, child);
-        if (first_sub == 0) first_sub = sub_part;
+        if (first_sub == nullptr) first_sub = sub_part;
         layout->addWidget(sub_part);
         sections.last()++;
     }
@@ -457,14 +461,14 @@ QWidget *RWTopicWidget::add_section(QList<int> sections, QAbstractItemModel *col
 
 QWidget *RWTopicWidget::add_snippet(QAbstractItemModel *columns, RWSnippet *snippet)
 {
-    QRadioButton *reveal = 0;
-    QLabel *label = 0;
-    FieldLineEdit *filename = 0;
-    FieldLineEdit *start_date = 0;
-    FieldLineEdit *finish_date = 0;
-    FieldLineEdit *number = 0;
-    FieldComboBox *combo = 0;
-    QWidget *edit_widget = 0;
+    QRadioButton *reveal = nullptr;
+    QLabel *label = nullptr;
+    FieldLineEdit *filename = nullptr;
+    FieldLineEdit *start_date = nullptr;
+    FieldLineEdit *finish_date = nullptr;
+    FieldLineEdit *number = nullptr;
+    FieldComboBox *combo = nullptr;
+    QWidget *edit_widget = nullptr;
 
     // Every snippet is revealable
     reveal = new QRadioButton(QString());
@@ -655,7 +659,6 @@ QWidget *RWTopicWidget::add_snippet(QAbstractItemModel *columns, RWSnippet *snip
 
     // And the actual widget to contain the row's layout
     QWidget *box = new QWidget;
-    box->setProperty("facet", QVariant::fromValue((void*)facet));
     box->setLayout(boxl);
 
     return box;

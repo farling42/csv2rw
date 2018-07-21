@@ -259,8 +259,8 @@ void RWSnippet::write_asset(QXmlStreamWriter *writer, const QString &asset) cons
     }
     else if (url.isValid())
     {
-        static QNetworkAccessManager *nam = 0;
-        if (nam == 0)
+        static QNetworkAccessManager *nam = nullptr;
+        if (nam == nullptr)
         {
             nam = new QNetworkAccessManager;
             nam->setRedirectPolicy(QNetworkRequest::NoLessSafeRedirectPolicy);
@@ -308,8 +308,8 @@ void RWSnippet::write_asset(QXmlStreamWriter *writer, const QString &asset) cons
     {
         QString message = "File/URL does not exist: " + asset;
 
-        static QMessageBox *warning = 0;
-        if (warning == 0)
+        static QMessageBox *warning = nullptr;
+        if (warning == nullptr)
         {
             warning = new QMessageBox;
             warning->setText("Issues encountered during GENERATE:\n");

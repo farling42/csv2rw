@@ -38,7 +38,7 @@ public:
 
     Q_ENUM(SnippetType)
 
-    RWFacet(QXmlStreamReader *stream, QObject *parent = 0);
+    RWFacet(QXmlStreamReader *stream, QObject *parent = nullptr);
 
     SnippetType  snippetType()  const { return p_snippet_type;  }
 

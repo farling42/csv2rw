@@ -27,7 +27,7 @@ class FieldComboBox : public QComboBox
 {
     Q_OBJECT
 public:
-    FieldComboBox(DataField &datafield, RWDomain *domain, QWidget *parent = 0);
+    FieldComboBox(DataField &datafield, RWDomain *domain, QWidget *parent = nullptr);
 
 public Q_SLOTS:
     void setIndexString(const QString&);

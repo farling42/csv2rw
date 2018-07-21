@@ -87,7 +87,7 @@ COMPANY = com.amusingtime.csv2rw
 DESTDIR = install
 
 # Installation on Windows is performed using NSIS (see http://nsis.sourceforge.net/)
-# On Project page, under "Run" step.
+# On Project page, on the "Run" tag, under "Deployment"
 # 1 - add a "Make" step with the following:
 #     Make arguments = "-f Makefile.%{CurrentBuild:Name} windeployqt"
 # 2 - add a "Custom" step with the following:

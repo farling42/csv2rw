@@ -164,5 +164,5 @@ RWContentsItem *RWContentsItem::childElement(const QString &element_name) const
         if (item && item->structureElement() == element_name)
             return item;
     }
-    return 0;
+    return nullptr;
 }

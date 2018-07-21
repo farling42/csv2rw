@@ -50,7 +50,7 @@ public:
 
 public Q_SLOTS:
     void setIsRevealed(bool is_revealed) { p_revealed = is_revealed; }
-    void setSnippetStyleInt(int style) { p_snippet_style = (SnippetStyle)style; }
+    void setSnippetStyleInt(int style) { p_snippet_style = static_cast<SnippetStyle>(style); }
     void setSnippetStyle(SnippetStyle style) { p_snippet_style = style; }
     void setSnippetVeracity(SnippetVeracity veracity) { p_snippet_veracity = veracity; }
     void setSnippetPurpose(SnippetPurpose purpose) { p_snippet_purpose = purpose; }

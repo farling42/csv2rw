@@ -29,7 +29,7 @@ class RWDomain : public RWStructureItem
 {
     Q_OBJECT
 public:
-    RWDomain(QXmlStreamReader *stream, QObject *parent = 0);
+    RWDomain(QXmlStreamReader *stream, QObject *parent = nullptr);
     static RWDomain *getDomainById(const QString &domain_id);
     static RWDomain *getDomainByName(const QString &domain_id);
     QStringList tagNames() const;

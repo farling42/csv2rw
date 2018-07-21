@@ -80,7 +80,7 @@ RWContentsItem *RWStructureItem::createContentsTree(RWContentsItem *parent)
     for (auto child: childItems<RWStructureItem*>())
     {
         // Ignore child <category> elements, since they are derived category definitions.
-        if (qobject_cast<RWCategory*>(child) == 0)
+        if (qobject_cast<RWCategory*>(child) == nullptr)
         {
             child->createContentsTree(result);
         }
@@ -132,5 +132,5 @@ RWStructureItem *RWStructureItem::childElement(const QString &element_name) cons
         if (item && item->structureElement() == element_name)
             return item;
     }
-    return 0;
+    return nullptr;
 }

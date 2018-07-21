@@ -33,7 +33,7 @@ RWDomain::RWDomain(QXmlStreamReader *stream, QObject *parent) :
 
 RWDomain *RWDomain::getDomainById(const QString &domain_id)
 {
-    if (domain_id.isEmpty()) return 0;
+    if (domain_id.isEmpty()) return nullptr;
     return all_domains_by_id.value(domain_id);
 }
 

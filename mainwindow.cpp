@@ -40,7 +40,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    topic_widget(0)
+    topic_widget(nullptr)
 {
     ui->setupUi(this);
 
@@ -201,7 +201,7 @@ void MainWindow::on_loadStructureButton_pressed()
 
 void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selection)
 {
-    RWCategory *choice = 0;
+    RWCategory *choice = nullptr;
     for (auto category: rw_structure.categories)
     {
         if (category->name() == selection)
@@ -210,7 +210,7 @@ void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selectio
             break;
         }
     }
-    if (choice == 0) return;
+    if (choice == nullptr) return;
 
     //qDebug() << "Selected category" << choice->name();
 

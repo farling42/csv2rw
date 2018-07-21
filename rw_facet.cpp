@@ -54,7 +54,7 @@ RWFacet::RWFacet(QXmlStreamReader *stream, QObject *parent) :
     {
         QString ftype = attributes().value("type").toString();
         bool ok = true;
-        p_snippet_type = (SnippetType) snip_type_enum.keyToValue(qPrintable(ftype), &ok);
+        p_snippet_type = static_cast<SnippetType>(snip_type_enum.keyToValue(qPrintable(ftype), &ok));
         if (!ok) qWarning() << "Unknown SNIPPET type" << ftype;
     }
     else

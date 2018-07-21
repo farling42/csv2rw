@@ -14,7 +14,7 @@ class FileDetails : public QDialog
     Q_OBJECT
 
 public:
-    explicit FileDetails(RealmWorksStructure *structure, QWidget *parent = 0);
+    explicit FileDetails(RealmWorksStructure *structure, QWidget *parent = nullptr);
     ~FileDetails();
 
 protected:

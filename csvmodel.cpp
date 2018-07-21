@@ -134,8 +134,8 @@ void CsvModel::setSeparator(const QChar &sep)
     {
         // Determine the CSV separator character from the locale:
         // Ideally QLocale would provide this (see QTBUG-17097)
-        char output[4];
-        if (GetLocaleInfo(GetThreadLocale(), LOCALE_SLIST, (wchar_t*)output, 4))
+        wchar_t output[4];
+        if (GetLocaleInfo(GetThreadLocale(), LOCALE_SLIST, output, 4))
         {
             //qDebug() << "Windows LOCALE_SLIST =" << output;
             p_csv_separator = output[0];

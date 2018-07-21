@@ -36,7 +36,7 @@ class RWStructureItem : public QObject
     Q_PROPERTY(bool ignoreForContents READ ignoreForContents WRITE setIgnoreForContents)
 
 public:
-    RWStructureItem(QXmlStreamReader *stream, QObject *parent = 0, bool ignore_for_contents = false);
+    RWStructureItem(QXmlStreamReader *stream, QObject *parent = nullptr, bool ignore_for_contents = false);
 
 public:
     // Attributes from the structure definition

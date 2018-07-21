@@ -57,7 +57,7 @@ void RealmWorksStructure::loadFile(QIODevice *device)
     // Move to the start of the first element
     if (reader.readNextStartElement())
     {
-        export_element = read_element(&reader, 0);
+        export_element = read_element(&reader, nullptr);
     }
 
     if (reader.hasError())
@@ -80,7 +80,7 @@ void RealmWorksStructure::loadFile(QIODevice *device)
 
 RWStructureItem *RealmWorksStructure::read_element(QXmlStreamReader *reader, RWStructureItem *parent)
 {
-    RWStructureItem *element = 0;
+    RWStructureItem *element = nullptr;
     if (reader->name().startsWith("structure"))
         element = new RWStructure(reader, parent);
     else if (reader->name().startsWith("category"))
@@ -167,7 +167,7 @@ void RealmWorksStructure::writeExportFile(QIODevice *device,
     progress.setModal(true);
     progress.setWindowTitle("Progress");
     progress.setLabelText("Generating topics/articles...");
-    progress.setCancelButton(0);  // hide cancel button
+    progress.setCancelButton(nullptr);  // hide cancel button
     progress.show();
 
     QXmlStreamWriter *writer = new QXmlStreamWriter(device);

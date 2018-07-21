@@ -26,7 +26,7 @@ class FieldMultiLineEdit : public QTextEdit
 {
     Q_OBJECT
 public:
-    FieldMultiLineEdit(DataField &datafield, QWidget *parent = 0);
+    FieldMultiLineEdit(DataField &datafield, QWidget *parent = nullptr);
 
 protected:
     virtual void mousePressEvent(QMouseEvent *event);

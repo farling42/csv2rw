@@ -30,7 +30,7 @@ class CsvModel : public QAbstractItemModel
     Q_PROPERTY(QChar csvSeparator READ fieldSeparator WRITE setSeparator)
 
 public:
-    explicit CsvModel(QObject *parent = 0);
+    explicit CsvModel(QObject *parent = nullptr);
 
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const;

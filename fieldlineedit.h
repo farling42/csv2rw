@@ -26,7 +26,7 @@ class FieldLineEdit : public QLineEdit
 {
     Q_OBJECT
 public:
-    FieldLineEdit(DataField &datafield, QWidget *parent = 0);
+    FieldLineEdit(DataField &datafield, QWidget *parent = nullptr);
 
 protected:
     virtual void dragEnterEvent(QDragEnterEvent *);

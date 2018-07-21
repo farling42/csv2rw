@@ -43,7 +43,7 @@ class RWTopicWidget : public QFrame
     QWidget *add_snippet(QAbstractItemModel *columns, RWSnippet *snippet);
 
 public:
-    explicit RWTopicWidget(RWTopic *topic, QAbstractItemModel *columns, bool include_sections = true, QWidget *parent = 0);
+    explicit RWTopicWidget(RWTopic *topic, QAbstractItemModel *columns, bool include_sections = true, QWidget *parent = nullptr);
     RWTopic *topic() const { return p_topic; }
 signals:
 

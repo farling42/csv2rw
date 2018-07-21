@@ -4,7 +4,7 @@
 #include <QAbstractItemModel>
 #include <QSet>
 
-static QAbstractItemModel *model = 0;
+static QAbstractItemModel *model = nullptr;
 
 TopicKey::TopicKey(QWidget *parent) :
     QDialog(parent),

@@ -29,7 +29,7 @@ class RWPartition : public RWStructureItem
 {
     Q_OBJECT
 public:
-    RWPartition(QXmlStreamReader *stream, QObject *parent = 0);
+    RWPartition(QXmlStreamReader *stream, QObject *parent = nullptr);
 
 protected:
     virtual RWContentsItem *createContentsItem(RWContentsItem *parent);

@@ -31,7 +31,7 @@ class RWCategory : public RWStructureItem
     Q_OBJECT
 
 public:
-    RWCategory(QXmlStreamReader *stream, QObject *parent = 0);
+    RWCategory(QXmlStreamReader *stream, QObject *parent = nullptr);
     virtual void postLoad();
     QList<RWAlias*> aliases;
 

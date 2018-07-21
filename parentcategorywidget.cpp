@@ -13,7 +13,7 @@
 ParentCategoryWidget::ParentCategoryWidget(RealmWorksStructure *structure, QAbstractItemModel *columns, int indent, RWTopic *topic, QWidget *parent) :
     QFrame(parent),
     structure(structure),
-    category_widget(0),
+    category_widget(nullptr),
     header_model(columns),
     ignore_select(false)
 {
@@ -62,14 +62,14 @@ ParentCategoryWidget::ParentCategoryWidget(RealmWorksStructure *structure, QAbst
 
 RWTopic *ParentCategoryWidget::topic() const
 {
-    return category_widget ? category_widget->topic() : 0;
+    return category_widget ? category_widget->topic() : nullptr;
 }
 
 void ParentCategoryWidget::select_category(const QString &selection)
 {
     if (ignore_select) return;
 
-    RWCategory *new_category = 0;
+    RWCategory *new_category = nullptr;
     for (auto category: structure->categories)
     {
         if (category->name() == selection)
@@ -78,7 +78,7 @@ void ParentCategoryWidget::select_category(const QString &selection)
             break;
         }
     }
-    if (new_category == 0) return;
+    if (new_category == nullptr) return;
 
     if (category_widget)
     {

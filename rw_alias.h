@@ -29,8 +29,8 @@ public:
     DataField &namefield()   { return p_name_field; }
 
 public slots:
-    void setCaseMatchingInt(int v) { p_case_matching = (CaseMatching)v; }
-    void setMatchPriorityInt(int v) { p_match_priority = (MatchPriority)v; }
+    void setCaseMatchingInt(int v) { p_case_matching = static_cast<CaseMatching>(v); }
+    void setMatchPriorityInt(int v) { p_match_priority = static_cast<MatchPriority>(v); }
     void setCaseMatching(CaseMatching v) { p_case_matching = v; }
     void setMatchPriority(MatchPriority v) { p_match_priority = v; }
     void setAutoAccept(bool v) { p_is_auto_accept = v; }
