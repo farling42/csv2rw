@@ -50,10 +50,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 static QMetaEnum case_matching_enum   = QMetaEnum::fromType<RWAlias::CaseMatching>();
 static QMetaEnum match_priority_enum  = QMetaEnum::fromType<RWAlias::MatchPriority>();
 
-#define INSERT_SECTION_LAYOUT_PROPERTY "insertWhere"
-#define REMOVE_NAME_ALIAS_PROPERTY "alias"
-#define REMOVE_NAME_LAYOUT_PROPERTY "layout"
-
 static inline QString column_name(QAbstractItemModel *model, int column)
 {
     return model->index(column, 0).data().toString();
@@ -185,7 +181,6 @@ void RWTopicWidget::add_rwalias(RWAlias *alias)
     connect(show_in_nav,    &QCheckBox::toggled,    alias, &RWAlias::setShowInNav);
     connect(case_matching,  QOverload<int>::of(&QComboBox::activated), alias, &RWAlias::setCaseMatchingInt);
     connect(match_priority, QOverload<int>::of(&QComboBox::activated), alias, &RWAlias::setMatchPriorityInt);
-    connect(delete_name,    &QPushButton::clicked,  this,  &RWTopicWidget::remove_name);
     // Don't allow deleting a True Name until all Other Names have been removed.
     if (is_true_name) delete_name->setEnabled(false);
 
@@ -217,9 +212,8 @@ void RWTopicWidget::add_rwalias(RWAlias *alias)
     row->addWidget(match_priority, 0);
     row->addWidget(delete_name,    0);
 
-    // Set properties on the delete button to allow it to do it's work.
-    delete_name->setProperty(REMOVE_NAME_ALIAS_PROPERTY,  QVariant::fromValue(alias));
-    delete_name->setProperty(REMOVE_NAME_LAYOUT_PROPERTY, QVariant::fromValue(row));
+    // Connect the "remove alias" button with the correct parameters
+    connect(delete_name, &QPushButton::clicked,  [=]() { remove_name(row, alias); });
 
     // Insert new name immediately before the FIRST section
     QVBoxLayout *top_layout = qobject_cast<QVBoxLayout*>(layout());
@@ -247,13 +241,8 @@ void RWTopicWidget::add_name()
 }
 
 
-void RWTopicWidget::remove_name()
+void RWTopicWidget::remove_name(QHBoxLayout *row, RWAlias *alias)
 {
-    QPushButton *button = qobject_cast<QPushButton*>(sender());
-    if (button == nullptr) return;
-
-    QBoxLayout *row   = button->property(REMOVE_NAME_LAYOUT_PROPERTY).value<QBoxLayout*>();
-    RWAlias    *alias = button->property(REMOVE_NAME_ALIAS_PROPERTY).value<RWAlias*>();
     if (row == nullptr || alias == nullptr) return;
 
     // Remove alias from the structure
@@ -263,8 +252,7 @@ void RWTopicWidget::remove_name()
     // Remove widget from the window
     QVBoxLayout *top_layout = qobject_cast<QVBoxLayout*>(layout());
     top_layout->removeItem(row);
-    QLayoutItem *child;
-    while ((child = row->takeAt(0)) != nullptr)
+    while (QLayoutItem *child = row->takeAt(0))
     {
         if (child->widget())
         {
@@ -291,25 +279,6 @@ void RWTopicWidget::show_key()
         p_topic->setKeyValue(key_dialog->selectedValue());
         set_key_tooltip();
     }
-}
-
-
-void RWTopicWidget::do_insert()
-{
-    QPushButton *button = qobject_cast<QPushButton*>(sender());
-    if (button == nullptr) return;
-    QBoxLayout *layout = button->property(INSERT_SECTION_LAYOUT_PROPERTY).value<QBoxLayout*>();
-    if (layout == nullptr) return;
-
-    // Add an additional contents field
-    FieldLineEdit *edit = new FieldLineEdit(p_topic->contentsText());
-    edit->setToolTip("contents");
-    edit->setPlaceholderText("<generic>");
-    //edit->setText(column_name(columns, p_category->modelColumnForText()));
-
-    // Insert immediately before the INSERT button
-    layout->insertWidget(layout->indexOf(button), edit);
-
 }
 
 
@@ -433,14 +402,6 @@ QWidget *RWTopicWidget::add_section(QList<int> sections, QAbstractItemModel *col
     textlayout->addWidget(multi_edit, 0);
     textlayout->addWidget(create_snippet_options(section));
     layout->addLayout(textlayout);
-
-#ifdef ADD_SNIPPET
-    // Add a button to allow a second <contents> section to be added.
-    QPushButton *insert_button = new QPushButton("+");
-    connect(insert_button, &QPushButton::clicked, this, &RWTopicWidget::do_insert);
-    insert_button->setProperty(INSERT_LAYOUT_PROPERTY, QVariant::fromValue(layout));
-    layout->addWidget(insert_button);
-#endif
 
     // Then display the sub-partitions
     QWidget *first_sub = nullptr;

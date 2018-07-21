@@ -33,6 +33,7 @@ class RWTopic;
 class QAbstractItemModel;
 class QActionGroup;
 class QComboBox;
+class QHBoxLayout;
 class QMenu;
 class QPushButton;
 
@@ -50,9 +51,8 @@ signals:
 public slots:
 
 private slots:
-    void do_insert();
     void add_name();
-    void remove_name();
+    void remove_name(QHBoxLayout *row, RWAlias *alias);
     void show_key();
 
 private:
