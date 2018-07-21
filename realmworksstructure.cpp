@@ -27,7 +27,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include "rw_topic.h"
 
-#define DUMP_ON_LOAD
+#undef DUMP_ON_LOAD
 
 #ifdef DUMP_ON_LOAD
 static void dump_tree(int indent, RWStructureItem *parent)
