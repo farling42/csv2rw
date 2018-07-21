@@ -38,7 +38,7 @@ FieldMultiLineEdit::FieldMultiLineEdit(DataField &datafield, QWidget *parent) :
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setSizeAdjustPolicy(AdjustToContents);
     QFontMetrics metrics=fontMetrics();
-    setMinimumHeight(metrics.height() + contentsMargins().top() + contentsMargins().bottom() + 2 * document()->documentMargin());
+    setMinimumHeight(metrics.height() + contentsMargins().top() + contentsMargins().bottom() + 2 * int(document()->documentMargin()));
     //setSizePolicy(QSizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed));
     connect(this, &QTextEdit::textChanged, this, &FieldMultiLineEdit::text_changed);
 }

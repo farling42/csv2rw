@@ -57,9 +57,9 @@ public Q_SLOTS:
 
 public:
     // Attributes from the structure definition
-    SnippetStyle snippetStyle() const { return p_snippet_style; }
-    SnippetVeracity snippetVeracity () const { return p_snippet_veracity; }
-    SnippetPurpose snippetPurpose() const { return p_snippet_purpose; }
+    inline SnippetStyle snippetStyle() const { return p_snippet_style; }
+    inline SnippetVeracity snippetVeracity() const { return p_snippet_veracity; }
+    inline SnippetPurpose snippetPurpose() const { return p_snippet_purpose; }
 
     // More information
     virtual bool canBeGenerated() const;
@@ -90,21 +90,17 @@ public:
     RWContentsItem *childElement(const QString &element_name) const;
     void writeExportTag(QXmlStreamWriter *writer) const;
 
-//protected:  // TODO - reinstate later
+protected:
     virtual void writeChildrenToContents(QXmlStreamWriter *writer, const QModelIndex &index) const;
-    SnippetStyle p_snippet_style;
-    SnippetVeracity p_snippet_veracity;
-    SnippetPurpose p_snippet_purpose;
 
 private:
-    //QXmlStreamAttributes p_attributes;
     DataField p_contents_text;
     bool p_revealed;
     QString p_structure_element;
     QString p_structure_text;
-    friend QDebug operator<<(QDebug stream, const RWContentsItem&);
+    SnippetStyle p_snippet_style;
+    SnippetVeracity p_snippet_veracity;
+    SnippetPurpose p_snippet_purpose;
 };
-
-QDebug operator<<(QDebug stream, const RWContentsItem&);
 
 #endif // RW_BASE_ITEM_H

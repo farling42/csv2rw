@@ -25,8 +25,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "rw_contents_item.h"
 #include "rw_category.h"    // to stop iteration into lower RWCategory
 
-#undef DEBUG_XML
-
 RWStructureItem::RWStructureItem(QXmlStreamReader *reader, QObject *parent, bool ignore_for_contents) :
     QObject(parent),
     p_ignore_for_contents(ignore_for_contents)
@@ -50,10 +48,6 @@ RWStructureItem::RWStructureItem(QXmlStreamReader *reader, QObject *parent, bool
     p_id = p_attributes.value(p_structure_element + "_id").toString();
     p_signature = p_attributes.value("signature").toString();
     p_revealed = p_attributes.value("is_revealed") == "true";
-
-#ifdef DEBUG_XML
-    qDebug() << *this;
-#endif
 }
 
 void RWStructureItem::writeToStructure(QXmlStreamWriter *writer)
@@ -79,7 +73,7 @@ RWContentsItem *RWStructureItem::createContentsTree(RWContentsItem *parent)
     RWContentsItem *result = createContentsItem(parent);
     for (auto child: childItems<RWStructureItem*>())
     {
-        // Ignore child <category> elements, since they are derived category definitions.
+        // Ignore child <category> elements, since they define sub-categories.
         if (qobject_cast<RWCategory*>(child) == nullptr)
         {
             child->createContentsTree(result);
@@ -92,7 +86,6 @@ RWContentsItem *RWStructureItem::createContentsItem(RWContentsItem *parent)
 {
     return new RWContentsItem(this, parent);
 }
-
 
 /**
  * @brief RWBaseItem::canBeGenerated
@@ -107,6 +100,17 @@ bool RWStructureItem::canBeGenerated() const
     return true;
 }
 
+RWStructureItem *RWStructureItem::childElement(const QString &element_name) const
+{
+    for (auto child: children())
+    {
+        RWStructureItem *item = qobject_cast<RWStructureItem*>(child);
+        if (item && item->structureElement() == element_name)
+            return item;
+    }
+    return nullptr;
+}
+
 QDebug operator<<(QDebug stream, const RWStructureItem &item)
 {
     stream.noquote().nospace() << item.metaObject()->className() << "(" << item.p_structure_element;
@@ -119,18 +123,5 @@ QDebug operator<<(QDebug stream, const RWStructureItem &item)
     QString text = item.p_contents_text.valueString();
     if (!text.isEmpty()) stream.noquote().nospace() << ":: value=\"" + text + "\"";
     stream.nospace() << ")";
-
     return stream;
-}
-
-
-RWStructureItem *RWStructureItem::childElement(const QString &element_name) const
-{
-    for (auto child: children())
-    {
-        RWStructureItem *item = qobject_cast<RWStructureItem*>(child);
-        if (item && item->structureElement() == element_name)
-            return item;
-    }
-    return nullptr;
 }

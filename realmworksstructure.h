@@ -35,7 +35,7 @@ class QProgressDialog;
 class RealmWorksStructure
 {
 public:
-    RealmWorksStructure();
+    RealmWorksStructure() {}
 
 public Q_SLOTS:
     void loadFile(QIODevice*);

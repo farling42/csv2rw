@@ -23,11 +23,12 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "rw_category.h"    // to stop iteration into lower RWCategory
 #include "regexp.h"
 
-#undef DEBUG_XML
-
 /* This is only here because DataField doesn't have a .c file */
 int DataField::p_column_offset = 0;
 
+/*
+ * These are the objects representing the items in the CONTENTS part of the RWEXPORT file.
+ */
 RWContentsItem::RWContentsItem(RWStructureItem *item, RWContentsItem *parent) :
     QObject(parent),
     structure(item),
@@ -35,14 +36,7 @@ RWContentsItem::RWContentsItem(RWStructureItem *item, RWContentsItem *parent) :
     p_snippet_veracity(Truth),
     p_snippet_purpose(Story_Only)
 {
-    // Extract common data from this XML element
-//    p_attributes = reader->attributes();  // TODO
-
     p_revealed = item->attributes().value("is_revealed") == "true";
-
-#ifdef DEBUG_XML
-    qDebug() << *this;
-#endif
 }
 
 void RWContentsItem::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index) const
@@ -88,24 +82,12 @@ void RWContentsItem::writeExportTag(QXmlStreamWriter *writer) const
  */
 bool RWContentsItem::canBeGenerated() const
 {
-    for (auto item: findChildren<RWContentsItem*>())
+    for (auto item: childItems<RWContentsItem*>())
     {
         if (!item->canBeGenerated()) return false;
     }
     return true;
 }
-
-QDebug operator<<(QDebug stream, const RWContentsItem &item)
-{
-    stream.noquote().nospace() << item.metaObject()->className() << "(" << item.p_structure_element;
-    stream.noquote().nospace() << " : ";
-    QString text = item.p_contents_text.valueString();
-    if (!text.isEmpty()) stream.noquote().nospace() << ":: value=\"" + text + "\"";
-    stream.nospace() << ")";
-
-    return stream;
-}
-
 
 QString RWContentsItem::xmlParagraph(const QString &text, TextClass text_class, int margin)
 {

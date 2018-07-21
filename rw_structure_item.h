@@ -40,33 +40,33 @@ public:
 
 public:
     // Attributes from the structure definition
-    QString name() const { return p_name; }
-    QString id() const { return p_id; }
-    bool global() const { return p_global; }
-    QString uuid() const { return p_uuid; }
-    QString signature() const { return p_signature; }
+    inline QString name() const { return p_name; }
+    inline QString id() const { return p_id; }
+    inline bool global() const { return p_global; }
+    inline QString uuid() const { return p_uuid; }
+    inline QString signature() const { return p_signature; }
 
-    void setIgnoreForContents(bool flag) { p_ignore_for_contents = flag; }
-    bool ignoreForContents() const { return p_ignore_for_contents; }
+    inline void setIgnoreForContents(bool flag) { p_ignore_for_contents = flag; }
+    inline bool ignoreForContents() const { return p_ignore_for_contents; }
 
     // More information
     virtual bool canBeGenerated() const;
-    QString structureText() { return p_structure_text; }
+    inline QString structureText() { return p_structure_text; }
     void setStructureText(const QString &text) { p_structure_text = text; }
 
     virtual void writeToStructure(QXmlStreamWriter*);
     virtual void postLoad(void) {}
 
-    QString structureElement() const { return p_structure_element; }
+    inline QString structureElement() const { return p_structure_element; }
 
-    QString namespaceUri() const { return p_namespace_uri; }
+    inline QString namespaceUri() const { return p_namespace_uri; }
     const QXmlStreamAttributes &attributes() const { return p_attributes; }
 
     template<typename T>
     inline QList<T> childItems() const { return findChildren<T>(QString(), Qt::FindDirectChildrenOnly); }
 
     RWStructureItem *childElement(const QString &element_name) const;
-    RWContentsItem *createContentsTree(RWContentsItem *parent = 0);
+    RWContentsItem *createContentsTree(RWContentsItem *parent = nullptr);
 
 protected:
     virtual void writeChildrenToStructure(QXmlStreamWriter *writer);
@@ -88,6 +88,6 @@ private:
     friend QDebug operator<<(QDebug stream, const RWStructureItem&);
 };
 
-QDebug operator<<(QDebug stream, const RWStructureItem&);
+extern QDebug operator<<(QDebug stream, const RWStructureItem &item);
 
 #endif // RW_BASE_ITEM_H

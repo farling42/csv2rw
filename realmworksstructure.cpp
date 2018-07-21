@@ -27,13 +27,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include "rw_topic.h"
 
-#define SHOW_XML
+#define DUMP_ON_LOAD
 
-RealmWorksStructure::RealmWorksStructure()
-{
-
-}
-
+#ifdef DUMP_ON_LOAD
 static void dump_tree(int indent, RWStructureItem *parent)
 {
     QString indentation(indent, QChar(QChar::Space));
@@ -44,6 +40,7 @@ static void dump_tree(int indent, RWStructureItem *parent)
         dump_tree(indent +3, child);
     }
 }
+#endif
 
 /**
  * @brief RealmWorksStructure::loadFile
@@ -69,7 +66,9 @@ void RealmWorksStructure::loadFile(QIODevice *device)
         return;
     }
     qWarning() << "Structure file loaded successfully";
-    //dump_tree (0, export_element);
+#ifdef DUMP_ON_LOAD
+    dump_tree (0, export_element);
+#endif
 
     // Now find the partitions and domains in the structure
     RWStructureItem *main_structure = export_element->findChild<RWStructure*>(QString(), Qt::FindDirectChildrenOnly);

@@ -76,7 +76,7 @@ void RWSection::write_text(QXmlStreamWriter *writer, const QString &user_text) c
         {
             writer->writeAttribute("type", "Multi_Line");
             // no facet_id
-            if (p_snippet_style != RWContentsItem::Normal) writer->writeAttribute("style", snip_style_enum.valueToKey(p_snippet_style));
+            if (snippetStyle() != RWContentsItem::Normal) writer->writeAttribute("style", snip_style_enum.valueToKey(snippetStyle()));
             if (isRevealed()) writer->writeAttribute("is_revealed", "true");
             QString text;
             for (auto para: user_text.split("\n\n"))

@@ -81,9 +81,9 @@ void RWSnippet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
 
         if (!structure->id().isEmpty()) writer->writeAttribute("facet_id", structure->id());
         writer->writeAttribute("type", snip_type_enum.valueToKey(facet->snippetType()));
-        if (p_snippet_veracity != RWContentsItem::Truth) writer->writeAttribute("veracity", snip_veracity_enum.valueToKey(p_snippet_veracity));
-        if (p_snippet_style != RWContentsItem::Normal) writer->writeAttribute("style", snip_style_enum.valueToKey(p_snippet_style));
-        if (p_snippet_purpose != RWContentsItem::Story_Only) writer->writeAttribute("purpose", snip_purpose_enum.valueToKey(p_snippet_purpose));
+        if (snippetVeracity() != RWContentsItem::Truth) writer->writeAttribute("veracity", snip_veracity_enum.valueToKey(snippetVeracity()));
+        if (snippetStyle() != RWContentsItem::Normal) writer->writeAttribute("style", snip_style_enum.valueToKey(snippetStyle()));
+        if (snippetPurpose() != RWContentsItem::Story_Only) writer->writeAttribute("purpose", snip_purpose_enum.valueToKey(snippetPurpose()));
         if (isRevealed()) writer->writeAttribute("is_revealed", "true");
         if (!gm_dir.isEmpty()) writer->writeAttribute("purpose", user_text.isEmpty() ? "Directions_Only" : "Both");
 
