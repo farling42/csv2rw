@@ -28,6 +28,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QNetworkReply>
 #include <QCoreApplication>
 
+#include "datafield.h"
 #include "rw_domain.h"
 #include "rw_facet.h"
 
@@ -344,4 +345,36 @@ void RWSnippet::write_smart_image(QXmlStreamWriter *writer, const QString &asset
     // write_superset_mask (0-1)
     // write_map_pan (0+)
     writer->writeEndElement();
+}
+
+QDataStream &operator<<(QDataStream &stream, const RWSnippet &snippet)
+{
+    // write base class items
+    qDebug() << "    RWSnippet<<" << snippet.structure->name();
+    stream << *dynamic_cast<const RWContentsItem*>(&snippet);
+    // write this class items
+    stream << snippet.p_tags;
+    stream << snippet.p_gm_directions;
+    stream << snippet.p_label_text;
+    stream << snippet.p_filename;
+    stream << snippet.p_start_date;
+    stream << snippet.p_finish_date;
+    stream << snippet.p_number;
+    return stream;
+}
+
+QDataStream &operator>>(QDataStream &stream, RWSnippet &snippet)
+{
+    qDebug() << "    RWSnippet>>" << snippet.structure->name();
+    // read base class items
+    stream >> *dynamic_cast<RWContentsItem*>(&snippet);
+    // read this class items
+    stream >> snippet.p_tags;
+    stream >> snippet.p_gm_directions;
+    stream >> snippet.p_label_text;
+    stream >> snippet.p_filename;
+    stream >> snippet.p_start_date;
+    stream >> snippet.p_finish_date;
+    stream >> snippet.p_number;
+    return stream;
 }

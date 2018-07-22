@@ -2,6 +2,8 @@
 #include "realmworksstructure.h"
 #include "ui_filedetails.h"
 
+#include <QDebug>
+
 FileDetails::FileDetails(RealmWorksStructure *structure, QWidget *parent) :
     QDialog(parent),
     ui(new Ui::fileDetails),

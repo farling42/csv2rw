@@ -101,6 +101,11 @@ private:
     SnippetStyle p_snippet_style;
     SnippetVeracity p_snippet_veracity;
     SnippetPurpose p_snippet_purpose;
+    friend QDataStream& operator<<(QDataStream&,const RWContentsItem&);
+    friend QDataStream& operator>>(QDataStream&,RWContentsItem&);
 };
+
+extern QDataStream& operator<<(QDataStream&,const RWContentsItem&);
+extern QDataStream& operator>>(QDataStream&,RWContentsItem&);
 
 #endif // RW_BASE_ITEM_H

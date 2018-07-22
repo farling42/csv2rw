@@ -268,6 +268,40 @@ void RealmWorksStructure::writeExportFile(QIODevice *device,
     delete writer;
 }
 
+void RealmWorksStructure::saveState(QDataStream &stream)
+{
+    qDebug() << "RealmWorksStructure::saveState";
+    // Save DETAILS
+    stream << details_name;
+    stream << details_version;
+    stream << details_abbrev;
+    stream << details_summary;
+    stream << details_description;
+    stream << details_requirements;
+    stream << details_credits;
+    stream << details_legal;
+    stream << details_other_notes;
+
+    // save topic field assignments
+}
+
+void RealmWorksStructure::loadState(QDataStream &stream)
+{
+    qDebug() << "RealmWorksStructure::loadState";
+    // Load DETAILS
+    stream >> details_name;
+    stream >> details_version;
+    stream >> details_abbrev;
+    stream >> details_summary;
+    stream >> details_description;
+    stream >> details_requirements;
+    stream >> details_credits;
+    stream >> details_legal;
+    stream >> details_other_notes;
+
+    // load topic field assignments
+}
+
 /**
  * @brief RealmWorksStructure::writeParentToStructure
  * Write out the parent topics, with the subject topics as children of the appropriate lowest parent.

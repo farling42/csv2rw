@@ -63,6 +63,11 @@ private:
     DataField p_start_date;
     DataField p_finish_date;
     DataField p_number;
+    friend QDataStream& operator<<(QDataStream&,const RWSnippet&);
+    friend QDataStream& operator>>(QDataStream&,RWSnippet&);
 };
+
+extern QDataStream& operator<<(QDataStream&,const RWSnippet&);
+extern QDataStream& operator>>(QDataStream&,RWSnippet&);
 
 #endif // RW_SNIPPET_H

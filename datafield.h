@@ -31,30 +31,26 @@ class DataField : public QObject
 public:
     explicit DataField(QObject *parent = nullptr) : QObject(parent) {}
 
-    static void setColumnOffset(int offset) { p_column_offset = offset; }
+    static void setColumnOffset(int offset);
 
-    int  modelColumn() const { return p_column_offset + p_model_column; }
-    QString fixedText() const { return p_fixed_text; }
-    QString valueString(const QModelIndex &index = QModelIndex()) const
-    {
-        if (p_model_column >= 0)
-            return index.sibling(index.row(), modelColumn()).data().toString();
-        else
-            return p_fixed_text;
-    }
-    bool isDefined() const
-    {
-        return p_model_column >= 0 || !p_fixed_text.isEmpty();
-    }
+    int  modelColumn() const;
+    QString fixedText() const;
+    QString valueString(const QModelIndex &index = QModelIndex()) const;
+    bool isDefined() const;
 
 public slots:
-    void setModelColumn(int column) { p_model_column = column; }
-    void setFixedText(const QString &text) { p_fixed_text = text; }
+    void setModelColumn(int column);
+    void setFixedText(const QString &text);
 
 private:
     int p_model_column{-1};
     QString p_fixed_text;
     static int p_column_offset;
+    friend QDataStream& operator<<(QDataStream&,const DataField&);
+    friend QDataStream& operator>>(QDataStream&,DataField&);
 };
+
+extern QDataStream& operator<<(QDataStream&,const DataField&);
+extern QDataStream& operator>>(QDataStream&,DataField&);
 
 #endif // DATAFIELD_H

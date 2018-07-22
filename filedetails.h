@@ -7,6 +7,7 @@ namespace Ui {
 class fileDetails;
 }
 
+class QTextStream;
 class RealmWorksStructure;
 
 class FileDetails : public QDialog

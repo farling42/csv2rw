@@ -31,6 +31,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "rw_structure.h"
 
 class QProgressDialog;
+class QDataStream;
 
 class RealmWorksStructure
 {
@@ -42,6 +43,9 @@ public Q_SLOTS:
     void writeExportFile(QIODevice*,
                          const QList<RWTopic*> &body_topics,
                          const QAbstractItemModel *model);
+
+    void saveState(QDataStream&);
+    void loadState(QDataStream&);
 
     int format_version;
     int game_system_id;

@@ -40,7 +40,8 @@ SOURCES += main.cpp\
     rw_snippet.cpp \
     rw_topic.cpp \
     rw_topic_widget.cpp \
-    topickey.cpp
+    topickey.cpp \
+    datafield.cpp
 
 HEADERS  += mainwindow.h \
     csvmodel.h \

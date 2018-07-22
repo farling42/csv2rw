@@ -37,6 +37,10 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "parentcategorywidget.h"
 #include "topickey.h"
 
+static const QString CSV_PROJECT_PARAM("csvProjectDirectory");
+static const QString CSV_DIRECTORY_PARAM("csvDirectory");
+static const QString STRUCTURE_DIRECTORY_PARAM("structureDirectory");
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -93,9 +97,9 @@ MainWindow::MainWindow(QWidget *parent) :
     //ui->actionAbout_CSV2RW->setShortcut();
 
     // Connect menu options
-    connect(ui->actionLoad, &QAction::triggered, this, &MainWindow::fileLoad);
-    connect(ui->actionSave, &QAction::triggered, this, &MainWindow::fileSave);
-    connect(ui->actionSave_AS, &QAction::triggered, this, &MainWindow::fileSaveAs);
+    connect(ui->actionLoad, &QAction::triggered, this, &MainWindow::loadProject);
+    connect(ui->actionSave, &QAction::triggered, this, &MainWindow::saveProject);
+    connect(ui->actionSave_AS, &QAction::triggered, this, &MainWindow::saveProjectAs);
     connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::fileQuit);
     connect(ui->actionBriefHelp, &QAction::triggered, this, &MainWindow::showBriefHelp);
     connect(ui->actionAbout_CSV2RW, &QAction::triggered, this, &MainWindow::showAbout);
@@ -106,41 +110,153 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::fileLoad()
+void MainWindow::set_project_filename(const QString &filename)
 {
-    qDebug() << "load file";
+    project_name = filename;
 }
 
-void MainWindow::fileSave()
+bool MainWindow::save_project(const QString &filename)
 {
-    qDebug() << "save file";
+    qDebug() << "Saving project to" << filename;
+    QFile file(filename);
+    if (!file.open(QFile::WriteOnly|QFile::Text)) return false;
+    QDataStream stream(&file);
+    stream << ui->csvFilename->text();
+    stream << ui->structureFilename->text();
+    stream << ui->categoryComboBox->currentText();  // name of topic currently on display
+    rw_structure.saveState(stream);
+    // Get a list of all the defined topics
+    QStringList topic_list;
+    for (auto topic : p_all_topics)
+    {
+        if (topic->namefield().modelColumn() >= 0)
+        {
+            topic_list.append(topic->structure->name());
+        }
+    }
+    stream << topic_list;
+    // Now write out the contents of each defined topic
+    for (auto topic : p_all_topics)
+    {
+        if (topic->namefield().modelColumn() >= 0)
+        {
+            stream << *topic;
+        }
+    }
+    return true;
 }
 
-void MainWindow::fileSaveAs()
+bool MainWindow::load_project(const QString &filename)
 {
-    qDebug() << "save file as";
+    qDebug() << "Loading project from" << filename;
+    QFile file(filename);
+    if (!file.open(QFile::ReadOnly|QFile::Text)) return false;
+    QDataStream stream(&file);
+
+    QString value;
+    QString current_topic;
+
+    // Read parameters in order
+    stream >> value;
+    if (!load_csv(value)) return false;
+    stream >> value;
+    if (!load_structure(value)) return false;
+    stream >> current_topic;
+    rw_structure.loadState(stream);
+
+    // Get the list of configured topics
+    QStringList topic_list;
+    stream >> topic_list;
+    qDebug() << "Loading topics" << topic_list;
+
+    // Create a lookup table of the known categories
+    QMap<QString,RWCategory*> cat_map;
+    for (auto cat: rw_structure.categories)
+        cat_map.insert(cat->name(), cat);
+
+    // Now all the defined column mappings
+    for (auto name : topic_list)
+    {
+        RWCategory *category = cat_map.value(name, nullptr);
+        if (category)
+        {
+            RWTopic *topic = qobject_cast<RWTopic*>(category->createContentsTree());
+            stream >> *topic;
+            p_all_topics.insert(name, topic);
+        }
+        else
+        {
+            qDebug() << "MainWindow::load_project:" << name << "not in category list";
+            stream.setStatus(QDataStream::ReadCorruptData);
+        }
+    }
+    ui->categoryComboBox->setCurrentText(current_topic);
+
+    return true;
+}
+
+void MainWindow::loadProject()
+{
+    QSettings settings;
+
+    qDebug() << "load project";
+    // Offer a file open dialog
+    QString filename = QFileDialog::getOpenFileName(this, tr("CSV2RW Project File"), /*dir*/ settings.value(CSV_PROJECT_PARAM).toString(), /*template*/ tr("CSV2RW Project Files (*.csv2rw)"));
+    if (filename.isEmpty()) return;
+    // read the contents of the selected file
+    if (load_project(filename))
+    {
+        set_project_filename(filename);
+        settings.setValue(CSV_PROJECT_PARAM, QFileInfo(filename).absolutePath());
+    }
+}
+
+void MainWindow::saveProject()
+{
+    qDebug() << "save project";
+    // If no project has been saved yet, do save-as
+    if (project_name.isEmpty())
+    {
+        saveProjectAs();
+        return;
+    }
+    save_project(project_name);
+}
+
+void MainWindow::saveProjectAs()
+{
+    QSettings settings;
+
+    qDebug() << "save project as";
+    // Open a file open dialog
+    QString filename = QFileDialog::getSaveFileName(this,
+                                                    /*caption*/ tr("CSV2RW Project File"),
+                                                    /*dir*/ settings.value(CSV_PROJECT_PARAM).toString() + '/' + rw_structure.details_name + ".csv2rw",
+                                                    /*filter*/ tr("CSV2RW Project Files (*.csv2rw)"));
+    if (filename.isEmpty()) return;
+    if (save_project(filename))
+    {
+        set_project_filename(filename);
+        settings.setValue(CSV_PROJECT_PARAM, QFileInfo(filename).absolutePath());
+    }
 }
 
 void MainWindow::fileQuit()
 {
     qDebug() << "quit";
+    // Prompt if we have an unsaved project
     qApp->quit();
 }
 
-void MainWindow::on_loadCsvButton_pressed()
+bool MainWindow::load_csv(const QString &filename)
 {
+    qDebug() << "MainWindow::load_csv" << filename;
     QSettings settings;
-    const QString CSV_DIRECTORY_PARAM("csvDirectory");
-
-    // Prompt use to select a CSV file
-    QString filename = QFileDialog::getOpenFileName(this, tr("CSV File"), /*dir*/ settings.value(CSV_DIRECTORY_PARAM).toString(), /*template*/ tr("CSV Files (*.csv)"));
-    if (filename.isEmpty()) return;
-
     QFile file(filename);
     if (!file.open(QFile::ReadOnly))
     {
         qWarning() << tr("Failed to find file") << file.fileName();
-        return;
+        return false;
     }
     ui->csvFilename->setText(filename);
     csv_full_model->readCSV(file);
@@ -161,23 +277,27 @@ void MainWindow::on_loadCsvButton_pressed()
     //qDebug() << "Model size: " << csv_full_model->rowCount() << "rows and" << csv_full_model->columnCount() << "columns";
     ui->generateButton->setEnabled(rw_structure.categories.size() > 0);
     TopicKey::setModel(csv_full_model);
+    return true;
 }
 
-
-void MainWindow::on_loadStructureButton_pressed()
+void MainWindow::on_loadCsvButton_pressed()
 {
     QSettings settings;
-    const QString STRUCTURE_DIRECTORY_PARAM("structureDirectory");
-
     // Prompt use to select a CSV file
-    QString filename = QFileDialog::getOpenFileName(this, tr("Structure File"), /*dir*/ settings.value(STRUCTURE_DIRECTORY_PARAM).toString(), /*template*/ tr("Realm Works® Structure Files (*.rwstructure)"));
+    QString filename = QFileDialog::getOpenFileName(this, tr("CSV File"), /*dir*/ settings.value(CSV_DIRECTORY_PARAM).toString(), /*template*/ tr("CSV Files (*.csv)"));
     if (filename.isEmpty()) return;
+    load_csv(filename);
+}
 
+bool MainWindow::load_structure(const QString &filename)
+{
+    qDebug() << "MainWindow::load_structure" << filename;
+    QSettings settings;
     QFile file(filename);
     if (!file.open(QFile::ReadOnly))
     {
         qWarning() << tr("Failed to find file") << file.fileName();
-        return;
+        return false;
     }
     ui->structureFilename->setText(filename);
     rw_structure.loadFile(&file);
@@ -197,10 +317,23 @@ void MainWindow::on_loadStructureButton_pressed()
     ui->addParent->setEnabled(true);
     ui->generateButton->setEnabled(csv_full_model->rowCount() > 0);
     ui->fileDetails->setEnabled(true);
+    return true;
+}
+
+void MainWindow::on_loadStructureButton_pressed()
+{
+    QSettings settings;
+
+    // Prompt use to select a CSV file
+    QString filename = QFileDialog::getOpenFileName(this, tr("Structure File"), /*dir*/ settings.value(STRUCTURE_DIRECTORY_PARAM).toString(), /*template*/ tr("Realm Works® Structure Files (*.rwstructure)"));
+    if (filename.isEmpty()) return;
+    load_structure(filename);
 }
 
 void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selection)
 {
+    qDebug() << "MainWindow::on_categoryComboBox_currentIndexChanged:" << selection;
+
     RWCategory *choice = nullptr;
     for (auto category: rw_structure.categories)
     {
@@ -210,7 +343,11 @@ void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selectio
             break;
         }
     }
-    if (choice == nullptr) return;
+    if (choice == nullptr)
+    {
+        qDebug() << "MainWindow::on_categoryComboBox_currentIndexChanged:" << selection << "not in category list";
+        return;
+    }
 
     //qDebug() << "Selected category" << choice->name();
 

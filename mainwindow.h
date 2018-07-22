@@ -43,9 +43,9 @@ public:
     QStringList parseCSV(const QString &string);
 
 public Q_SLOTS:
-    void fileLoad();
-    void fileSave();
-    void fileSaveAs();
+    void loadProject();
+    void saveProject();
+    void saveProjectAs();
     void fileQuit();
     void on_loadCsvButton_pressed();
     void on_loadStructureButton_pressed();
@@ -70,6 +70,13 @@ private:
     QList<ParentCategoryWidget*> parents;
     FileDetails *file_details;
     QMap<QString, RWTopic*> p_all_topics;
+    QString project_name;
+    bool load_project(const QString &filename);
+    bool save_project(const QString &filename);
+    void set_project_filename(const QString &filename);
+    bool load_structure(const QString &filename);
+    bool load_csv(const QString &filename);
+    void set_current_topic(const QString &selection);
 };
 
 #endif // MAINWINDOW_H

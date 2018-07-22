@@ -18,13 +18,11 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include "rw_contents_item.h"
 #include <QXmlStreamWriter>
+#include <QDataStream>
 #include <QModelIndex>
 #include <QDebug>
 #include "rw_category.h"    // to stop iteration into lower RWCategory
 #include "regexp.h"
-
-/* This is only here because DataField doesn't have a .c file */
-int DataField::p_column_offset = 0;
 
 /*
  * These are the objects representing the items in the CONTENTS part of the RWEXPORT file.
@@ -147,4 +145,35 @@ RWContentsItem *RWContentsItem::childElement(const QString &element_name) const
             return item;
     }
     return nullptr;
+}
+
+QDataStream &operator<<(QDataStream &stream, const RWContentsItem &item)
+{
+    //qDebug() << "RWContentsItem<<" << item.structure->name();
+    stream << item.p_contents_text;
+    stream << item.p_revealed;
+    stream << item.p_structure_element;
+    stream << item.p_structure_text;
+    stream << item.p_snippet_style;
+    stream << item.p_snippet_veracity;
+    stream << item.p_snippet_purpose;
+    return stream;
+}
+
+QDataStream &operator>>(QDataStream &stream, RWContentsItem &item)
+{
+    //qDebug() << "RWContentsItem>>" << item.structure->name();
+    int style, veracity, purpose;
+    stream >> item.p_contents_text;
+    stream >> item.p_revealed;
+    stream >> item.p_structure_element;
+    stream >> item.p_structure_text;
+    // ENUMs can't be read directly
+    stream >> style;
+    stream >> veracity;
+    stream >> purpose;
+    item.p_snippet_style = static_cast<RWContentsItem::SnippetStyle>(style);
+    item.p_snippet_veracity = static_cast<RWContentsItem::SnippetVeracity>(veracity);
+    item.p_snippet_purpose = static_cast<RWContentsItem::SnippetPurpose>(purpose);
+    return stream;
 }

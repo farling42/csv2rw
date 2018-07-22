@@ -18,12 +18,15 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include "rw_alias.h"
 #include "rw_category.h"
+#include "rw_section.h"
+#include "rw_snippet.h"
 #include "rw_topic.h"
 #include "rw_partition.h"
 #include <QXmlStreamWriter>
 #include <QMetaEnum>
 #include <QModelIndex>
 #include <QDebug>
+#include <QDataStream>
 
 #include "rw_contents_item.h"   // TODO - remove this?
 
@@ -103,4 +106,79 @@ void RWTopic::writeStartToContents(QXmlStreamWriter *writer, const QModelIndex &
 void RWTopic::setDefaultName(const QString &name)
 {
     g_default_name = name;
+}
+
+static const QString END_MARKER("--end--");
+
+QDataStream& operator<<(QDataStream &stream, const RWTopic &topic)
+{
+    qDebug() << "RWTopic<<" << topic.structure->name();
+    // write base class items
+    stream << *dynamic_cast<const RWContentsItem*>(&topic);
+    // write this class items
+    stream << topic.p_name;
+    stream << topic.p_prefix;
+    stream << topic.p_suffix;
+    stream << topic.p_key_column;
+    stream << topic.p_key_value;
+    // write children
+    for (auto elem : topic.findChildren<RWContentsItem*>())
+    {
+        stream << elem->structure->name();
+        // Use the correct outputter
+        if (RWSection *section = qobject_cast<RWSection*>(elem))
+            stream << *section;
+        else if (RWSnippet *snippet = qobject_cast<RWSnippet*>(elem))
+            stream << *snippet;
+        else
+            stream << *elem;
+    }
+    stream << END_MARKER;
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream &stream, RWTopic &topic)
+{
+    qDebug() << "RWTopic>>" << topic.structure->name();
+    // Collect the structure->name() of each child into a look-up table
+    QMap<QString,RWContentsItem*> contents;
+    for (auto child: topic.findChildren<RWContentsItem*>())
+    {
+        contents.insert(child->structure->name(), child);
+    }
+
+    // read base class items
+    stream >> *dynamic_cast<RWContentsItem*>(&topic);
+    // read this class items
+    stream >> topic.p_name;
+    stream >> topic.p_prefix;
+    stream >> topic.p_suffix;
+    stream >> topic.p_key_column;
+    stream >> topic.p_key_value;
+
+    // read contents for children
+    while (true)
+    {
+        QString name;
+        stream >> name;
+        if (name == END_MARKER) break;
+
+        // Find the named child
+        RWContentsItem *elem = contents.value(name, nullptr);
+        if (!elem)
+        {
+            qWarning() << "RWTopic>> failed to find RWContentsItem for" << name;
+            stream.setStatus(QDataStream::ReadCorruptData);
+            break;
+        }
+
+        // Use correct reader
+        if (RWSection *section = qobject_cast<RWSection*>(elem))
+            stream >> *section;
+        else if (RWSnippet *snippet = qobject_cast<RWSnippet*>(elem))
+            stream >> *snippet;
+        else
+            stream >> *elem;
+    }
+    return stream;
 }

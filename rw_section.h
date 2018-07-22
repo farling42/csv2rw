@@ -55,6 +55,11 @@ private:
     DataField p_second_multiple;
     DataField p_last_multiple;
     DataField p_last_contents;
+    friend QDataStream& operator<<(QDataStream&,const RWSection&);
+    friend QDataStream& operator>>(QDataStream&,RWSection&);
 };
+
+extern QDataStream& operator<<(QDataStream&,const RWSection&);
+extern QDataStream& operator>>(QDataStream&,RWSection&);
 
 #endif // RW_SECTION_H

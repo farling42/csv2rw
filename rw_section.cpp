@@ -19,8 +19,10 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "rw_partition.h"
 #include "rw_section.h"
 #include "rw_snippet.h"
+#include <QDebug>
 #include <QXmlStreamWriter>
 #include <QMetaEnum>
+#include <QDataStream>
 
 
 static QMetaEnum snip_style_enum = QMetaEnum::fromType<RWContentsItem::SnippetStyle>();
@@ -115,4 +117,34 @@ void RWSection::write_one(QXmlStreamWriter *writer, const QString &attr_name, co
     }
 
     writer->writeEndElement();  //section
+}
+
+QDataStream &operator<<(QDataStream &stream, const RWSection &section)
+{
+    qDebug() << "  RWSection<<" << section.structure->name();
+    // write base class items
+    stream << *dynamic_cast<const RWContentsItem*>(&section);
+    // write this class items
+    stream << section.p_start_collapsed;
+    stream << section.p_is_multiple;
+    stream << section.p_first_multiple;
+    stream << section.p_second_multiple;
+    stream << section.p_last_multiple;
+    stream << section.p_last_contents;
+    return stream;
+}
+
+QDataStream &operator>>(QDataStream &stream, RWSection &section)
+{
+    qDebug() << "  RWSection>>" << section.structure->name();
+    // read base class items
+    stream >> *dynamic_cast<RWContentsItem*>(&section);
+    // read this class items
+    stream >> section.p_start_collapsed;
+    stream >> section.p_is_multiple;
+    stream >> section.p_first_multiple;
+    stream >> section.p_second_multiple;
+    stream >> section.p_last_multiple;
+    stream >> section.p_last_contents;
+    return stream;
 }

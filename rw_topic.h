@@ -21,6 +21,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include "rw_contents_item.h"
 
+class QDataStream;
 class QXmlStreamWriter;
 class RWAlias;
 class RWCategory;
@@ -62,6 +63,11 @@ private:
     DataField p_suffix;
     int p_key_column;
     QString p_key_value;
+    friend QDataStream& operator<<(QDataStream&, const RWTopic&);
+    friend QDataStream& operator>>(QDataStream&, RWTopic&);
 };
+
+extern QDataStream& operator<<(QDataStream&, const RWTopic&);
+extern QDataStream& operator>>(QDataStream&, RWTopic&);
 
 #endif // RW_TOPIC_H

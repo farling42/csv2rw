@@ -89,6 +89,7 @@ RWTopicWidget::RWTopicWidget(RWTopic *topic, QAbstractItemModel *columns, bool i
     // Should the category be marked as revealed
     reveal->setAutoExclusive(false);
     reveal->setToolTip("revealed?");
+    reveal->setChecked(topic->isRevealed());
     connect(reveal, &QRadioButton::toggled, topic, &RWContentsItem::setIsRevealed);
 
     if (p_key)
@@ -435,6 +436,7 @@ QWidget *RWTopicWidget::add_snippet(QAbstractItemModel *columns, RWSnippet *snip
     reveal = new QRadioButton(QString());
     reveal->setAutoExclusive(false);
     reveal->setToolTip("revealed?");
+    reveal->setChecked(snippet->isRevealed());
     connect(reveal, &QRadioButton::toggled, snippet, &RWContentsItem::setIsRevealed);
 
     const RWFacet *facet = snippet->facet;
