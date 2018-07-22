@@ -349,8 +349,8 @@ void RWSnippet::write_smart_image(QXmlStreamWriter *writer, const QString &asset
 
 QDataStream &operator<<(QDataStream &stream, const RWSnippet &snippet)
 {
+    //qDebug() << "    RWSnippet<<" << snippet.structure->name();
     // write base class items
-    qDebug() << "    RWSnippet<<" << snippet.structure->name();
     stream << *dynamic_cast<const RWContentsItem*>(&snippet);
     // write this class items
     stream << snippet.p_tags;
@@ -365,7 +365,7 @@ QDataStream &operator<<(QDataStream &stream, const RWSnippet &snippet)
 
 QDataStream &operator>>(QDataStream &stream, RWSnippet &snippet)
 {
-    qDebug() << "    RWSnippet>>" << snippet.structure->name();
+    //qDebug() << "    RWSnippet>>" << snippet.structure->name();
     // read base class items
     stream >> *dynamic_cast<RWContentsItem*>(&snippet);
     // read this class items

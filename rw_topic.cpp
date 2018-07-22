@@ -112,7 +112,7 @@ static const QString END_MARKER("--end--");
 
 QDataStream& operator<<(QDataStream &stream, const RWTopic &topic)
 {
-    qDebug() << "RWTopic<<" << topic.structure->name();
+    //qDebug() << "RWTopic<<" << topic.structure->name();
     // write base class items
     stream << *dynamic_cast<const RWContentsItem*>(&topic);
     // write this class items
@@ -139,7 +139,7 @@ QDataStream& operator<<(QDataStream &stream, const RWTopic &topic)
 
 QDataStream& operator>>(QDataStream &stream, RWTopic &topic)
 {
-    qDebug() << "RWTopic>>" << topic.structure->name();
+    //qDebug() << "RWTopic>>" << topic.structure->name();
     // Collect the structure->name() of each child into a look-up table
     QMap<QString,RWContentsItem*> contents;
     for (auto child: topic.findChildren<RWContentsItem*>())

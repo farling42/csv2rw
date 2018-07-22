@@ -65,7 +65,6 @@ void RealmWorksStructure::loadFile(QIODevice *device)
                       reader.errorString();
         return;
     }
-    qWarning() << "Structure file loaded successfully";
 #ifdef DUMP_ON_LOAD
     dump_tree (0, export_element);
 #endif
@@ -270,7 +269,7 @@ void RealmWorksStructure::writeExportFile(QIODevice *device,
 
 void RealmWorksStructure::saveState(QDataStream &stream)
 {
-    qDebug() << "RealmWorksStructure::saveState";
+    //qDebug() << "RealmWorksStructure::saveState";
     // Save DETAILS
     stream << details_name;
     stream << details_version;
@@ -281,13 +280,11 @@ void RealmWorksStructure::saveState(QDataStream &stream)
     stream << details_credits;
     stream << details_legal;
     stream << details_other_notes;
-
-    // save topic field assignments
 }
 
 void RealmWorksStructure::loadState(QDataStream &stream)
 {
-    qDebug() << "RealmWorksStructure::loadState";
+    //qDebug() << "RealmWorksStructure::loadState";
     // Load DETAILS
     stream >> details_name;
     stream >> details_version;
@@ -298,8 +295,6 @@ void RealmWorksStructure::loadState(QDataStream &stream)
     stream >> details_credits;
     stream >> details_legal;
     stream >> details_other_notes;
-
-    // load topic field assignments
 }
 
 /**

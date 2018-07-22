@@ -121,7 +121,7 @@ void RWSection::write_one(QXmlStreamWriter *writer, const QString &attr_name, co
 
 QDataStream &operator<<(QDataStream &stream, const RWSection &section)
 {
-    qDebug() << "  RWSection<<" << section.structure->name();
+    //qDebug() << "  RWSection<<" << section.structure->name();
     // write base class items
     stream << *dynamic_cast<const RWContentsItem*>(&section);
     // write this class items
@@ -136,7 +136,7 @@ QDataStream &operator<<(QDataStream &stream, const RWSection &section)
 
 QDataStream &operator>>(QDataStream &stream, RWSection &section)
 {
-    qDebug() << "  RWSection>>" << section.structure->name();
+    //qDebug() << "  RWSection>>" << section.structure->name();
     // read base class items
     stream >> *dynamic_cast<RWContentsItem*>(&section);
     // read this class items

@@ -117,7 +117,7 @@ void MainWindow::set_project_filename(const QString &filename)
 
 bool MainWindow::save_project(const QString &filename)
 {
-    qDebug() << "Saving project to" << filename;
+    //qDebug() << "Saving project to" << filename;
     QFile file(filename);
     if (!file.open(QFile::WriteOnly|QFile::Text)) return false;
     QDataStream stream(&file);
@@ -148,7 +148,7 @@ bool MainWindow::save_project(const QString &filename)
 
 bool MainWindow::load_project(const QString &filename)
 {
-    qDebug() << "Loading project from" << filename;
+    //qDebug() << "Loading project from" << filename;
     QFile file(filename);
     if (!file.open(QFile::ReadOnly|QFile::Text)) return false;
     QDataStream stream(&file);
@@ -167,7 +167,7 @@ bool MainWindow::load_project(const QString &filename)
     // Get the list of configured topics
     QStringList topic_list;
     stream >> topic_list;
-    qDebug() << "Loading topics" << topic_list;
+    //qDebug() << "Loading topics" << topic_list;
 
     // Create a lookup table of the known categories
     QMap<QString,RWCategory*> cat_map;
@@ -199,7 +199,6 @@ void MainWindow::loadProject()
 {
     QSettings settings;
 
-    qDebug() << "load project";
     // Offer a file open dialog
     QString filename = QFileDialog::getOpenFileName(this, tr("CSV2RW Project File"), /*dir*/ settings.value(CSV_PROJECT_PARAM).toString(), /*template*/ tr("CSV2RW Project Files (*.csv2rw)"));
     if (filename.isEmpty()) return;
@@ -213,7 +212,6 @@ void MainWindow::loadProject()
 
 void MainWindow::saveProject()
 {
-    qDebug() << "save project";
     // If no project has been saved yet, do save-as
     if (project_name.isEmpty())
     {
@@ -227,7 +225,6 @@ void MainWindow::saveProjectAs()
 {
     QSettings settings;
 
-    qDebug() << "save project as";
     // Open a file open dialog
     QString filename = QFileDialog::getSaveFileName(this,
                                                     /*caption*/ tr("CSV2RW Project File"),
@@ -243,14 +240,13 @@ void MainWindow::saveProjectAs()
 
 void MainWindow::fileQuit()
 {
-    qDebug() << "quit";
     // Prompt if we have an unsaved project
     qApp->quit();
 }
 
 bool MainWindow::load_csv(const QString &filename)
 {
-    qDebug() << "MainWindow::load_csv" << filename;
+    //qDebug() << "MainWindow::load_csv" << filename;
     QSettings settings;
     QFile file(filename);
     if (!file.open(QFile::ReadOnly))
@@ -291,7 +287,7 @@ void MainWindow::on_loadCsvButton_pressed()
 
 bool MainWindow::load_structure(const QString &filename)
 {
-    qDebug() << "MainWindow::load_structure" << filename;
+    //qDebug() << "MainWindow::load_structure" << filename;
     QSettings settings;
     QFile file(filename);
     if (!file.open(QFile::ReadOnly))
@@ -299,6 +295,11 @@ bool MainWindow::load_structure(const QString &filename)
         qWarning() << tr("Failed to find file") << file.fileName();
         return false;
     }
+
+    // Delete all previous information
+    qDeleteAll(p_all_topics);
+    p_all_topics.clear();
+
     ui->structureFilename->setText(filename);
     rw_structure.loadFile(&file);
 
@@ -332,7 +333,7 @@ void MainWindow::on_loadStructureButton_pressed()
 
 void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selection)
 {
-    qDebug() << "MainWindow::on_categoryComboBox_currentIndexChanged:" << selection;
+    //qDebug() << "MainWindow::on_categoryComboBox_currentIndexChanged:" << selection;
 
     RWCategory *choice = nullptr;
     for (auto category: rw_structure.categories)
