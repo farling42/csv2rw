@@ -120,8 +120,9 @@ QVariant ExcelXlsxModel::data(const QModelIndex &index, int role) const
             {
                 style = " style=\"" + styles.join(';') + "\"";
             }
-
-            result.append(QString("<span class=\"RWSnippet\"%1>%2</span>").arg(style).arg(rich.fragmentText(i)));
+            // Escape any "<" that might be in the cell, to avoid interpreting it as markup.
+            // How do we allow HTML to be imported from the CELL?
+            result.append(QString("<span class=\"RWSnippet\"%1>%2</span>").arg(style).arg(rich.fragmentText(i).replace("<", "&lt;")));
 
 #if 0
             // TODO
