@@ -103,6 +103,9 @@ QString RWContentsItem::xmlParagraph(const QString &text, TextClass text_class, 
 
 QString RWContentsItem::xmlSpan(const QString &text, bool bold, bool italic, bool line_through, bool underline)
 {
+    // Special situation where the formatting has already been done
+    if (text.startsWith("<span class=") && text.endsWith("</span>")) return text;
+
     // text-decoration - space separated list
     QStringList decorations;
     if (underline) decorations.append("underline");

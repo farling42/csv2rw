@@ -16,7 +16,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#undef SHOW_FORMATTING
+#define SHOW_FORMATTING
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -274,7 +274,6 @@ bool MainWindow::load_csv(const QString &filename)
     {
         // Excel file
         if (excel_full_model) delete excel_full_model;
-        qDebug() << "EXCEL 1";
         excel_full_model = new ExcelXlsxModel(filename, this);
         model = excel_full_model;
     }

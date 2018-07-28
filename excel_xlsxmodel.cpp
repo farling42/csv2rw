@@ -5,7 +5,7 @@
 
 #include <QDebug>
 
-#undef ALLOW_FORMATTING
+#define ALLOW_FORMATTING
 
 struct PrivateData
 {
@@ -81,7 +81,7 @@ QVariant ExcelXlsxModel::data(const QModelIndex &index, int role) const
         if (!cell->isRichString()) return cell->value();
         // Convert rich string to HTML
         const QXlsx::RichString rich = cell->richString();
-        qDebug() << "data: cell " << r << "," << c << "has a rich string";
+        //qDebug() << "data: cell " << r << "," << c << "has a rich string";
 
         // as rich.toPlainString()
         if (rich.isEmtpy()) return QString();
@@ -92,18 +92,38 @@ QVariant ExcelXlsxModel::data(const QModelIndex &index, int role) const
             QXlsx::Format format = rich.fragmentFormat(i);
 #if 0
             QString prefix = QString("r%1, c%2, f%3").arg(r).arg(c).arg(i+1);
-            qDebug() << prefix << "font  :" << format.font(); // QFont
+            qDebug() << prefix << "font  :" << format.font(); // QFont -- TBD
             qDebug() << prefix << "bold  :" << format.fontBold(); // bool
-            qDebug() << prefix << "colour:" << format.fontColor(); // QColor
+            qDebug() << prefix << "colour:" << format.fontColor(); // QColor -- TBD
             qDebug() << prefix << "italic:" << format.fontItalic(); // bool
-            qDebug() << prefix << "fontNm:" << format.fontName(); // QString
-            qDebug() << prefix << "outlin:" << format.fontOutline(); // bool
-            qDebug() << prefix << "script:" << format.fontScript(); // FontScript
-            qDebug() << prefix << "size  :" << format.fontSize(); // int
+            qDebug() << prefix << "fontNm:" << format.fontName(); // QString -- TBD
+            qDebug() << prefix << "outlin:" << format.fontOutline(); // bool -- TBD
+            qDebug() << prefix << "script:" << format.fontScript(); // FontScript -- TBD
+            qDebug() << prefix << "size  :" << format.fontSize(); // int -- TBD
             qDebug() << prefix << "strike:" << format.fontStrikeOut(); // bool
             qDebug() << prefix << "under :" << format.fontUnderline();
 #endif
+            // Encode into the final Realm Works "RWSnippet" class of span.
+            // RWContentsItem::xmlSpan will detect this formatting and not apply any itself.
 
+            QStringList decorations;
+            if (format.fontUnderline()) decorations.append("underline");
+            if (format.fontStrikeOut()) decorations.append("line-through");
+            // Styles - semi-colon separated list
+            QStringList styles;
+            if (!decorations.isEmpty()) styles.append("text-decoration:" + decorations.join(' '));
+            if (format.fontBold()) styles.append("font-weight:bold");
+            if (format.fontItalic()) styles.append("font-style:italic");
+
+            QString style;
+            if (!styles.isEmpty())
+            {
+                style = " style=\"" + styles.join(';') + "\"";
+            }
+
+            result.append(QString("<span class=\"RWSnippet\"%1>%2</span>").arg(style).arg(rich.fragmentText(i)));
+
+#if 0
             // TODO
             if (format.fontBold())
                 result.append("<b>" + rich.fragmentText(i) + "</b>");
@@ -113,6 +133,7 @@ QVariant ExcelXlsxModel::data(const QModelIndex &index, int role) const
                 result.append("<u>" + rich.fragmentText(i) + "</u>");
             else
                 result.append(rich.fragmentText(i));
+#endif
         }
         //qDebug() << "    " << result;
         return result;
