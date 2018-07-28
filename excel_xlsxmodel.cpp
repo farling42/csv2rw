@@ -75,10 +75,16 @@ QVariant ExcelXlsxModel::data(const QModelIndex &index, int role) const
         QXlsx::Cell *cell = p->doc.cellAt(r, c);
         //qDebug() << "data: cell " << r << "," << c << "=" << (cell ? cell->value() : "<null>");
         if (!cell) return QVariant();
+
 #ifndef ALLOW_FORMATTING
         return cell->value();
 #else
-        if (!cell->isRichString()) return cell->value();
+        QString text = cell->value().toString();
+        if (!cell->isRichString()) return text;
+
+        // If the entire cell is HTML, then don't process it
+        if (text.startsWith('<') && text.endsWith('>')) return text;
+
         // Convert rich string to HTML
         const QXlsx::RichString rich = cell->richString();
         //qDebug() << "data: cell " << r << "," << c << "has a rich string";
@@ -123,24 +129,10 @@ QVariant ExcelXlsxModel::data(const QModelIndex &index, int role) const
             // Escape any "<" that might be in the cell, to avoid interpreting it as markup.
             // How do we allow HTML to be imported from the CELL?
             result.append(QString("<span class=\"RWSnippet\"%1>%2</span>").arg(style).arg(rich.fragmentText(i).replace("<", "&lt;")));
-
-#if 0
-            // TODO
-            if (format.fontBold())
-                result.append("<b>" + rich.fragmentText(i) + "</b>");
-            else if (format.fontItalic())
-                result.append("<i>" + rich.fragmentText(i) + "</i>");
-            else if (format.fontUnderline())
-                result.append("<u>" + rich.fragmentText(i) + "</u>");
-            else
-                result.append(rich.fragmentText(i));
-#endif
         }
         //qDebug() << "    " << result;
         return result;
 #endif
-
-        // Try to use formatting of each fragment
     }
     return QVariant();
 }

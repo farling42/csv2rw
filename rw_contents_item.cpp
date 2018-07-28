@@ -103,7 +103,7 @@ QString RWContentsItem::xmlParagraph(const QString &text, TextClass text_class, 
 
 QString RWContentsItem::xmlSpan(const QString &text, bool bold, bool italic, bool line_through, bool underline)
 {
-    // Special situation where the formatting has already been done
+    // Special situation where the formatting has already been done (e.g. by excel_xlsxmodel.cpp)
     if (text.startsWith("<span class=") && text.endsWith("</span>")) return text;
 
     // text-decoration - space separated list
