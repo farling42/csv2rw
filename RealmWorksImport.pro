@@ -4,11 +4,15 @@
 #
 #-------------------------------------------------
 
-VERSION = 1.37
+VERSION = 1.38
+
+# Found at https://github.com/dbzhang800/QtXlsxWriter
+include (3rdparty/QtXlsxWriter/src/xlsx/qtxlsx.pri)
 
 QT       += core gui network xmlpatterns
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+
 
 TARGET = RealmWorksImport
 TEMPLATE = app
@@ -41,7 +45,9 @@ SOURCES += main.cpp\
     rw_topic.cpp \
     rw_topic_widget.cpp \
     topickey.cpp \
-    datafield.cpp
+    datafield.cpp \
+    excel_xlsxmodel.cpp \
+    htmlitemdelegate.cpp
 
 HEADERS  += mainwindow.h \
     csvmodel.h \
@@ -66,7 +72,9 @@ HEADERS  += mainwindow.h \
     rw_snippet.h \
     rw_topic.h \
     rw_topic_widget.h \
-    topickey.h
+    topickey.h \
+    excel_xlsxmodel.h \
+    htmlitemdelegate.h
 
 FORMS    += mainwindow.ui \
     filedetails.ui \

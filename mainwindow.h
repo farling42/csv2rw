@@ -27,7 +27,9 @@ class MainWindow;
 }
 
 class CsvModel;
+class ExcelXlsxModel;
 class FileDetails;
+class QAbstractProxyModel;
 class QStringListModel;
 class ParentCategoryWidget;
 class RWTopicWidget;
@@ -61,14 +63,16 @@ private slots:
     void showAbout();
 
 private:
-    Ui::MainWindow *ui;
-    CsvModel *csv_full_model;
-    QStringListModel *header_model;
+    Ui::MainWindow *ui{nullptr};
+    QAbstractProxyModel *proxy{nullptr};
+    CsvModel *csv_full_model{nullptr};
+    ExcelXlsxModel *excel_full_model{nullptr};
+    QStringListModel *header_model{nullptr};
     RealmWorksStructure rw_structure;
-    RWTopicWidget *topic_widget;
-    RWTopic *current_topic;
+    RWTopicWidget *topic_widget{nullptr};
+    RWTopic *current_topic{nullptr};
     QList<ParentCategoryWidget*> parents;
-    FileDetails *file_details;
+    FileDetails *file_details{nullptr};
     QMap<QString, RWTopic*> p_all_topics;
     QString project_name;
     bool load_project(const QString &filename);

@@ -16,6 +16,8 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#undef SHOW_FORMATTING
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "csvmodel.h"
@@ -31,11 +33,15 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include "rw_topic.h"
 
+#include "excel_xlsxmodel.h"
 #include "filedetails.h"
 #include "realmworksstructure.h"
 #include "performxsltranslation.h"
 #include "parentcategorywidget.h"
 #include "topickey.h"
+#ifdef SHOW_FORMATTING
+#include "htmlitemdelegate.h"
+#endif
 
 static const QString CSV_PROJECT_PARAM("csvProjectDirectory");
 static const QString CSV_DIRECTORY_PARAM("csvDirectory");
@@ -43,8 +49,7 @@ static const QString STRUCTURE_DIRECTORY_PARAM("structureDirectory");
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    topic_widget(nullptr)
+    ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
@@ -67,10 +72,12 @@ MainWindow::MainWindow(QWidget *parent) :
         ui->actionUse_Semicolon->setChecked(true);
 
     // Set up the full CSV view
-    QAbstractProxyModel *proxy = new QSortFilterProxyModel;
+    proxy = new QSortFilterProxyModel;
     proxy->setSourceModel(csv_full_model);
     ui->csvContentsTableView->setModel(proxy);
-
+#ifdef SHOW_FORMATTING
+    ui->csvContentsTableView->setItemDelegate(new HtmlItemDelegate);
+#endif
     // Set up the list of headers
     header_model = new QStringListModel;
     ui->headerListView->setModel(header_model);
@@ -248,31 +255,49 @@ bool MainWindow::load_csv(const QString &filename)
 {
     //qDebug() << "MainWindow::load_csv" << filename;
     QSettings settings;
-    QFile file(filename);
-    if (!file.open(QFile::ReadOnly))
+
+    QAbstractItemModel *model;
+
+    if (filename.endsWith((".csv")))
     {
-        qWarning() << tr("Failed to find file") << file.fileName();
-        return false;
+        QFile file(filename);
+        if (!file.open(QFile::ReadOnly))
+        {
+            qWarning() << tr("Failed to find file") << file.fileName();
+            return false;
+        }
+        ui->csvFilename->setText(filename);
+        csv_full_model->readCSV(file);
+        model = csv_full_model;
     }
-    ui->csvFilename->setText(filename);
-    csv_full_model->readCSV(file);
+    else
+    {
+        // Excel file
+        if (excel_full_model) delete excel_full_model;
+        qDebug() << "EXCEL 1";
+        excel_full_model = new ExcelXlsxModel(filename, this);
+        model = excel_full_model;
+    }
 
     // Remember the CSV directory
-    settings.setValue(CSV_DIRECTORY_PARAM, QFileInfo(file).absolutePath());
+    settings.setValue(CSV_DIRECTORY_PARAM, QFileInfo(filename).absolutePath());
 
     // Switch to the CSV directory, in case we need to load images.
-    QDir::setCurrent(QFileInfo(file).absolutePath());
+    QDir::setCurrent(QFileInfo(filename).absolutePath());
 
     // Put headers into the header model
     QStringList headers;
-    for (int row = 0; row < csv_full_model->columnCount(); row++)
+    for (int row = 0; row < model->columnCount(); row++)
     {
-        headers.append(csv_full_model->headerData(row, Qt::Horizontal).toString());
+        headers.append(model->headerData(row, Qt::Horizontal).toString());
     }
     header_model->setStringList(headers);
+
     //qDebug() << "Model size: " << csv_full_model->rowCount() << "rows and" << csv_full_model->columnCount() << "columns";
     ui->generateButton->setEnabled(rw_structure.categories.size() > 0);
-    TopicKey::setModel(csv_full_model);
+    TopicKey::setModel(model);
+    proxy->setSourceModel(model);
+
     return true;
 }
 
@@ -280,7 +305,7 @@ void MainWindow::on_loadCsvButton_pressed()
 {
     QSettings settings;
     // Prompt use to select a CSV file
-    QString filename = QFileDialog::getOpenFileName(this, tr("CSV File"), /*dir*/ settings.value(CSV_DIRECTORY_PARAM).toString(), /*template*/ tr("CSV Files (*.csv)"));
+    QString filename = QFileDialog::getOpenFileName(this, tr("CSV File"), /*dir*/ settings.value(CSV_DIRECTORY_PARAM).toString(), /*template*/ tr("CSV Files (*.csv);;Excel Workbook (*.xlsx)"));
     if (filename.isEmpty()) return;
     load_csv(filename);
 }
@@ -316,7 +341,7 @@ bool MainWindow::load_structure(const QString &filename)
     ui->categoryComboBox->clear();
     ui->categoryComboBox->addItems(cats);
     ui->addParent->setEnabled(true);
-    ui->generateButton->setEnabled(csv_full_model->rowCount() > 0);
+    ui->generateButton->setEnabled(proxy->sourceModel()->rowCount() > 0);
     ui->fileDetails->setEnabled(true);
     return true;
 }
@@ -448,7 +473,7 @@ void MainWindow::on_generateButton_clicked()
         parent_topics.append(widget->topic());
 
     // TODO - parent_topics is specific to each RWTopic
-    rw_structure.writeExportFile(&file, p_all_topics.values(), csv_full_model);
+    rw_structure.writeExportFile(&file, p_all_topics.values(), proxy->sourceModel());
     file.close();
 
     // Enable button again (so that we know it is finished
