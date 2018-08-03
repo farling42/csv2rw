@@ -104,7 +104,16 @@ QString RWContentsItem::xmlParagraph(const QString &text, TextClass text_class, 
 QString RWContentsItem::xmlSpan(const QString &text, bool bold, bool italic, bool line_through, bool underline)
 {
     // Special situation where the formatting has already been done (e.g. by excel_xlsxmodel.cpp)
-    if (text.startsWith("<span class=") && text.endsWith("</span>")) return text;
+    if (text.startsWith("<span class=") && text.endsWith("</span>"))
+    {
+#ifdef DEBUG_SPAN
+        qDebug() << "xmlSpan: formatting already done:" << text;
+#endif
+        return text;
+    }
+#ifdef DEBUG_SPAN
+    qDebug() << "xmlSpan: applying formatting" << text;
+#endif
 
     // text-decoration - space separated list
     QStringList decorations;
@@ -136,7 +145,11 @@ QString RWContentsItem::xmlSpan(const QString &text, bool bold, bool italic, boo
 
     // Parse for possible URLs, remembering style for future text
     const QString url_replacement("<a class=\"RWLink\" style=\"color:#000000;text-decoration:none\" href=\"\\1\" title=\"\\1\"><span class=\"RWLink\">\\1</span></a></span>" + start_rwsnippet);
-    return start_rwsnippet + buffer.replace(url_regexp, url_replacement) + "</span>";
+    QString result = start_rwsnippet + buffer.replace(url_regexp, url_replacement) + "</span>";
+#ifdef DEBUG_SPAN
+    qDebug() << "xmlSpan:   output =" << result;
+#endif
+    return result;
 }
 
 RWContentsItem *RWContentsItem::childElement(const QString &element_name) const

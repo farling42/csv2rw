@@ -112,6 +112,8 @@ QVariant ExcelXlsxModel::data(const QModelIndex &index, int role) const
             // Encode into the final Realm Works "RWSnippet" class of span.
             // RWContentsItem::xmlSpan will detect this formatting and not apply any itself.
 
+            //qDebug() << index << ", fragment" << i << "=" << rich.fragmentText(i);
+
             QStringList decorations;
             if (format.fontUnderline()) decorations.append("underline");
             if (format.fontStrikeOut()) decorations.append("line-through");
@@ -128,7 +130,15 @@ QVariant ExcelXlsxModel::data(const QModelIndex &index, int role) const
             }
             // Escape any "<" that might be in the cell, to avoid interpreting it as markup.
             // How do we allow HTML to be imported from the CELL?
-            result.append(QString("<span class=\"RWSnippet\"%1>%2</span>").arg(style).arg(rich.fragmentText(i).replace("<", "&lt;")));
+            QString escaped = rich.fragmentText(i).replace("<", "&lt;");
+            // Handle multiple paragraphs in the cell, the tool always double line-break so that users
+            // don't have to manually remove line breaks
+            QStringList paras = escaped.split("\n\n");
+            for (auto para : escaped.split("\n\n"))
+            {
+                if (para != paras.first()) result.append("\n\n"); // Keep double line-break for the xmlPara/xmlSpan processing
+                result.append(QString("<span class=\"RWSnippet\"%1>%2</span>").arg(style).arg(para));
+            }
         }
         //qDebug() << "    " << result;
         return result;
