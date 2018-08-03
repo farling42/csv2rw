@@ -167,8 +167,8 @@ void RWSnippet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
                 writer->writeStartElement("game_date");
                 //writer->writeAttribute("canonical", start_date);
                 writer->writeAttribute("gregorian", to_gregorian(start_date));
-                //writer->writeAttribute("display", start_date); // XML v3?
                 writer->writeEndElement();
+                //
                 if (!user_text.isEmpty())
                 {
                     writer->writeTextElement("annotation", xmlParagraph(xmlSpan(user_text, bold)));
@@ -179,11 +179,10 @@ void RWSnippet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
                 writer->writeStartElement("date_range");
                 //writer->writeAttribute("canonical_start", start_date);
                 writer->writeAttribute("gregorian_start", to_gregorian(start_date));
-                //writer->writeAttribute("display_start", start_date);
                 //writer->writeAttribute("canonical_end",   finish_date);
                 writer->writeAttribute("gregorian_end",   to_gregorian(finish_date));
-                //writer->writeAttribute("display_end",   finish_date);
                 writer->writeEndElement();
+                //
                 if (!user_text.isEmpty())
                 {
                     writer->writeTextElement("annotation", xmlParagraph(xmlSpan(user_text, bold)));

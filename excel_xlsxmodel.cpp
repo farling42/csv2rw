@@ -128,15 +128,22 @@ QVariant ExcelXlsxModel::data(const QModelIndex &index, int role) const
             {
                 style = " style=\"" + styles.join(';') + "\"";
             }
+
             // Escape any "<" that might be in the cell, to avoid interpreting it as markup.
             // How do we allow HTML to be imported from the CELL?
             QString escaped = rich.fragmentText(i).replace("<", "&lt;");
+
             // Handle multiple paragraphs in the cell, the tool always double line-break so that users
             // don't have to manually remove line breaks
-            QStringList paras = escaped.split("\n\n");
+            bool first=true;
             for (auto para : escaped.split("\n\n"))
             {
-                if (para != paras.first()) result.append("\n\n"); // Keep double line-break for the xmlPara/xmlSpan processing
+                // Keep double line-break for the xmlPara/xmlSpan processing
+                if (first)
+                    first = false;
+                else
+                    result.append("\n\n");
+
                 result.append(QString("<span class=\"RWSnippet\"%1>%2</span>").arg(style).arg(para));
             }
         }

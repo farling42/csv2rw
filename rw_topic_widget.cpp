@@ -444,6 +444,7 @@ QWidget *RWTopicWidget::add_snippet(QAbstractItemModel *columns, RWSnippet *snip
     // Maybe a field-name to start the line
     if (facet->snippetType() == RWFacet::Labeled_Text ||
         facet->snippetType() == RWFacet::Hybrid_Tag   ||
+        facet->snippetType() == RWFacet::Tag_Standard ||
         facet->snippetType() == RWFacet::Date_Game    ||
         facet->snippetType() == RWFacet::Date_Range   ||
         facet->snippetType() == RWFacet::Numeric)
@@ -458,10 +459,11 @@ QWidget *RWTopicWidget::add_snippet(QAbstractItemModel *columns, RWSnippet *snip
         }
         label->setToolTip(facet->id());
     }
-//Multi_Line, Hybrid_Tag, Labeled_Text, Tag_Standard, Picture
+// Tag_Standard
 
     // Maybe a tag selector
-    if (facet->snippetType() == RWFacet::Hybrid_Tag)
+    if (facet->snippetType() == RWFacet::Hybrid_Tag ||
+        facet->snippetType() == RWFacet::Tag_Standard )
     {
         combo = new FieldComboBox(snippet->tags(), RWDomain::getDomainById(facet->attributes().value("domain_id").toString()));
         if (snippet->tags().modelColumn() >= 0)
@@ -496,7 +498,8 @@ QWidget *RWTopicWidget::add_snippet(QAbstractItemModel *columns, RWSnippet *snip
         }
     }
 
-    if (facet->snippetType() == RWFacet::Date_Game || facet->snippetType() == RWFacet::Date_Range)
+    if (facet->snippetType() == RWFacet::Date_Game ||
+            facet->snippetType() == RWFacet::Date_Range)
     {
         start_date = new FieldLineEdit(snippet->startDate());
         start_date->setToolTip((facet->snippetType() == RWFacet::Date_Game) ? "Date" : "Start Date");
@@ -556,14 +559,7 @@ QWidget *RWTopicWidget::add_snippet(QAbstractItemModel *columns, RWSnippet *snip
         // Use the <description> child as a tool tip, if available
         RWContentsItem *description = snippet->childElement("description");
         edit->setToolTip(description ? description->structureText() : facet->uuid());
-        if (facet->snippetType() == RWFacet::Hybrid_Tag)
-        {
-            edit->setPlaceholderText("Enter annotation here");
-        }
-        else
-        {
-            edit->setPlaceholderText(facet->name());
-        }
+        edit->setPlaceholderText(facet->name());
         if (snippet->contentsText().modelColumn() >= 0)
         {
             edit->setText(column_name(columns, snippet->contentsText().modelColumn()));
@@ -578,6 +574,7 @@ QWidget *RWTopicWidget::add_snippet(QAbstractItemModel *columns, RWSnippet *snip
         RWContentsItem *description = snippet->childElement("description");
         edit->setToolTip(description ? description->structureText() : facet->uuid());
         if (facet->snippetType() == RWFacet::Hybrid_Tag ||
+                facet->snippetType() == RWFacet::Tag_Standard ||
                 facet->snippetType() == RWFacet::Numeric ||
                 facet->snippetType() == RWFacet::Picture ||
                 facet->snippetType() == RWFacet::Smart_Image ||
