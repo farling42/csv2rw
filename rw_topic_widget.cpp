@@ -156,7 +156,7 @@ void RWTopicWidget::add_rwalias(RWAlias *alias)
     alias->setIsTrueName(is_true_name);
 
     QLabel        *label          = new QLabel(is_true_name ? "True Name :" : "Other Name:");
-    QRadioButton  *revealed       = new QRadioButton;
+    QRadioButton  *reveal         = new QRadioButton(QString());
     FieldLineEdit *name           = new FieldLineEdit(alias->namefield());
     QCheckBox     *auto_accept    = new QCheckBox;
     QCheckBox     *show_in_nav    = new QCheckBox;
@@ -173,11 +173,13 @@ void RWTopicWidget::add_rwalias(RWAlias *alias)
     case_matching->addItem("Sensitive");
     case_matching->addItem("Auto Correct"); // XML uses "Correction"
 #endif
+    reveal->setAutoExclusive(false);
+    reveal->setToolTip("revealed?");
 
     for (int key=0; key<match_priority_enum.keyCount(); key++)
         match_priority->addItem(match_priority_enum.key(key));
 
-    connect(revealed,       &QRadioButton::toggled, alias, &RWAlias::setRevealed);
+    connect(reveal,         &QRadioButton::toggled, alias, &RWAlias::setRevealed);
     connect(auto_accept,    &QCheckBox::toggled,    alias, &RWAlias::setAutoAccept);
     connect(show_in_nav,    &QCheckBox::toggled,    alias, &RWAlias::setShowInNav);
     connect(case_matching,  QOverload<int>::of(&QComboBox::activated), alias, &RWAlias::setCaseMatchingInt);
@@ -186,14 +188,14 @@ void RWTopicWidget::add_rwalias(RWAlias *alias)
     if (is_true_name) delete_name->setEnabled(false);
 
     name->setPlaceholderText(is_true_name ? "Enter True Name" : "Enter New Alias");
-    revealed->setToolTip("Revealed");
+    reveal->setToolTip("Revealed");
     auto_accept->setToolTip("Auto Accept");
     show_in_nav->setToolTip("Shown In Nav");
     case_matching->setToolTip("Case Matching");
     match_priority->setToolTip("Priority");
     delete_name->setToolTip(is_true_name ? "Unable to delete True Name" : "Delete this name");
 
-    revealed->setChecked(alias->isRevealed());
+    reveal->setChecked(alias->isRevealed());
     auto_accept->setChecked(alias->isAutoAccept());
     show_in_nav->setChecked(alias->isShowNavPane());
     case_matching->setCurrentIndex(alias->caseMatching());
@@ -204,7 +206,7 @@ void RWTopicWidget::add_rwalias(RWAlias *alias)
 
     // Add everything to the layout
     QHBoxLayout *row = new QHBoxLayout;
-    row->addWidget(revealed,       0);
+    row->addWidget(reveal,       0);
     row->addWidget(label,          0);
     row->addWidget(name,           1);  // the only stretched field
     row->addWidget(case_matching,  0);
