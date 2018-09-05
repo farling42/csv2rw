@@ -42,12 +42,6 @@ void RWContentsItem::writeToContents(QXmlStreamWriter *writer, const QModelIndex
     // Special case: never put text_override into the contents section
     if (structure->ignoreForContents()) return;
 
-    if (p_structure_element == "overlay")
-    {
-        // "<overlay>" can appear in domain_global, facet_global, partition_globaland category_global elements,
-        // but there is no clear indication what they are used for!
-        return;
-    }
     writer->writeStartElement(p_structure_element);
 
     if (!structure->id().isEmpty()) writer->writeAttribute(p_structure_element + "_id", structure->id());   // e.g. partition_id, not the same as <element>_id

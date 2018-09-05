@@ -89,7 +89,8 @@ RWStructureItem *RealmWorksStructure::read_element(QXmlStreamReader *reader, RWS
         element = new RWFacet(reader, parent);
     else if (reader->name().startsWith("partition"))
         element = new RWPartition(reader, parent);
-    else if (reader->name().startsWith("text_override"))
+    else if (reader->name().startsWith("text_override") ||
+             reader->name().startsWith("overlay"))
         element = new RWStructureItem(reader, parent, /*ignore_for_contents*/ true);
     else if (reader->name().startsWith("export") ||
              reader->name().startsWith("tag") ||
