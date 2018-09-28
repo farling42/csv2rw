@@ -71,7 +71,7 @@ void RealmWorksStructure::loadFile(QIODevice *device)
 
     // Now find the partitions and domains in the structure
     RWStructureItem *main_structure = export_element->findChild<RWStructure*>(QString(), Qt::FindDirectChildrenOnly);
-    categories = main_structure->childItems<RWCategory*>();
+    categories = main_structure->findChildren<RWCategory*>();   // not simply childItems, since some might be sub-categories
     domains = main_structure->childItems<RWDomain*>();
     //qDebug() << "File has" << categories.count() << "categories and" << domains.count() << "domains";
 }
