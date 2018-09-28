@@ -136,7 +136,7 @@ bool MainWindow::save_project(const QString &filename)
     QStringList topic_list;
     for (auto topic : p_all_topics)
     {
-        if (topic->namefield().modelColumn() >= 0)
+        if (topic->publicName().namefield().modelColumn() >= 0)
         {
             topic_list.append(topic->structure->name());
         }
@@ -145,7 +145,7 @@ bool MainWindow::save_project(const QString &filename)
     // Now write out the contents of each defined topic
     for (auto topic : p_all_topics)
     {
-        if (topic->namefield().modelColumn() >= 0)
+        if (topic->publicName().namefield().modelColumn() >= 0)
         {
             stream << *topic;
         }
@@ -419,7 +419,7 @@ void MainWindow::on_generateButton_clicked()
     used_topics.insert(topic_widget->topic());
     for (auto widget: parents)
     {
-        if (!widget->topic()->namefield().isDefined())
+        if (!widget->topic()->publicName().namefield().isDefined())
         {
             QMessageBox::critical(this, tr("Incomplete Parent"),
                                   tr("The parent topic/article needs a name."));

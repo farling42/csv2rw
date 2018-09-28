@@ -15,7 +15,22 @@ RWAlias::RWAlias(QObject *parent) : QObject(parent),
 
 }
 
-void RWAlias::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index)
+/**
+ * @brief RWAlias::writeAttributes
+ * Write out the attributes which are common to an Alias and a Topic
+ * @param writer
+ * @param index
+ */
+void RWAlias::writeAttributes(QXmlStreamWriter *writer, const QModelIndex &index) const
+{
+    if (p_is_auto_accept) writer->writeAttribute("is_auto_accept", "true");
+    if (p_case_matching  != Ignore) writer->writeAttribute("case_matching",   case_matching_enum.valueToKey(p_case_matching));
+    if (p_match_priority != Normal) writer->writeAttribute("match_priority", match_priority_enum.valueToKey(p_match_priority));
+    if (!p_is_show_nav_pane) writer->writeAttribute("is_show_nav_pane", "false");
+}
+
+
+void RWAlias::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index) const
 {
     QString name = p_name_field.valueString(index);
     if (!name.isEmpty())
@@ -23,10 +38,7 @@ void RWAlias::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
         writer->writeStartElement("alias");
         writer->writeAttribute("alias_id", "Alias_" + QString::number(g_alias_id++));
         writer->writeAttribute("name", name);
-        if (p_is_auto_accept) writer->writeAttribute("is_auto_accept", "true");
-        if (p_case_matching  != Ignore) writer->writeAttribute("case_matching",   case_matching_enum.valueToKey(p_case_matching));
-        if (p_match_priority != Normal) writer->writeAttribute("match_priority", match_priority_enum.valueToKey(p_match_priority));
-        if (!p_is_show_nav_pane) writer->writeAttribute("is_show_nav_pane", "false");
+        writeAttributes(writer, index);
         if (p_is_true_name) writer->writeAttribute("is_true_name", "true");
         if (p_is_revealed)  writer->writeAttribute("is_revealed",  "true");
         writer->writeEndElement();

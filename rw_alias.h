@@ -25,8 +25,10 @@ public:
     CaseMatching caseMatching() const { return p_case_matching; }
     MatchPriority matchPriority() const { return p_match_priority; }
 
-    virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index);
+    virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index) const;
     DataField &namefield()   { return p_name_field; }
+    const DataField &namefield() const { return p_name_field; }
+    void writeAttributes(QXmlStreamWriter *writer, const QModelIndex &index) const;
 
 public slots:
     void setCaseMatchingInt(int v) { p_case_matching = static_cast<CaseMatching>(v); }

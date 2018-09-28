@@ -47,8 +47,8 @@ RWTopic::RWTopic(RWCategory *item, RWContentsItem *parent) :
 bool RWTopic::canBeGenerated() const
 {
     // Don't check children, since only the name is needed in a topic.
-    return p_name.modelColumn() >= 0;
-    //return p_name.modelColumn() >= 0 && RWBaseItem::canBeGenerated();
+    return p_public_name.namefield().modelColumn() >= 0;
+    //return p_name.namefield().modelColumn() >= 0 && RWBaseItem::canBeGenerated();
 }
 
 void RWTopic::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index) const
@@ -68,13 +68,14 @@ void RWTopic::writeStartToContents(QXmlStreamWriter *writer, const QModelIndex &
     {
         writer->writeAttribute("topic_id", QString("topic_%1").arg(topic_id++));
         if (!category->id().isEmpty()) writer->writeAttribute("category_id", category->id());
-        QString public_name = p_name.valueString(index);
+        QString public_name = p_public_name.namefield().valueString(index);
         if (public_name.isEmpty()) public_name = g_default_name;
         writer->writeAttribute("public_name", public_name);
         QString prefix = p_prefix.valueString(index);
         if (!prefix.isEmpty()) writer->writeAttribute("prefix", prefix);
         QString suffix = p_suffix.valueString(index);
         if (!suffix.isEmpty()) writer->writeAttribute("suffix", suffix);
+        p_public_name.writeAttributes(writer, index);
         if (isRevealed()) writer->writeAttribute("is_revealed", "true");
 
         // Add alias snippets as the first entry within the topic,
@@ -116,7 +117,7 @@ QDataStream& operator<<(QDataStream &stream, const RWTopic &topic)
     // write base class items
     stream << *dynamic_cast<const RWContentsItem*>(&topic);
     // write this class items
-    stream << topic.p_name;
+    stream << topic.p_public_name.namefield();
     stream << topic.p_prefix;
     stream << topic.p_suffix;
     stream << topic.p_key_column;
@@ -150,7 +151,7 @@ QDataStream& operator>>(QDataStream &stream, RWTopic &topic)
     // read base class items
     stream >> *dynamic_cast<RWContentsItem*>(&topic);
     // read this class items
-    stream >> topic.p_name;
+    stream >> topic.p_public_name.namefield();
     stream >> topic.p_prefix;
     stream >> topic.p_suffix;
     stream >> topic.p_key_column;

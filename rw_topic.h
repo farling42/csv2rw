@@ -20,6 +20,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "rw_contents_item.h"
+#include "rw_alias.h"
 
 class QDataStream;
 class QXmlStreamWriter;
@@ -45,9 +46,9 @@ public:
     QList<RWTopic*> parents;
 
 public:
-    DataField &namefield()   { return p_name; }
-    DataField &prefix() { return p_prefix; }
-    DataField &suffix() { return p_suffix; }
+    RWAlias &publicName() { return p_public_name; }
+    DataField &prefix()  { return p_prefix; }
+    DataField &suffix()  { return p_suffix; }
 
     static void setDefaultName(const QString &name);
     int keyColumn() const { return p_key_column; }
@@ -58,7 +59,7 @@ public slots:
     void setKeyValue(const QString &value) { p_key_value = value; }
 
 private:
-    DataField p_name;
+    RWAlias p_public_name;
     DataField p_prefix;
     DataField p_suffix;
     int p_key_column;

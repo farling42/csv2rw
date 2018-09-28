@@ -214,7 +214,7 @@ void RealmWorksStructure::writeExportFile(QIODevice *device,
                 int topic_count = 0;
                 for (auto topic: body_topics)
                 {
-                    if (topic->namefield().modelColumn() >= 0)
+                    if (topic->publicName().namefield().modelColumn() >= 0)
                     {
                         if (topic->keyColumn() < 0)
                             topic_count += model->rowCount(); // all entries will be added
@@ -243,7 +243,7 @@ void RealmWorksStructure::writeExportFile(QIODevice *device,
 
         for (auto topic: body_topics)
         {
-            if (topic->namefield().modelColumn() >= 0)
+            if (topic->publicName().namefield().modelColumn() >= 0)
             {
                 if (topic->keyColumn() >= 0)
                 {
@@ -327,7 +327,7 @@ void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress,
             body_topic->writeToContents(writer, model->index(row, 0));
         }
     }
-    else if (parent_topics.first()->namefield().modelColumn() < 0)
+    else if (parent_topics.first()->publicName().namefield().modelColumn() < 0)
     {
         // The parent has a FIXED STRING
         parent_topics.first()->writeStartToContents(writer, model->index(0,0));
@@ -340,7 +340,7 @@ void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress,
         // The parent identifies a COLUMN to use to generate a parent for each unique entry
         // in that column.
         QSet<QString> parent_set;
-        int parent_column = parent_topics.first()->namefield().modelColumn();
+        int parent_column = parent_topics.first()->publicName().namefield().modelColumn();
         for (int row=0; row<model->rowCount(); row++)
         {
             QString name = model->index(row, parent_column).data().toString();

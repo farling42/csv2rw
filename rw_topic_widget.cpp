@@ -77,7 +77,7 @@ RWTopicWidget::RWTopicWidget(RWTopic *topic, QAbstractItemModel *columns, bool i
     // Start with the title (+ prefix + suffix)
     QRadioButton  *reveal = new QRadioButton(QString());
     if (include_sections) p_key = new QPushButton(style()->standardIcon(QStyle::SP_MessageBoxQuestion), QString());
-    FieldLineEdit *name   = new FieldLineEdit(topic->namefield());
+    FieldLineEdit *name   = new FieldLineEdit(topic->publicName().namefield());
     FieldLineEdit *prefix = new FieldLineEdit(topic->prefix());
     FieldLineEdit *suffix = new FieldLineEdit(topic->suffix());
     QPushButton   *addName = new QPushButton("+Name");
@@ -101,8 +101,8 @@ RWTopicWidget::RWTopicWidget(RWTopic *topic, QAbstractItemModel *columns, bool i
     name->setPlaceholderText("<name>");
     description = topic->category->childElement("description");     // TODO - probably need to find the local version
     name->setToolTip(description ? description->structureText() : topic->category->name());
-    if (topic->namefield().modelColumn() >= 0)
-        name->setText(column_name(columns, topic->namefield().modelColumn()));
+    if (topic->publicName().namefield().modelColumn() >= 0)
+        name->setText(column_name(columns, topic->publicName().namefield().modelColumn()));
 
     prefix->setPlaceholderText("<prefix>");
     prefix->setToolTip("prefix");
@@ -122,6 +122,7 @@ RWTopicWidget::RWTopicWidget(RWTopic *topic, QAbstractItemModel *columns, bool i
     title->addWidget(name,    2);
     title->addWidget(prefix,  1);
     title->addWidget(suffix,  1);
+    add_name_attributes(title, &topic->publicName());
     title->addWidget(addName, 0);
     layout->addLayout(title);
 
@@ -149,6 +150,48 @@ RWTopicWidget::RWTopicWidget(RWTopic *topic, QAbstractItemModel *columns, bool i
 }
 
 
+void RWTopicWidget::add_name_attributes(QBoxLayout *layout, RWAlias *alias)
+{
+    QCheckBox     *auto_accept    = new QCheckBox;
+    QCheckBox     *show_in_nav    = new QCheckBox;
+    QComboBox     *case_matching  = new QComboBox;
+    QComboBox     *match_priority = new QComboBox;
+
+#if 0
+    // XML uses "Correction" whereas RW uses "Correct"
+    for (int key=0; key<case_matching_enum.keyCount(); key++)
+        case_matching->addItem(case_matching_enum.key(key));
+#else
+    case_matching->addItem("Ignore");
+    case_matching->addItem("Sensitive");
+    case_matching->addItem("Correct"); // XML uses "Correction"
+#endif
+
+    for (int key=0; key<match_priority_enum.keyCount(); key++)
+        match_priority->addItem(match_priority_enum.key(key));
+
+    connect(auto_accept,    &QCheckBox::toggled,    alias, &RWAlias::setAutoAccept);
+    connect(show_in_nav,    &QCheckBox::toggled,    alias, &RWAlias::setShowInNav);
+    connect(case_matching,  QOverload<int>::of(&QComboBox::activated), alias, &RWAlias::setCaseMatchingInt);
+    connect(match_priority, QOverload<int>::of(&QComboBox::activated), alias, &RWAlias::setMatchPriorityInt);
+
+    auto_accept->setToolTip("Auto Accept");
+    show_in_nav->setToolTip("Shown In Nav");
+    case_matching->setToolTip("Case Matching");
+    match_priority->setToolTip("Priority");
+
+    auto_accept->setChecked(alias->isAutoAccept());
+    show_in_nav->setChecked(alias->isShowNavPane());
+    case_matching->setCurrentIndex(alias->caseMatching());
+    match_priority->setCurrentIndex(alias->matchPriority());
+
+    layout->addWidget(case_matching,  0);
+    layout->addWidget(auto_accept,    0);
+    layout->addWidget(show_in_nav,    0);
+    layout->addWidget(match_priority, 0);
+}
+
+
 void RWTopicWidget::add_rwalias(RWAlias *alias)
 {
     bool is_true_name = (p_topic->aliases.first() == alias);
@@ -158,62 +201,31 @@ void RWTopicWidget::add_rwalias(RWAlias *alias)
     QLabel        *label          = new QLabel(is_true_name ? "True Name :" : "Other Name:");
     QRadioButton  *reveal         = new QRadioButton(QString());
     FieldLineEdit *name           = new FieldLineEdit(alias->namefield());
-    QCheckBox     *auto_accept    = new QCheckBox;
-    QCheckBox     *show_in_nav    = new QCheckBox;
-    QComboBox     *case_matching  = new QComboBox;
-    QComboBox     *match_priority = new QComboBox;
     QPushButton   *delete_name    = new QPushButton(style()->standardIcon(QStyle::SP_LineEditClearButton), "");
 
-#if 0
-    // XML uses "Correction" whereas RW uses "Auto Correct"
-    for (int key=0; key<case_matching_enum.keyCount(); key++)
-        case_matching->addItem(case_matching_enum.key(key));
-#else
-    case_matching->addItem("Ignore");
-    case_matching->addItem("Sensitive");
-    case_matching->addItem("Auto Correct"); // XML uses "Correction"
-#endif
     reveal->setAutoExclusive(false);
     reveal->setToolTip("revealed?");
 
-    for (int key=0; key<match_priority_enum.keyCount(); key++)
-        match_priority->addItem(match_priority_enum.key(key));
-
     connect(reveal,         &QRadioButton::toggled, alias, &RWAlias::setRevealed);
-    connect(auto_accept,    &QCheckBox::toggled,    alias, &RWAlias::setAutoAccept);
-    connect(show_in_nav,    &QCheckBox::toggled,    alias, &RWAlias::setShowInNav);
-    connect(case_matching,  QOverload<int>::of(&QComboBox::activated), alias, &RWAlias::setCaseMatchingInt);
-    connect(match_priority, QOverload<int>::of(&QComboBox::activated), alias, &RWAlias::setMatchPriorityInt);
     // Don't allow deleting a True Name until all Other Names have been removed.
     if (is_true_name) delete_name->setEnabled(false);
 
     name->setPlaceholderText(is_true_name ? "Enter True Name" : "Enter New Alias");
     reveal->setToolTip("Revealed");
-    auto_accept->setToolTip("Auto Accept");
-    show_in_nav->setToolTip("Shown In Nav");
-    case_matching->setToolTip("Case Matching");
-    match_priority->setToolTip("Priority");
     delete_name->setToolTip(is_true_name ? "Unable to delete True Name" : "Delete this name");
 
     reveal->setChecked(alias->isRevealed());
-    auto_accept->setChecked(alias->isAutoAccept());
-    show_in_nav->setChecked(alias->isShowNavPane());
-    case_matching->setCurrentIndex(alias->caseMatching());
-    match_priority->setCurrentIndex(alias->matchPriority());
 
     if (alias->namefield().modelColumn() >= 0)
         name->setText(column_name(p_columns, alias->namefield().modelColumn()));
 
     // Add everything to the layout
     QHBoxLayout *row = new QHBoxLayout;
-    row->addWidget(reveal,       0);
-    row->addWidget(label,          0);
-    row->addWidget(name,           1);  // the only stretched field
-    row->addWidget(case_matching,  0);
-    row->addWidget(auto_accept,    0);
-    row->addWidget(show_in_nav,    0);
-    row->addWidget(match_priority, 0);
-    row->addWidget(delete_name,    0);
+    row->addWidget(reveal, 0);
+    row->addWidget(label,  0);
+    row->addWidget(name,   1);  // the only stretched field
+    add_name_attributes(row, alias);
+    row->addWidget(delete_name, 0);
 
     // Connect the "remove alias" button with the correct parameters
     connect(delete_name, &QPushButton::clicked,  [=]() { remove_name(row, alias); });

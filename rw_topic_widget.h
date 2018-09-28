@@ -33,6 +33,7 @@ class RWTopic;
 class QAbstractItemModel;
 class QActionGroup;
 class QComboBox;
+class QBoxLayout;
 class QHBoxLayout;
 class QMenu;
 class QPushButton;
@@ -66,6 +67,7 @@ private:
     QWidget *create_snippet_options(RWContentsItem *Item);
     template<typename T>
     QActionGroup *create_enum_actions(const QString &section_name, T current_value, QMenu *menu, QMap<QString,QString> &rename);
+    void add_name_attributes(QBoxLayout *layout, RWAlias *alias);
 };
 
 #endif // RW_TOPIC_WIDGET_H
