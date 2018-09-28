@@ -1,3 +1,90 @@
+v1.44
+All categories are now shown in the category drop-down list (sub-categories were previously being skipped).
+It is now possible to set attributes on the public name of the topic/article (e.g. auto-accept, case-matching, match-priority and show-in-nav-pane).
+The name of the case-matching has been shortened from "Auto Correct" to "Correct" to make the field shorter.
+
+v1.43
+This fixes a bug where a blank element was being put into the contents section when an "overlay" was present in the topic's definition in the structure.
+
+v1.42 (the Meaning of Life edition)
+This fixes a bug in that the reveal button on "other" names was set to be exclusive across all names. This is no longer the case.
+
+v1.41
+This version simply presents Tag_Standard snippets the same way as Hybrid_Tag snippets, in that a CSV column can be assigned to choose the corresponding domain tag for the field.
+
+v1.40.1
+A bug-fix release so that Realm Works doesn't crash when importing a file generated from an XLSX file containing multiple paragraphs in a single cell. (Multiple paragraphs are separated by blank lines in the cell.)
+
+v1.40
+Fix XLSX file reading so that "<" are copied to Realm Works properly, as are cells which contain only HTML.
+
+v1.39
+If you have BOLD, ITALIC, UNDERLINE and/or STRIKE-THROUGH in your XLSX files, then this formatting will be imported into Realm Works.
+
+v1.38
+Provide the option to read XLSX files as an alternative to CSV files.
+
+v1.37
+You can now save your current project, and load it back later.
+The names of the CSV and RWEXPORT files are saved as part of the project.
+Your mappings within the categories is also saved (although if no field is mapped to the topic's name, then that category won't get saved).
+
+v1.36
+Fixes a bug where the import would fail if the category has child sub-categories (e.g. the "Location" category has "Settlement" and "Adventure Area" sub-categories; so any attempt to create "Location" topics would fail).
+
+v1.35
+Fixes a bug where the import would fail if the category definition has sub-sections within sections.
+
+v1.34
+It is now possible to create multiple content snippets in the main body of a section.
+Individual snippets can't be duplicated, but the general "contents" snippet of the section can now generate multiple snippets.
+
+v1.33
+Allow a section to be marked as starting in the "collapsed" state.
+Allow a CSV column to be used as the name of a section within a topic.
+Allow a set of CSV columns to be used to create multiple sections within a topic.
+See http://forums.wolflair.com/showpost....&postcount=295 for more details on how to use this functionality.
+
+v1.32
+A small update to add a menu option to choose what to use for the field separator in the CSV file. You can choose from comma, semi-colon, or the windows list separator.
+
+v1.31
+The default separator in CSV files is now read from the Windows Regional Settings (the "list separator").
+If you don't want to use your language's default list separator, it can be changed by opening windows Settings (windows 10) and finding the "Region & Language" section. Click on the "Administrative language settings" under "related settings". Go to the "Formats" tab, and click "Additional Settings...". Here you will see "List separator:" where you can change the default separator.
+
+v1.30
+You can now define more than one category to be exported from the tool (e.g. spells and items).
+Each category definition can have its own set of parents.
+The new "key" icon in the title of the category allows you to specify which rows in the CSV table should be displayed in this category (based on a column having a specific "key" value in it).
+Note that separate parents are created for each category, so for example it isn't possible to create some spells and some items and have them appear under the same parent topic/article in Realm Works.
+
+v1.29
+The same category can now be chosen for each level of parents.
+In theory (untested), you could even select the same category that you've chosen for the main topics.
+This removes the previous restriction that all parents had to be using a different category.
+
+v1.28
+For each snippet, it is now also possible to set the Veracity of that snippet (True, Partially True, Untrue).
+The selection of snippet style has been merged into the new Options menu.
+
+v1.27
+Adds support for numeric snippets.
+
+v1.26
+The "Import Name" text box has been replaced with a button to open a File Details dialog in which the import name, as well as other details, can be entered.
+
+v1.25
+Individual "<" are now treated properly so that they don't cause an error on import.
+However, any field which starts with "<" and finishes with ">" is left unchanged, since it is assumed to be HTML that you wish to have imported directly.
+
+v1.24
+Don't include "overlay" elements in the generated RWexport file.
+(There is no v1.23)
+
+v1.22
+You can now enter the name of the RW import before generating the output file.
+The installer has been changed from QTIF to NSIS.
+
 v1.21
 Add a method of setting the Snippet Style on every snippet.
 

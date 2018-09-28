@@ -108,7 +108,6 @@ DESTDIR = install
 DISTFILES += \
     LICENSE.txt \
     RELEASE_NOTES.txt \
-    TODO.txt \
     csv2rw_en.ts \
     ob2rw-xsl1.xslt
 
