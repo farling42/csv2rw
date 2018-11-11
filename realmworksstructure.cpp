@@ -250,7 +250,8 @@ void RealmWorksStructure::writeExportFile(QIODevice *device,
                     QSortFilterProxyModel proxy;
                     proxy.setSourceModel(const_cast<QAbstractItemModel*>(model));
                     proxy.setFilterKeyColumn(topic->keyColumn());
-                    proxy.setFilterRegExp('^' + topic->keyValue() + '$');
+                    // TODO: need to ignore all possible "regexp" special characters from topic->keyValue
+                    proxy.setFilterFixedString(topic->keyValue());
                     writeParentToStructure(progress, writer, topic, &proxy, topic->parents);
                 }
                 else
@@ -362,7 +363,8 @@ void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress,
         for (auto name: parent_names)
         {
             // Find the rows which match the parent's name
-            proxy.setFilterRegExp('^' + name + '$');
+            // (ignore regexp characters in the name)
+            proxy.setFilterFixedString(name);
 
             parent_topics.first()->writeStartToContents(writer, proxy.index(0,0));
             writeParentToStructure(progress, writer, body_topic, &proxy, parent_topics.mid(1));
