@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-VERSION = 1.45
+VERSION = 1.46
 
 # Found at https://github.com/dbzhang800/QtXlsxWriter
 include (3rdparty/QtXlsxWriter/src/xlsx/qtxlsx.pri)

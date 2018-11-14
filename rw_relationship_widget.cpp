@@ -77,7 +77,7 @@ RWRelationshipWidget::RWRelationshipWidget(RWRelationship *relationship, QAbstra
 
 void RWRelationshipWidget::setNature(const QString &reason)
 {
-    qDebug() << "RWRelationshipWidget::setNature =" << reason;
+    //qDebug() << "RWRelationshipWidget::setNature =" << reason;
     bool ok;
     int value = nature_enum.keyToValue(qPrintable(reason), &ok);
     if (!ok) return;
@@ -121,12 +121,14 @@ void RWRelationshipWidget::setNature(const QString &reason)
         // No additional attributes
         break;
     }
+    // Ensure a valid item is set in the menu
+    if (qualifier->isVisible()) setQualifier(qualifier->itemText(0));
 }
 
 
 void RWRelationshipWidget::setQualifier(const QString &value)
 {
-    qDebug() << "RWRelationshipWidget::setQualifier =" << value;
+    //qDebug() << "RWRelationshipWidget::setQualifier =" << value;
     p_relationship->qualifier_tag_name = value;
     qualifier->setCurrentText(value);
 }
