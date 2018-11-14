@@ -47,7 +47,9 @@ SOURCES += main.cpp\
     topickey.cpp \
     datafield.cpp \
     excel_xlsxmodel.cpp \
-    htmlitemdelegate.cpp
+    htmlitemdelegate.cpp \
+    rw_relationship.cpp \
+    rw_relationship_widget.cpp
 
 HEADERS  += mainwindow.h \
     csvmodel.h \
@@ -74,7 +76,9 @@ HEADERS  += mainwindow.h \
     rw_topic_widget.h \
     topickey.h \
     excel_xlsxmodel.h \
-    htmlitemdelegate.h
+    htmlitemdelegate.h \
+    rw_relationship.h \
+    rw_relationship_widget.h
 
 FORMS    += mainwindow.ui \
     filedetails.ui \

@@ -22,6 +22,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "rw_snippet.h"
 #include "rw_topic.h"
 #include "rw_partition.h"
+#include "rw_relationship.h"
 #include <QXmlStreamWriter>
 #include <QMetaEnum>
 #include <QModelIndex>
@@ -30,7 +31,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include "rw_contents_item.h"   // TODO - remove this?
 
-static int topic_id = 1;
+static int base_topic_id = 1000;
 static QString g_default_name = "no-name";
 
 RWTopic::RWTopic(RWCategory *item, RWContentsItem *parent) :
@@ -38,6 +39,16 @@ RWTopic::RWTopic(RWCategory *item, RWContentsItem *parent) :
     category(item),
     p_key_column(-1)
 {
+}
+
+/**
+ * @brief RWTopic::setBaseTopicId
+ * @param value
+ * Sets the base topic id to be used for topics which are not directly created from a row in the source model.
+ */
+void RWTopic::setSourceModelSize(int value)
+{
+    base_topic_id = value + 10;
 }
 
 /**
@@ -51,22 +62,27 @@ bool RWTopic::canBeGenerated() const
     //return p_name.namefield().modelColumn() >= 0 && RWBaseItem::canBeGenerated();
 }
 
-void RWTopic::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index) const
+void RWTopic::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index, bool use_index_topic_id) const
 {
     // Don't put topics into the file if they don't match the filter
     if (keyColumn() < 0 || index.sibling(index.row(), keyColumn()).data().toString() == keyValue())
     {
-        writeStartToContents(writer, index);
+        writeStartToContents(writer, index, use_index_topic_id);
         writer->writeEndElement();  // </topic>
     }
 }
 
 
-void RWTopic::writeStartToContents(QXmlStreamWriter *writer, const QModelIndex &index) const
+void RWTopic::writeStartToContents(QXmlStreamWriter *writer, const QModelIndex &index, bool use_index_topic_id) const
 {
     writer->writeStartElement("topic");
     {
-        writer->writeAttribute("topic_id", QString("topic_%1").arg(topic_id++));
+        // Use model row for an explicit topic, otherwise allocate a "random" topic id
+        if (use_index_topic_id && p_public_name.namefield().modelColumn() >= 0)
+            writer->writeAttribute("topic_id", index.data(Qt::UserRole).toString());
+        else
+            writer->writeAttribute("topic_id", QString("topic_%1").arg(base_topic_id++));
+
         if (!category->id().isEmpty()) writer->writeAttribute("category_id", category->id());
         QString public_name = p_public_name.namefield().valueString(index);
         if (public_name.isEmpty()) public_name = g_default_name;
@@ -93,10 +109,14 @@ void RWTopic::writeStartToContents(QXmlStreamWriter *writer, const QModelIndex &
         //   X x 'tag_assign'
         //   X x connection / dconnection
         //   X x 'topic'
-        writeChildrenToContents(writer, index);
+        writeChildrenToContents(writer, index);   // this will do sections
 
         // Relevant export tag on every topic
         writeExportTag(writer);
+
+        // All possible relationships
+        for (auto relationship: relationships)
+            relationship->writeToContents(writer, index);
 
         // No actual TEXT for this element (only children)
         //if (!text().valueString(index).isEmpty()) writer->writeCharacters(text().valueString(index));
@@ -135,6 +155,10 @@ QDataStream& operator<<(QDataStream &stream, const RWTopic &topic)
             stream << *elem;
     }
     stream << END_MARKER;
+    // write relationships
+    stream << topic.relationships.count();
+    for (auto relationship: topic.relationships)
+        stream << *relationship;
     return stream;
 }
 
@@ -180,6 +204,16 @@ QDataStream& operator>>(QDataStream &stream, RWTopic &topic)
             stream >> *snippet;
         else
             stream >> *elem;
+    }
+
+    // read relationships
+    int count;
+    stream >> count;
+    while (count--)
+    {
+        RWRelationship *relationship = new RWRelationship;
+        stream >> *relationship;
+        topic.relationships.append(relationship);
     }
     return stream;
 }

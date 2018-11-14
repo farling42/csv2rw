@@ -33,6 +33,7 @@ class QAbstractProxyModel;
 class QStringListModel;
 class ParentCategoryWidget;
 class RWTopicWidget;
+class RWRelationshipWidget;
 
 class MainWindow : public QMainWindow
 {
@@ -62,6 +63,9 @@ private slots:
     void parent_topics_changed();
     void showAbout();
 
+    void on_addRelationship_clicked();
+    void delete_relationship(RWRelationshipWidget*);
+
 private:
     Ui::MainWindow *ui{nullptr};
     QAbstractProxyModel *proxy{nullptr};
@@ -72,6 +76,7 @@ private:
     RWTopicWidget *topic_widget{nullptr};
     RWTopic *current_topic{nullptr};
     QList<ParentCategoryWidget*> parents;
+    QList<RWRelationshipWidget*> relationships;
     FileDetails *file_details{nullptr};
     QMap<QString, RWTopic*> p_all_topics;
     QString project_name;

@@ -151,5 +151,9 @@ QVariant ExcelXlsxModel::data(const QModelIndex &index, int role) const
         return result;
 #endif
     }
+    else if (role == Qt::UserRole && index.isValid())
+    {
+        return QString("topic_%1").arg(index.row()+1);
+    }
     return QVariant();
 }

@@ -42,6 +42,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #ifdef SHOW_FORMATTING
 #include "htmlitemdelegate.h"
 #endif
+#include "rw_relationship.h"
+#include "rw_relationship_widget.h"
 
 static const QString CSV_PROJECT_PARAM("csvProjectDirectory");
 static const QString CSV_DIRECTORY_PARAM("csvDirectory");
@@ -82,6 +84,7 @@ MainWindow::MainWindow(QWidget *parent) :
     header_model = new QStringListModel;
     ui->headerListView->setModel(header_model);
     ui->addParent->setEnabled(false);
+    ui->addRelationship->setEnabled(false);
 
     // Set some icons that can't be set in Qt Creator
     ui->loadCsvButton->setIcon(style()->standardIcon(QStyle::SP_FileDialogStart));
@@ -266,7 +269,6 @@ bool MainWindow::load_csv(const QString &filename)
             qWarning() << tr("Failed to find file") << file.fileName();
             return false;
         }
-        ui->csvFilename->setText(filename);
         csv_full_model->readCSV(file);
         model = csv_full_model;
     }
@@ -277,6 +279,7 @@ bool MainWindow::load_csv(const QString &filename)
         excel_full_model = new ExcelXlsxModel(filename, this);
         model = excel_full_model;
     }
+    ui->csvFilename->setText(filename);
 
     // Remember the CSV directory
     settings.setValue(CSV_DIRECTORY_PARAM, QFileInfo(filename).absolutePath());
@@ -340,6 +343,7 @@ bool MainWindow::load_structure(const QString &filename)
     ui->categoryComboBox->clear();
     ui->categoryComboBox->addItems(cats);
     ui->addParent->setEnabled(true);
+    ui->addRelationship->setEnabled(true);
     ui->generateButton->setEnabled(proxy->sourceModel()->rowCount() > 0);
     ui->fileDetails->setEnabled(true);
     return true;
@@ -394,6 +398,18 @@ void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selectio
         connect(widget, &ParentCategoryWidget::deleteRequested, this, &MainWindow::delete_parent);
         parents.append(widget);
         ui->parentWidget->layout()->addWidget(widget);
+    }
+
+    // Set up the relationships (if any)
+    qDeleteAll(relationships);
+    relationships.clear();
+
+    for (auto relationship : current_topic->relationships)
+    {
+        RWRelationshipWidget *widget = new RWRelationshipWidget(relationship, header_model);
+        connect(widget, &RWRelationshipWidget::deleteRequested, [=]() { delete_relationship(widget); });
+        relationships.append(widget);
+        ui->relationshipWidget->layout()->addWidget(widget);
     }
 }
 
@@ -512,6 +528,7 @@ void MainWindow::on_addParent_clicked()
     ui->parentWidget->layout()->addWidget(widget);
 }
 
+
 void MainWindow::parent_topics_changed()
 {
     current_topic->parents.clear();
@@ -538,4 +555,28 @@ void MainWindow::delete_parent()
     parents.takeLast()->deleteLater();
     current_topic->parents.takeLast()->deleteLater();
     if (parents.size() > 0) parents.last()->setCanDelete(true);
+}
+
+/**
+ * @brief MainWindow::on_addConnection_clicked
+ * Add a new connection to be established from an instance of this topic to another named topic.
+ */
+void MainWindow::on_addRelationship_clicked()
+{
+    RWRelationship *relationship = new RWRelationship;
+    RWRelationshipWidget *widget = new RWRelationshipWidget(relationship, header_model);
+    connect(widget, &RWRelationshipWidget::deleteRequested, [=]() { delete_relationship(widget); });
+    //connect(widget, &RWConnectionWidget::categoryChanged, this, &MainWindow::connection_changed);
+    relationships.append(widget);
+    current_topic->relationships.append(widget->relationship());
+    ui->relationshipWidget->layout()->addWidget(widget);
+}
+
+void MainWindow::delete_relationship(RWRelationshipWidget *w_conn)
+{
+    ui->relationshipWidget->layout()->removeWidget(w_conn);
+    relationships.removeAll(w_conn);
+    current_topic->relationships.removeAll(w_conn->relationship());
+    w_conn->relationship()->deleteLater();
+    w_conn->deleteLater();
 }

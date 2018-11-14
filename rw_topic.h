@@ -26,6 +26,7 @@ class QDataStream;
 class QXmlStreamWriter;
 class RWAlias;
 class RWCategory;
+class RWRelationship;
 class RWPartition;
 
 class RWTopic : public RWContentsItem
@@ -35,8 +36,8 @@ class RWTopic : public RWContentsItem
 public:
     RWTopic(RWCategory *item, RWContentsItem *parent);
 
-    virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index) const;
-    virtual void writeStartToContents(QXmlStreamWriter*, const QModelIndex &index) const;
+    virtual void writeToContents(QXmlStreamWriter*, const QModelIndex &index, bool use_index_topic_id) const;
+    virtual void writeStartToContents(QXmlStreamWriter*, const QModelIndex &index, bool use_index_topic_id) const;
 
     virtual bool canBeGenerated() const;
 
@@ -44,6 +45,7 @@ public:
     const RWCategory *const category;
 
     QList<RWTopic*> parents;
+    QList<RWRelationship*> relationships;
 
 public:
     RWAlias &publicName() { return p_public_name; }
@@ -51,6 +53,7 @@ public:
     DataField &suffix()  { return p_suffix; }
 
     static void setDefaultName(const QString &name);
+    static void setSourceModelSize(int value);
     int keyColumn() const { return p_key_column; }
     QString keyValue() const { return p_key_column >= 0 ? p_key_value : QString(); }
 

@@ -85,6 +85,10 @@ QVariant CsvModel::data(const QModelIndex &index, int role) const
         // the correct number of entries
         return lines.at(index.row()).at(index.column());
     }
+    else if (role == Qt::UserRole && index.isValid())
+    {
+        return QString("topic_%1").arg(index.row()+1);
+    }
     return QVariant();
 }
 

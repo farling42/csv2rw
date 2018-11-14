@@ -169,6 +169,8 @@ void RealmWorksStructure::writeExportFile(QIODevice *device,
     progress.setCancelButton(nullptr);  // hide cancel button
     progress.show();
 
+    RWTopic::setSourceModelSize(model->rowCount());
+
     QXmlStreamWriter *writer = new QXmlStreamWriter(device);
     // Write out the basics to the file.
     writer->setAutoFormatting(true);
@@ -325,13 +327,13 @@ void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress,
             progress.setValue(row);
             qApp->processEvents();  // for progress dialog
 
-            body_topic->writeToContents(writer, model->index(row, 0));
+            body_topic->writeToContents(writer, model->index(row, 0), true);
         }
     }
     else if (parent_topics.first()->publicName().namefield().modelColumn() < 0)
     {
         // The parent has a FIXED STRING
-        parent_topics.first()->writeStartToContents(writer, model->index(0,0));
+        parent_topics.first()->writeStartToContents(writer, model->index(0,0), false);
         // Maybe more children to write
         writeParentToStructure(progress, writer, body_topic, model, parent_topics.mid(1));
         writer->writeEndElement();
@@ -366,7 +368,7 @@ void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress,
             // (ignore regexp characters in the name)
             proxy.setFilterFixedString(name);
 
-            parent_topics.first()->writeStartToContents(writer, proxy.index(0,0));
+            parent_topics.first()->writeStartToContents(writer, proxy.index(0,0), false);
             writeParentToStructure(progress, writer, body_topic, &proxy, parent_topics.mid(1));
             writer->writeEndElement();
         }
