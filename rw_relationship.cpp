@@ -62,49 +62,48 @@ void RWRelationship::writeToContents(QXmlStreamWriter *writer, const QModelIndex
     while (const QAbstractProxyModel *proxy = qobject_cast<const QAbstractProxyModel*>(model))
         model = proxy->sourceModel();
 
-    // Look in the base model for the matching value
-    QModelIndexList topics = model->match(model->index(0,p_other_link.modelColumn()), Qt::DisplayRole, value_to_match, /*hits*/ 1, Qt::MatchExactly);
-    if (topics.isEmpty()) return;
-
-    QString target_id = topics.first().data(Qt::UserRole).toString();
-
-    writer->writeStartElement("connection");
-    writer->writeAttribute("target_id", target_id);
-    writer->writeAttribute("nature", nature_enum.valueToKey(nature));
-
-    switch (nature)
+    // Create one connection for each matching topic
+    const QModelIndexList topics = model->match(model->index(0, p_other_link.modelColumn()), Qt::DisplayRole, value_to_match, /*hits*/ -1, Qt::MatchExactly);
+    for (auto other_index : topics)
     {
-    case Master_To_Minion:
-    case Minion_To_Master:
-        // Requires tag from "Comprises Relationship Types" domain
-        if (comprises_domain.isNull()) comprises_domain = RWDomain::getDomainByName("Comprises Relationship Types");
-        writer->writeAttribute("qualifier_tag_id", comprises_domain->tagId(qualifier_tag_name));
-        writer->writeAttribute("qualifier", qualifier_tag_name);
-        break;
+        writer->writeStartElement("connection");
+        writer->writeAttribute("target_id", other_index.data(Qt::UserRole).toString());
+        writer->writeAttribute("nature", nature_enum.valueToKey(nature));
 
-    case Generic:
-        // Requires tag from "Generic Relationship Types" domain
-        if (generic_domain.isNull()) generic_domain = RWDomain::getDomainByName("Generic Relationship Types");
-        writer->writeAttribute("qualifier_tag_id", generic_domain->tagId(qualifier_tag_name));
-        writer->writeAttribute("qualifier", qualifier_tag_name);
-        break;
+        switch (nature)
+        {
+        case Master_To_Minion:
+        //case Minion_To_Master:
+            // Requires tag from "Comprises Relationship Types" domain
+            if (comprises_domain.isNull()) comprises_domain = RWDomain::getDomainByName("Comprises Relationship Types");
+            writer->writeAttribute("qualifier_tag_id", comprises_domain->tagId(qualifier_tag_name));
+            writer->writeAttribute("qualifier", qualifier_tag_name);
+            break;
 
-    case Public_Attitude_Towards:
-    case Private_Attitude_Towards:
-        writer->writeAttribute("rating", attitudeId.value(qualifier_tag_name));
-        writer->writeAttribute("attitude", qualifier_tag_name);
-        break;
+        case Generic:
+            // Requires tag from "Generic Relationship Types" domain
+            if (generic_domain.isNull()) generic_domain = RWDomain::getDomainByName("Generic Relationship Types");
+            writer->writeAttribute("qualifier_tag_id", generic_domain->tagId(qualifier_tag_name));
+            writer->writeAttribute("qualifier", qualifier_tag_name);
+            break;
 
-    case Parent_To_Offspring:
-    case Offspring_To_Parent:
-    case Arbitrary:
-    case Union:
-        // No additional attributes
-        break;
+        case Public_Attitude_Towards:
+        case Private_Attitude_Towards:
+            writer->writeAttribute("rating", attitudeId.value(qualifier_tag_name));
+            writer->writeAttribute("attitude", qualifier_tag_name);
+            break;
+
+        case Parent_To_Offspring:
+        //case Offspring_To_Parent:
+        case Arbitrary:
+        case Union:
+            // No additional attributes
+            break;
+        }
+
+        if (is_revealed) writer->writeAttribute("is_revealed", "true");
+        writer->writeEndElement();
     }
-
-    if (is_revealed) writer->writeAttribute("is_revealed", "true");
-    writer->writeEndElement();
 }
 
 

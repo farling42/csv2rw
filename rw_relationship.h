@@ -30,7 +30,11 @@ class RWRelationship : public QObject
 public:
     explicit RWRelationship(QObject *parent = nullptr);
 
-    enum Nature { Arbitrary, Generic, Union, Parent_To_Offspring, Offspring_To_Parent, Master_To_Minion, Minion_To_Master, Public_Attitude_Towards, Private_Attitude_Towards };
+    enum Nature { Arbitrary, Generic, Union, Parent_To_Offspring,
+                  //Offspring_To_Parent,   // RW import only creates with Parent_To_Offspring
+                  Master_To_Minion,
+                  //Minion_To_Master,       // RW import only creates with Master_To_Minion
+                  Public_Attitude_Towards, Private_Attitude_Towards };
     enum Attitude { Hostile, Angry, Annoyed, Neutral, Pleased, Friendly, Gracious };
     Q_ENUM(Nature)
     Q_ENUM(Attitude)

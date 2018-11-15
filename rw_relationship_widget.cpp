@@ -62,6 +62,9 @@ RWRelationshipWidget::RWRelationshipWidget(RWRelationship *relationship, QAbstra
     other_link->setToolTip("The column to search in the table");
     remove->setToolTip("Remove this relationship");
 
+    this_link->setPlaceholderText("Key Column");
+    other_link->setPlaceholderText("Search Column");
+
     for (int i=0; i<nature_enum.keyCount(); i++)
         nature->addItem(nature_enum.key(i));
 
@@ -108,7 +111,7 @@ void RWRelationshipWidget::setNature(const QString &reason)
     switch (p_relationship->nature)
     {
     case RWRelationship::Master_To_Minion:
-    case RWRelationship::Minion_To_Master:
+    //case RWRelationship::Minion_To_Master:
         // Requires tag from "Comprises Relationship Types" domain
         domain = RWDomain::getDomainByName("Comprises Relationship Types");
         if (domain == nullptr) return;
@@ -132,7 +135,7 @@ void RWRelationshipWidget::setNature(const QString &reason)
         break;
 
     case RWRelationship::Parent_To_Offspring:
-    case RWRelationship::Offspring_To_Parent:
+    //case RWRelationship::Offspring_To_Parent:
     case RWRelationship::Arbitrary:
     case RWRelationship::Union:
         qualifier->hide();
