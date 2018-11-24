@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-VERSION = 1.47
+VERSION = 1.48
 
 # Found at https://github.com/dbzhang800/QtXlsxWriter
 include (3rdparty/QtXlsxWriter/src/xlsx/qtxlsx.pri)
@@ -49,7 +49,8 @@ SOURCES += main.cpp\
     excel_xlsxmodel.cpp \
     htmlitemdelegate.cpp \
     rw_relationship.cpp \
-    rw_relationship_widget.cpp
+    rw_relationship_widget.cpp \
+    errordialog.cpp
 
 HEADERS  += mainwindow.h \
     csvmodel.h \
@@ -78,11 +79,13 @@ HEADERS  += mainwindow.h \
     excel_xlsxmodel.h \
     htmlitemdelegate.h \
     rw_relationship.h \
-    rw_relationship_widget.h
+    rw_relationship_widget.h \
+    errordialog.h
 
 FORMS    += mainwindow.ui \
     filedetails.ui \
-    topickey.ui
+    topickey.ui \
+    errordialog.ui
 
 TRANSLATIONS += csv2rw_en.ts
 
@@ -113,7 +116,8 @@ DISTFILES += \
     LICENSE.txt \
     RELEASE_NOTES.txt \
     csv2rw_en.ts \
-    ob2rw-xsl1.xslt
+    ob2rw-xsl1.xslt \
+    config.nsi
 
 RESOURCES += \
     rwimport.qrc

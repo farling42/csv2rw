@@ -53,9 +53,12 @@ public:
     DataField &suffix()  { return p_suffix; }
 
     static void setDefaultName(const QString &name);
-    static void setSourceModelSize(int value);
+    static void initBeforeExport(int model_row_count);
     int keyColumn() const { return p_key_column; }
     QString keyValue() const { return p_key_column >= 0 ? p_key_value : QString(); }
+
+signals:
+    void duplicateTopicInOutput(const QString &public_name) const;
 
 public slots:
     void setKeyColumn(int column) { p_key_column = column; }

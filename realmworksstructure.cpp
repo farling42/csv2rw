@@ -26,6 +26,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QSortFilterProxyModel>
 
 #include "rw_topic.h"
+#include "rw_topic.h"
 
 #undef DUMP_ON_LOAD
 
@@ -169,7 +170,7 @@ void RealmWorksStructure::writeExportFile(QIODevice *device,
     progress.setCancelButton(nullptr);  // hide cancel button
     progress.show();
 
-    RWTopic::setSourceModelSize(model->rowCount());
+    RWTopic::initBeforeExport(model->rowCount());
 
     QXmlStreamWriter *writer = new QXmlStreamWriter(device);
     // Write out the basics to the file.

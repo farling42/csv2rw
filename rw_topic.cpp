@@ -23,6 +23,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "rw_topic.h"
 #include "rw_partition.h"
 #include "rw_relationship.h"
+#include "errordialog.h"
 #include <QXmlStreamWriter>
 #include <QMetaEnum>
 #include <QModelIndex>
@@ -33,6 +34,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 static int base_topic_id = 1000;
 static QString g_default_name = "no-name";
+static QSet<QString> generated_topics;
 
 RWTopic::RWTopic(RWCategory *item, RWContentsItem *parent) :
     RWContentsItem(item, parent),
@@ -44,11 +46,14 @@ RWTopic::RWTopic(RWCategory *item, RWContentsItem *parent) :
 /**
  * @brief RWTopic::setBaseTopicId
  * @param value
+ * This should be called before each new export.
  * Sets the base topic id to be used for topics which are not directly created from a row in the source model.
  */
-void RWTopic::setSourceModelSize(int value)
+void RWTopic::initBeforeExport(int model_row_count)
 {
-    base_topic_id = value + 10;
+    generated_topics.clear();
+    base_topic_id = model_row_count + 10;
+    ErrorDialog::theInstance()->clear();
 }
 
 /**
@@ -78,14 +83,26 @@ void RWTopic::writeStartToContents(QXmlStreamWriter *writer, const QModelIndex &
     writer->writeStartElement("topic");
     {
         // Use model row for an explicit topic, otherwise allocate a "random" topic id
+        QString topic_id;
         if (use_index_topic_id && p_public_name.namefield().modelColumn() >= 0)
-            writer->writeAttribute("topic_id", index.data(Qt::UserRole).toString());
+        {
+            topic_id = index.data(Qt::UserRole).toString();
+        }
         else
-            writer->writeAttribute("topic_id", QString("topic_%1").arg(base_topic_id++));
+            topic_id = QString("topic_%1").arg(base_topic_id++);
 
-        if (!category->id().isEmpty()) writer->writeAttribute("category_id", category->id());
         QString public_name = p_public_name.namefield().valueString(index);
-        if (public_name.isEmpty()) public_name = g_default_name;
+
+        if (public_name.isEmpty())
+            public_name = g_default_name;
+        else if (generated_topics.contains(topic_id))
+            // Report the duplicate name
+            ErrorDialog::theInstance()->addMessage(tr("Topic '%1' appears in output more than once (the import will fail).").arg(public_name));
+        else
+            generated_topics.insert(topic_id);
+
+        writer->writeAttribute("topic_id", topic_id);
+        if (!category->id().isEmpty()) writer->writeAttribute("category_id", category->id());
         writer->writeAttribute("public_name", public_name);
         QString prefix = p_prefix.valueString(index);
         if (!prefix.isEmpty()) writer->writeAttribute("prefix", prefix);
