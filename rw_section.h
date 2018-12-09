@@ -50,7 +50,7 @@ public:
     bool p_is_multiple{false};
 private:
     void write_one(QXmlStreamWriter*, const QString &attr_name, const QString &attr_value, const QModelIndex &index) const;
-    void write_text(QXmlStreamWriter *writer, const QString &user_text) const;
+    void write_text(QXmlStreamWriter *writer, const QString &user_text, const QString &gm_dir) const;
     DataField p_first_multiple;
     DataField p_second_multiple;
     DataField p_last_multiple;

@@ -164,6 +164,7 @@ QDataStream &operator<<(QDataStream &stream, const RWContentsItem &item)
     stream << item.p_revealed;
     stream << item.p_structure_element;
     stream << item.p_structure_text;
+    stream << item.p_gm_directions;
     stream << item.p_snippet_style;
     stream << item.p_snippet_veracity;
     stream << item.p_snippet_purpose;
@@ -178,6 +179,7 @@ QDataStream &operator>>(QDataStream &stream, RWContentsItem &item)
     stream >> item.p_revealed;
     stream >> item.p_structure_element;
     stream >> item.p_structure_text;
+    stream >> item.p_gm_directions;
     // ENUMs can't be read directly
     stream >> style;
     stream >> veracity;

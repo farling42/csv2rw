@@ -65,6 +65,10 @@ public:
     virtual bool canBeGenerated() const;
     DataField &contentsText() { return p_contents_text; }
     const DataField &contentsText() const { return p_contents_text; }
+
+    DataField &gmDirections() { return p_gm_directions; }
+    const DataField &gmDirections() const { return p_gm_directions; }
+
     QString structureText() const { return p_structure_text; }
     void setStructureText(const QString &text) { p_structure_text = text; }
 
@@ -95,6 +99,7 @@ protected:
 
 private:
     DataField p_contents_text;
+    DataField p_gm_directions;
     bool p_revealed;
     QString p_structure_element;
     QString p_structure_text;

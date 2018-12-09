@@ -68,9 +68,9 @@ void RWSection::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
     }
 }
 
-void RWSection::write_text(QXmlStreamWriter *writer, const QString &user_text) const
+void RWSection::write_text(QXmlStreamWriter *writer, const QString &user_text, const QString &gm_dir) const
 {
-    if (!user_text.isEmpty())
+    if (!user_text.isEmpty() || !gm_dir.isEmpty())
     {
         bool bold = false;
 
@@ -80,10 +80,20 @@ void RWSection::write_text(QXmlStreamWriter *writer, const QString &user_text) c
             // no facet_id
             if (snippetStyle() != RWContentsItem::Normal) writer->writeAttribute("style", snip_style_enum.valueToKey(snippetStyle()));
             if (isRevealed()) writer->writeAttribute("is_revealed", "true");
-            QString text;
-            for (auto para: user_text.split("\n\n"))
-                text.append(xmlParagraph(xmlSpan(para, bold)));
-            writer->writeTextElement("contents", text);
+            if (!gm_dir.isEmpty()) writer->writeAttribute("purpose", user_text.isEmpty() ? "Directions_Only" : "Both");
+
+            if (!user_text.isEmpty())
+            {
+                QString text;
+                for (auto para: user_text.split("\n\n"))
+                    text.append(xmlParagraph(xmlSpan(para, bold)));
+                writer->writeTextElement("contents", text);
+            }
+            // Maybe some GM directions
+            if (!gm_dir.isEmpty())
+            {
+                writer->writeTextElement("gm_directions", xmlParagraph(xmlSpan(gm_dir, /*bold*/ false)));
+            }
         }
         writer->writeEndElement(); // snippet
     }
@@ -108,12 +118,17 @@ void RWSection::write_one(QXmlStreamWriter *writer, const QString &attr_name, co
     }
 
     // It may have some text directly on it, not stored in a facet
-    write_text(writer, contentsText().valueString(index));
+    write_text(writer, contentsText().valueString(index), gmDirections().valueString(index));
     int last_column = lastContents().modelColumn();
     if (last_column >= 0)
     {
-        for (int column = contentsText().modelColumn()+1; column <= last_column; column++)
-            write_text(writer, index.sibling(index.row(), column).data().toString());
+        if (gmDirections().modelColumn() >= 0)
+            for (int text_column = contentsText().modelColumn()+1, gm_column = gmDirections().modelColumn(); text_column <= last_column; text_column++, gm_column++)
+                write_text(writer, index.sibling(index.row(), text_column).data().toString(), index.sibling(index.row(), gm_column).data().toString());
+        else
+            for (int text_column = contentsText().modelColumn()+1; text_column <= last_column; text_column++)
+                write_text(writer, index.sibling(index.row(), text_column).data().toString(), QString());
+
     }
 
     writer->writeEndElement();  //section

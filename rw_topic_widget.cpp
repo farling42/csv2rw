@@ -411,10 +411,16 @@ QWidget *RWTopicWidget::add_section(QList<int> sections, QAbstractItemModel *col
     multi_edit->setPlaceholderText("Multiple");
     multi_edit->setToolTip("Leave this blank, unless you want multiple content snippets in which case set it to the LAST column containing the contents");
 
+    // Maybe some GM-Only directions are needed?
+    FieldLineEdit *gmdir = new FieldLineEdit(section->gmDirections());
+    gmdir->setPlaceholderText("GM-Only Text");
+    gmdir->setToolTip("This information will appear as GM-only information");
+
     QHBoxLayout *textlayout = new QHBoxLayout;
     textlayout->addWidget(reveal, 0);
     textlayout->addWidget(edit, 1);
     textlayout->addWidget(multi_edit, 0);
+    textlayout->addWidget(gmdir, 0);
     textlayout->addWidget(create_snippet_options(section));
     layout->addLayout(textlayout);
 
@@ -613,6 +619,10 @@ QWidget *RWTopicWidget::add_snippet(QAbstractItemModel *columns, RWSnippet *snip
         }
     }
 
+    // Maybe some GM-Only directions are needed?
+    FieldLineEdit *gmdir = new FieldLineEdit(snippet->gmDirections());
+    gmdir->setPlaceholderText("GM-Only Text");
+
     // Finally some selectable options for this snippet
     QWidget *options_button = create_snippet_options(snippet);
 
@@ -629,6 +639,7 @@ QWidget *RWTopicWidget::add_snippet(QAbstractItemModel *columns, RWSnippet *snip
     if (combo) boxl->addWidget(combo);
     if (number) boxl->addWidget(number);
     if (edit_widget) boxl->addWidget(edit_widget);
+    if (gmdir) boxl->addWidget(gmdir);
     if (options_button) boxl->addWidget(options_button);
 
     // And the actual widget to contain the row's layout

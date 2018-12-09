@@ -86,7 +86,15 @@ void RWSnippet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
         if (snippetStyle() != RWContentsItem::Normal) writer->writeAttribute("style", snip_style_enum.valueToKey(snippetStyle()));
         if (snippetPurpose() != RWContentsItem::Story_Only) writer->writeAttribute("purpose", snip_purpose_enum.valueToKey(snippetPurpose()));
         if (isRevealed()) writer->writeAttribute("is_revealed", "true");
-        if (!gm_dir.isEmpty()) writer->writeAttribute("purpose", user_text.isEmpty() ? "Directions_Only" : "Both");
+
+        if (!gm_dir.isEmpty())
+        {
+            RWFacet::SnippetType ft = facet->snippetType();
+            writer->writeAttribute("purpose",
+                                   ((ft == RWFacet::Multi_Line || ft == RWFacet::Labeled_Text ||
+                                     ft == RWFacet::Tag_Standard ||
+                                     ft == RWFacet::Numeric) && user_text.isEmpty() && p_tags.valueString(index).isEmpty()) ? "Directions_Only" : "Both");
+        }
 
 #if 0
         QString label_text = p_label_text.valueString(index);
@@ -198,7 +206,7 @@ void RWSnippet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
         // Maybe some GM directions
         if (!gm_dir.isEmpty())
         {
-            writer->writeTextElement("gm_directions", xmlParagraph(xmlSpan(user_text, /*bold*/ false)));
+            writer->writeTextElement("gm_directions", xmlParagraph(xmlSpan(gm_dir, /*bold*/ false)));
         }
 
         // Maybe one or more TAG_ASSIGN (to be entered AFTER the contents/annotation)
@@ -353,7 +361,6 @@ QDataStream &operator<<(QDataStream &stream, const RWSnippet &snippet)
     stream << *dynamic_cast<const RWContentsItem*>(&snippet);
     // write this class items
     stream << snippet.p_tags;
-    stream << snippet.p_gm_directions;
     stream << snippet.p_label_text;
     stream << snippet.p_filename;
     stream << snippet.p_start_date;
@@ -369,7 +376,6 @@ QDataStream &operator>>(QDataStream &stream, RWSnippet &snippet)
     stream >> *dynamic_cast<RWContentsItem*>(&snippet);
     // read this class items
     stream >> snippet.p_tags;
-    stream >> snippet.p_gm_directions;
     stream >> snippet.p_label_text;
     stream >> snippet.p_filename;
     stream >> snippet.p_start_date;

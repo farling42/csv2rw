@@ -31,11 +31,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "rw_snippet.h"
 
 static QMetaEnum snip_type_enum  = QMetaEnum::fromType<RWFacet::SnippetType>();
-static QMetaEnum snip_veracity_enum = QMetaEnum::fromType<RWContentsItem::SnippetVeracity>();
-static QMetaEnum snip_style_enum = QMetaEnum::fromType<RWContentsItem::SnippetStyle>();
-static QMetaEnum snip_purpose_enum = QMetaEnum::fromType<RWContentsItem::SnippetPurpose>();
-
-const int NAME_TYPE_LENGTH = 50;
 
 RWFacet::RWFacet(QXmlStreamReader *stream, QObject *parent) :
     RWStructureItem(stream, parent),
