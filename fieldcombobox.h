@@ -33,9 +33,11 @@ public Q_SLOTS:
     void setIndexString(const QString&);
 
 protected:
-    virtual void dragEnterEvent(QDragEnterEvent *);
-    virtual void dropEvent(QDropEvent *e);
-    virtual void mousePressEvent(QMouseEvent *event);
+    virtual void dragEnterEvent(QDragEnterEvent *) override;
+    virtual void dropEvent(QDropEvent *e) override;
+    virtual void mousePressEvent(QMouseEvent *event) override;
+    virtual void dragMoveEvent(QDragMoveEvent *event) override;
+
 private slots:
     void text_changed(const QString &value);
 private:

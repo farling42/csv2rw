@@ -37,7 +37,7 @@ public:
     ~FileDetails();
 
 protected:
-    virtual void showEvent(QShowEvent *event);
+    virtual void showEvent(QShowEvent *event) override;
 
 private slots:
     void on_fileDetails_accepted();

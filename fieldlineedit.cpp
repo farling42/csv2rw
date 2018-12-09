@@ -37,36 +37,54 @@ FieldLineEdit::FieldLineEdit(DataField &datafield, QWidget *parent) :
 
 void FieldLineEdit::dragEnterEvent(QDragEnterEvent *event)
 {
-    switch (p_mode)
+    if (p_mode == Mode_Fixed)
     {
-    case Mode_Fixed:
         QLineEdit::dragEnterEvent(event);
-        break;
-
-    case Mode_Empty:
-    case Mode_Index:
-        event->acceptProposedAction();
-        break;
     }
+    else
+    {
+        // Field is empty or contains a dropped index, so drop is enabled
+        if (event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist"))
+            event->acceptProposedAction();
+        else
+            event->ignore();
+    }
+}
+
+void FieldLineEdit::dragMoveEvent(QDragMoveEvent *event)
+{
+    if (p_mode == Mode_Fixed)
+        QLineEdit::dragMoveEvent(event);
+    else
+        event->acceptProposedAction();
 }
 
 void FieldLineEdit::dropEvent(QDropEvent *event)
 {
-    QByteArray encoded(event->mimeData()->data("application/x-qabstractitemmodeldatalist"));
-    QDataStream stream(&encoded, QIODevice::ReadOnly);
-    while (!stream.atEnd())
+    if (p_mode == Mode_Fixed)
     {
-        int row, col;
-        QMap<int,QVariant> map;
-        stream >> row >> col >> map;
-        if (map.contains(Qt::DisplayRole))
+        // The field contains fixed text, so use normal text copy
+        QLineEdit::dropEvent(event);
+    }
+    else if (event->mimeData()->hasFormat("application/x-qabstractitemmodeldatalist"))
+    {
+        QByteArray encoded(event->mimeData()->data("application/x-qabstractitemmodeldatalist"));
+        QDataStream stream(&encoded, QIODevice::ReadOnly);
+        while (!stream.atEnd())
         {
-            p_data.setModelColumn(row);
-            setText(map.value(Qt::DisplayRole).toString());
-            setMode(Mode_Index);
-            //qDebug() << "dropEvent for row" << row << ", col" << col << ":=" << text();
-            // Drag from list of column names, so transpose row number to equate to column number
+            int row, col;
+            QMap<int,QVariant> map;
+            stream >> row >> col >> map;
+            if (map.contains(Qt::DisplayRole))
+            {
+                p_data.setModelColumn(row);
+                setText(map.value(Qt::DisplayRole).toString());
+                setMode(Mode_Index);
+                //qDebug() << "dropEvent for row" << row << ", col" << col << ":=" << text();
+                // Drag from list of column names, so transpose row number to equate to column number
+            }
         }
+        event->acceptProposedAction();
     }
 }
 

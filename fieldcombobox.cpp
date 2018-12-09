@@ -64,6 +64,12 @@ void FieldComboBox::dragEnterEvent(QDragEnterEvent *event)
     }
 }
 
+void FieldComboBox::dragMoveEvent(QDragMoveEvent *event)
+{
+    event->acceptProposedAction();
+}
+
+
 void FieldComboBox::dropEvent(QDropEvent *event)
 {
     QByteArray encoded(event->mimeData()->data("application/x-qabstractitemmodeldatalist"));

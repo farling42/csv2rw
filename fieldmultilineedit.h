@@ -29,9 +29,9 @@ public:
     FieldMultiLineEdit(DataField &datafield, QWidget *parent = nullptr);
 
 protected:
-    virtual void mousePressEvent(QMouseEvent *event);
-    virtual bool canInsertFromMimeData(const QMimeData *source) const;
-    virtual void insertFromMimeData(const QMimeData *source);
+    virtual void mousePressEvent(QMouseEvent *event) override;
+    virtual bool canInsertFromMimeData(const QMimeData *source) const override;
+    virtual void insertFromMimeData(const QMimeData *source) override;
 
 private slots:
     void text_changed();
