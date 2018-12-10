@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-VERSION = 1.49
+VERSION = 2.0
 
 # Found at https://github.com/dbzhang800/QtXlsxWriter
 include (3rdparty/QtXlsxWriter/src/xlsx/qtxlsx.pri)
@@ -97,6 +97,7 @@ CONFIG += macdeployqt
 win32 {
 WINDEPLOYQT_OPTIONS = -verbose 3
 CONFIG += windeployqt
+}
 
 COMPANY = com.amusingtime.csv2rw
 
@@ -110,7 +111,6 @@ DESTDIR = install
 #     Command   = "C:\Program Files (x86)\NSIS\makeNSIS.exe"
 #     Arguments = "/nocd %{CurrentProject:NativePath}\config.nsi"
 #     Working Directory = "%{buildDir}"
-}
 
 DISTFILES += \
     LICENSE.txt \
