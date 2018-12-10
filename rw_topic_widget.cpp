@@ -411,10 +411,10 @@ QWidget *RWTopicWidget::add_section(QList<int> sections, QAbstractItemModel *col
     multi_edit->setPlaceholderText("Multiple");
     multi_edit->setToolTip("Leave this blank, unless you want multiple content snippets in which case set it to the LAST column containing the contents");
 
-    // Maybe some GM-Only directions are needed?
+    // Maybe some GM Directions are needed?
     FieldLineEdit *gmdir = new FieldLineEdit(section->gmDirections());
-    gmdir->setPlaceholderText("GM-Only Text");
-    gmdir->setToolTip("This information will appear as GM-only information");
+    gmdir->setPlaceholderText("GM Directions");
+    gmdir->setToolTip("This information will appear as GM Directions");
 
     QHBoxLayout *textlayout = new QHBoxLayout;
     textlayout->addWidget(reveal, 0);
@@ -619,9 +619,9 @@ QWidget *RWTopicWidget::add_snippet(QAbstractItemModel *columns, RWSnippet *snip
         }
     }
 
-    // Maybe some GM-Only directions are needed?
+    // Maybe some GM Directions are needed?
     FieldLineEdit *gmdir = new FieldLineEdit(snippet->gmDirections());
-    gmdir->setPlaceholderText("GM-Only Text");
+    gmdir->setPlaceholderText("GM Directions");
 
     // Finally some selectable options for this snippet
     QWidget *options_button = create_snippet_options(snippet);
@@ -631,16 +631,16 @@ QWidget *RWTopicWidget::add_snippet(QAbstractItemModel *columns, RWSnippet *snip
     //
     QHBoxLayout *boxl = new QHBoxLayout;
     boxl->setContentsMargins(0,0,0,0);
-    if (reveal) boxl->addWidget(reveal);
-    if (label) boxl->addWidget(label);
-    if (filename) boxl->addWidget(filename);
-    if (start_date) boxl->addWidget(start_date);
-    if (finish_date) boxl->addWidget(finish_date);
-    if (combo) boxl->addWidget(combo);
-    if (number) boxl->addWidget(number);
-    if (edit_widget) boxl->addWidget(edit_widget);
-    if (gmdir) boxl->addWidget(gmdir);
-    if (options_button) boxl->addWidget(options_button);
+    if (reveal) boxl->addWidget(reveal, 0);
+    if (label) boxl->addWidget(label, 0);
+    if (filename) boxl->addWidget(filename, 0);
+    if (start_date) boxl->addWidget(start_date, 0);
+    if (finish_date) boxl->addWidget(finish_date, 0);
+    if (combo) boxl->addWidget(combo, 0);
+    if (number) boxl->addWidget(number, 0);
+    if (edit_widget) boxl->addWidget(edit_widget, 1);
+    if (gmdir) boxl->addWidget(gmdir, 0);
+    if (options_button) boxl->addWidget(options_button, 0);
 
     // And the actual widget to contain the row's layout
     QWidget *box = new QWidget;
