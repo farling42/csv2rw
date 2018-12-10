@@ -41,6 +41,7 @@ RWAlias::RWAlias(QObject *parent) : QObject(parent),
  */
 void RWAlias::writeAttributes(QXmlStreamWriter *writer, const QModelIndex &index) const
 {
+    Q_UNUSED(index)
     if (p_is_auto_accept) writer->writeAttribute("is_auto_accept", "true");
     if (p_case_matching  != Ignore) writer->writeAttribute("case_matching",   case_matching_enum.valueToKey(p_case_matching));
     if (p_match_priority != Normal) writer->writeAttribute("match_priority", match_priority_enum.valueToKey(p_match_priority));
