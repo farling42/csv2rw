@@ -3,13 +3,13 @@
 
 !include "MUI2.nsh"
 
-!define APPNAME      "CSV to Realm Works Importer"
+!define APPNAME      "Realm Works Importer"
 !define COMPANYNAME  "Amusing Time"
-!define DESCRIPTION  "A tool to convert a CSV file into a Realm Works Import file"
+!define DESCRIPTION  "A tool to help bulk import data into Realm Works"
 
 #define name of installer
 Name "${COMPANYNAME} - ${APPNAME}"
-OutFile "CSV2RW.exe"
+OutFile "RWimporter.exe"
 
 # define installation directory
 InstallDir "$PROGRAMFILES\${COMPANYNAME}\${APPNAME}"
@@ -50,7 +50,7 @@ Section
 
    # create a shortcut named "new shortcut" in the start menu programs directory
    # point the new shortcut at the program uninstaller
-   CreateShortCut "$SMPROGRAMS\Uninstall CSV to Realm Works.lnk" "$INSTDIR\uninstall.exe"
+   CreateShortCut "$SMPROGRAMS\Uninstall Realm Works Importer.lnk" "$INSTDIR\uninstall.exe"
 
    # Put into the "Add/Remove" menu
    WriteRegStr HKLM "${ARP}" "DisplayName"     "${APPNAME}"

@@ -2,7 +2,7 @@
 #define FIELDLINEEDIT_H
 
 /*
-CSV2RW
+RWImporter
 Copyright (C) 2017 Martin Smith
 
 This program is free software: you can redistribute it and/or modify

@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Convert CSV to Realm Works®</string>
+   <string>Realm Works® Importer</string>
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -532,7 +532,7 @@
     </property>
     <addaction name="actionBriefHelp"/>
     <addaction name="separator"/>
-    <addaction name="actionAbout_CSV2RW"/>
+    <addaction name="actionAbout_RWImport"/>
    </widget>
    <widget class="QMenu" name="menuOptions">
     <property name="title">
@@ -584,9 +584,9 @@
     <string>Brief Help</string>
    </property>
   </action>
-  <action name="actionAbout_CSV2RW">
+  <action name="actionAbout_RWImport">
    <property name="text">
-    <string>About CSV2RW</string>
+    <string>About RWImport</string>
    </property>
    <property name="menuRole">
     <enum>QAction::AboutRole</enum>

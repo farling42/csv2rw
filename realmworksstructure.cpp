@@ -1,5 +1,5 @@
 /*
-CSV2RW
+RWImporter
 Copyright (C) 2017 Martin Smith
 
 This program is free software: you can redistribute it and/or modify
@@ -238,7 +238,7 @@ void RealmWorksStructure::writeExportFile(QIODevice *device,
         // Write out the loaded structure
         main_structure->writeToStructure(writer);
 
-        // Process the CSV to write out the entire RWEXPORT file.
+        // Process the source data to write out the entire RWEXPORT file.
         writer->writeStartElement("contents");
 
         // Progress is across all rows of the base model

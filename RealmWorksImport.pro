@@ -87,7 +87,7 @@ FORMS    += mainwindow.ui \
     topickey.ui \
     errordialog.ui
 
-TRANSLATIONS += csv2rw_en.ts
+TRANSLATIONS += rwImporter_en.ts
 
 macx {
 MACDEPLOYQT_OPTIONS = -verbose 3 -dmg
@@ -99,7 +99,7 @@ WINDEPLOYQT_OPTIONS = -verbose 3
 CONFIG += windeployqt
 }
 
-COMPANY = com.amusingtime.csv2rw
+COMPANY = com.amusingtime.rwImporter
 
 DESTDIR = install
 
@@ -115,7 +115,7 @@ DESTDIR = install
 DISTFILES += \
     LICENSE.txt \
     RELEASE_NOTES.txt \
-    csv2rw_en.ts \
+    rwImporter_en.ts \
     ob2rw-xsl1.xslt \
     config.nsi
 

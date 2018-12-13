@@ -1,5 +1,5 @@
 /*
-CSV2RW
+RWImporter
 Copyright (C) 2017 Martin Smith
 
 This program is free software: you can redistribute it and/or modify
@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     QCoreApplication::setOrganizationName("Amusing Time");
     QCoreApplication::setOrganizationDomain("amusingtime.uk");
-    QCoreApplication::setApplicationName("CSV2RW");
+    QCoreApplication::setApplicationName("RWImporter");
 
     MainWindow w;
     w.show();

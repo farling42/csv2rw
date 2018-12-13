@@ -1,5 +1,5 @@
 /*
-CSV2RW
+RWImporter
 Copyright (C) 2017 Martin Smith
 
 This program is free software: you can redistribute it and/or modify
@@ -104,7 +104,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->actionSave_AS->setShortcut(QKeySequence::SaveAs);
     ui->actionQuit->setShortcut(QKeySequence::Quit);
     //ui->actionBriefHelp->setShortcut();
-    //ui->actionAbout_CSV2RW->setShortcut();
+    //ui->actionAbout_RWImport->setShortcut();
 
     // Connect menu options
     connect(ui->actionLoad, &QAction::triggered, this, &MainWindow::loadProject);
@@ -112,7 +112,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionSave_AS, &QAction::triggered, this, &MainWindow::saveProjectAs);
     connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::fileQuit);
     connect(ui->actionBriefHelp, &QAction::triggered, this, &MainWindow::showBriefHelp);
-    connect(ui->actionAbout_CSV2RW, &QAction::triggered, this, &MainWindow::showAbout);
+    connect(ui->actionAbout_RWImport, &QAction::triggered, this, &MainWindow::showAbout);
 }
 
 MainWindow::~MainWindow()
@@ -210,7 +210,7 @@ void MainWindow::loadProject()
     QSettings settings;
 
     // Offer a file open dialog
-    QString filename = QFileDialog::getOpenFileName(this, tr("CSV2RW Project File"), /*dir*/ settings.value(CSV_PROJECT_PARAM).toString(), /*template*/ tr("CSV2RW Project Files (*.csv2rw)"));
+    QString filename = QFileDialog::getOpenFileName(this, tr("RWImport Project File"), /*dir*/ settings.value(CSV_PROJECT_PARAM).toString(), /*template*/ tr("RWImport Project Files (*.csv2rw)"));
     if (filename.isEmpty()) return;
     // read the contents of the selected file
     if (load_project(filename))
@@ -237,9 +237,9 @@ void MainWindow::saveProjectAs()
 
     // Open a file open dialog
     QString filename = QFileDialog::getSaveFileName(this,
-                                                    /*caption*/ tr("CSV2RW Project File"),
+                                                    /*caption*/ tr("RWImport Project File"),
                                                     /*dir*/ settings.value(CSV_PROJECT_PARAM).toString() + '/' + rw_structure.details_name + ".csv2rw",
-                                                    /*filter*/ tr("CSV2RW Project Files (*.csv2rw)"));
+                                                    /*filter*/ tr("RWImport Project Files (*.csv2rw)"));
     if (filename.isEmpty()) return;
     if (save_project(filename))
     {
@@ -442,15 +442,6 @@ void MainWindow::on_generateButton_clicked()
             ui->generateButton->setEnabled(true);
             return;
         }
-#if 0
-        if (used_categories.contains(widget->category()))
-        {
-            QMessageBox::critical(this, tr("Bad Parent Category"),
-                                  tr("The parent should be a different category to the CSV topic and other parents."));
-            ui->generateButton->setEnabled(true);
-            return;
-        }
-#endif
         used_topics.insert(widget->topic());
     }
 
@@ -540,7 +531,7 @@ void MainWindow::parent_topics_changed()
 
 void MainWindow::showAbout()
 {
-    static QString about_text = tr("CSV to Realm Works®\n\n"
+    static QString about_text = tr("Realm Works® Importer\n\n"
                                    "Copyright (C) 2017-2018 Martin Smith\n\n"
                                    "Version %1").arg(qApp->applicationVersion());
     QMessageBox::information(this, tr("About"), about_text);

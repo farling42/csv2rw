@@ -1,5 +1,5 @@
 /*
-CSV2RW
+RWImporter
 Copyright (C) 2017 Martin Smith
 
 This program is free software: you can redistribute it and/or modify
@@ -199,7 +199,6 @@ void RWSnippet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
 
             case RWFacet::Tag_Multi_Domain:
                 qFatal("RWSnippet::writeToContents: invalid snippet type: %d", facet->snippetType());
-                break;
             }
         }
 

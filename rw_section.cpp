@@ -1,5 +1,5 @@
 /*
-CSV2RW
+RWImporter
 Copyright (C) 2017 Martin Smith
 
 This program is free software: you can redistribute it and/or modify
@@ -123,12 +123,11 @@ void RWSection::write_one(QXmlStreamWriter *writer, const QString &attr_name, co
     if (last_column >= 0)
     {
         if (gmDirections().modelColumn() >= 0)
-            for (int text_column = contentsText().modelColumn()+1, gm_column = gmDirections().modelColumn(); text_column <= last_column; text_column++, gm_column++)
+            for (int text_column = contentsText().modelColumn()+1, gm_column = gmDirections().modelColumn()+1; text_column <= last_column; text_column++, gm_column++)
                 write_text(writer, index.sibling(index.row(), text_column).data().toString(), index.sibling(index.row(), gm_column).data().toString());
         else
             for (int text_column = contentsText().modelColumn()+1; text_column <= last_column; text_column++)
                 write_text(writer, index.sibling(index.row(), text_column).data().toString(), QString());
-
     }
 
     writer->writeEndElement();  //section
