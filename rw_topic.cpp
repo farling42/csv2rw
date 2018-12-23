@@ -115,9 +115,21 @@ void RWTopic::writeStartToContents(QXmlStreamWriter *writer, const QModelIndex &
         // but only generate aliases for those entries that have a non-empty string.
         // This allows a user to specify several different aliases in the GUI each using a different set of attributes,
         // and then use a different CSV column for each particular alias.
+        // (Ensure that all aliases are different, and also different from the topic's main title
+        QStringList known_names(public_name);
         for (auto alias: aliases)
         {
-            alias->writeToContents(writer, index);
+            QString name = alias->namefield().valueString(index);
+            if (name.isEmpty()) continue;
+            if (!known_names.contains(name))
+            {
+                alias->writeToContents(writer, index);
+                known_names.append(name);
+            }
+            else if (name == public_name)
+                ErrorDialog::theInstance()->addMessage(tr("Can't create alias with same name as topic: '%1'").arg(name));
+            else
+                ErrorDialog::theInstance()->addMessage(tr("Same alias '%1' appears more than once in topic '%2'").arg(name).arg(public_name));
         }
 
         // Children in the following order:
