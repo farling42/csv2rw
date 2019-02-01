@@ -29,6 +29,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QCoreApplication>
 
 #include "datafield.h"
+#include "errordialog.h"
 #include "rw_domain.h"
 #include "rw_facet.h"
 
@@ -38,6 +39,8 @@ static QMetaEnum snip_style_enum = QMetaEnum::fromType<RWContentsItem::SnippetSt
 static QMetaEnum snip_purpose_enum = QMetaEnum::fromType<RWContentsItem::SnippetPurpose>();
 
 const int NAME_TYPE_LENGTH = 50;
+
+#define CONTENTS_TOKEN   "contents"
 
 RWSnippet::RWSnippet(RWFacet *facet, RWContentsItem *parent) :
     RWContentsItem(facet, parent),
@@ -116,6 +119,8 @@ void RWSnippet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
         // Maybe an ANNOTATION or CONTENTS
         if (!user_text.isEmpty() || !asset.isEmpty() || !start_date.isEmpty() || !digits.isEmpty())
         {
+            bool check_annotation = true;
+
             switch (facet->snippetType())
             {
             case RWFacet::Multi_Line:
@@ -124,17 +129,26 @@ void RWSnippet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
                 QString text;
                 for (auto para: user_text.split("\n\n"))
                     text.append(xmlParagraph(xmlSpan(para, bold)));
-                writer->writeTextElement("contents", text);
+                writer->writeTextElement(CONTENTS_TOKEN, text);
+                // No annotation for these two snippet types
+                check_annotation = false;
                 break;
             }
             case RWFacet::Tag_Standard:
             case RWFacet::Hybrid_Tag:
-                writer->writeTextElement("annotation", xmlParagraph(xmlSpan(user_text, bold)));
+                // annotation done later
                 break;
 
             case RWFacet::Numeric:
-                if (!digits.isEmpty()) writer->writeTextElement("contents", digits);
-                if (!user_text.isEmpty()) writer->writeTextElement("annotation", xmlParagraph(xmlSpan(user_text, bold)));
+                if (!digits.isEmpty())
+                {
+                    bool ok;
+                    digits.toFloat(&ok);
+                    if (!ok)
+                        ErrorDialog::theInstance()->addMessage(tr("Non-numeric characters in numeric field: %1").arg(digits));
+                    else
+                        writer->writeTextElement(CONTENTS_TOKEN, digits);
+                }
                 break;
 
                 // There are a lot of snippet types which have an ext_object child (which has an asset child)
@@ -176,11 +190,6 @@ void RWSnippet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
                 //writer->writeAttribute("canonical", start_date);
                 writer->writeAttribute("gregorian", to_gregorian(start_date));
                 writer->writeEndElement();
-                //
-                if (!user_text.isEmpty())
-                {
-                    writer->writeTextElement("annotation", xmlParagraph(xmlSpan(user_text, bold)));
-                }
                 break;
 
             case RWFacet::Date_Range:
@@ -190,15 +199,15 @@ void RWSnippet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
                 //writer->writeAttribute("canonical_end",   finish_date);
                 writer->writeAttribute("gregorian_end",   to_gregorian(finish_date));
                 writer->writeEndElement();
-                //
-                if (!user_text.isEmpty())
-                {
-                    writer->writeTextElement("annotation", xmlParagraph(xmlSpan(user_text, bold)));
-                }
                 break;
 
             case RWFacet::Tag_Multi_Domain:
                 qFatal("RWSnippet::writeToContents: invalid snippet type: %d", facet->snippetType());
+            } /* switch snippet type */
+
+            if (check_annotation && !user_text.isEmpty())
+            {
+                writer->writeTextElement("annotation", xmlParagraph(xmlSpan(user_text, /*bold*/ false)));
             }
         }
 
@@ -256,7 +265,7 @@ void RWSnippet::write_asset(QXmlStreamWriter *writer, const QString &asset) cons
         //writer->writeAttribute("thumbnail_size", info.fileName());
 
         QByteArray contents = file.readAll();
-        writer->writeTextElement("contents", contents.toBase64());
+        writer->writeTextElement(CONTENTS_TOKEN, contents.toBase64());
 
         //writer->writeTextElement("thumbnail", thumbnail.toBase64());
         //writer->writeTextElement("summary", thing.toBase64());
@@ -292,7 +301,7 @@ void RWSnippet::write_asset(QXmlStreamWriter *writer, const QString &asset) cons
             writer->writeAttribute("filename", tempname.right(FILENAME_TYPE_LENGTH));
 
             QByteArray contents = reply->readAll();
-            writer->writeTextElement("contents", contents.toBase64());
+            writer->writeTextElement(CONTENTS_TOKEN, contents.toBase64());
             //writer->writeTextElement("url", filename);
 
             writer->writeEndElement();   // asset
