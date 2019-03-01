@@ -110,27 +110,31 @@ QVariant ExcelXlsxModel::data(const QModelIndex &index, int role) const
         // as rich.toPlainString()
         if (rich.isEmtpy()) return QString();
 
+        // Start with the CELL's format, in case we ever get an invalid format from the RichString fragment.
+        QXlsx::Format format = cell->format();
         QString result;
         for (int i=0; i<rich.fragmentCount(); i++)
         {
-            QXlsx::Format format = rich.fragmentFormat(i);
+            QXlsx::Format newformat = rich.fragmentFormat(i);
+            if (!newformat.isEmpty()) format = newformat;
+
 #if 0
+            qDebug() << index << ", fragment" << i << "=" << rich.fragmentText(i);
             QString prefix = QString("r%1, c%2, f%3").arg(r).arg(c).arg(i+1);
-            qDebug() << prefix << "font  :" << format.font(); // QFont -- TBD
+            qDebug() << prefix << "font  :" << format.fontName(); // QFont -- TBD
+            qDebug() << prefix << "size  :" << format.fontSize(); // int -- TBD
             qDebug() << prefix << "bold  :" << format.fontBold(); // bool
-            qDebug() << prefix << "colour:" << format.fontColor(); // QColor -- TBD
             qDebug() << prefix << "italic:" << format.fontItalic(); // bool
+            qDebug() << prefix << "under :" << format.fontUnderline();  // != FontUnderlineNone
+            qDebug() << prefix << "strike:" << format.fontStrikeOut(); // bool
+
+            qDebug() << prefix << "colour:" << format.fontColor(); // QColor -- TBD
             qDebug() << prefix << "fontNm:" << format.fontName(); // QString -- TBD
             qDebug() << prefix << "outlin:" << format.fontOutline(); // bool -- TBD
             qDebug() << prefix << "script:" << format.fontScript(); // FontScript -- TBD
-            qDebug() << prefix << "size  :" << format.fontSize(); // int -- TBD
-            qDebug() << prefix << "strike:" << format.fontStrikeOut(); // bool
-            qDebug() << prefix << "under :" << format.fontUnderline();
 #endif
             // Encode into the final Realm Works "RWSnippet" class of span.
             // RWContentsItem::xmlSpan will detect this formatting and not apply any itself.
-
-            //qDebug() << index << ", fragment" << i << "=" << rich.fragmentText(i);
 
             QStringList decorations;
             if (format.fontUnderline()) decorations.append("underline");

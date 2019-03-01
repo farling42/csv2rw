@@ -4,9 +4,10 @@
 #
 #-------------------------------------------------
 
-VERSION = 2.2
+VERSION = 2.3
 
 # Found at https://github.com/dbzhang800/QtXlsxWriter
+# (with one tweak to XlsCell to add a richString() method)
 include (3rdparty/QtXlsxWriter/src/xlsx/qtxlsx.pri)
 
 QT       += core gui network xmlpatterns
