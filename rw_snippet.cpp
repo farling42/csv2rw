@@ -29,7 +29,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QCoreApplication>
 
 #include "datafield.h"
-#include "errordialog.h"
 #include "rw_domain.h"
 #include "rw_facet.h"
 
@@ -145,7 +144,7 @@ void RWSnippet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
                     bool ok;
                     digits.toFloat(&ok);
                     if (!ok)
-                        ErrorDialog::theInstance()->addMessage(tr("Non-numeric characters in numeric field: %1").arg(digits));
+                        qWarning() << tr("Non-numeric characters in numeric field: %1").arg(digits);
                     else
                         writer->writeTextElement(CONTENTS_TOKEN, digits);
                 }
@@ -322,8 +321,10 @@ void RWSnippet::write_asset(QXmlStreamWriter *writer, const QString &asset) cons
     }
     else
     {
+#if 1
+        qWarning() << "File/URL does not exist:" + asset;
+#else
         QString message = "File/URL does not exist: " + asset;
-
         static QMessageBox *warning = nullptr;
         if (warning == nullptr)
         {
@@ -332,6 +333,7 @@ void RWSnippet::write_asset(QXmlStreamWriter *writer, const QString &asset) cons
         }
         warning->setText(warning->text() + '\n' + message);
         warning->show();
+#endif
     }
 }
 

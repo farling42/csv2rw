@@ -18,9 +18,35 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include "mainwindow.h"
 #include <QApplication>
+#include <QMessageBox>
+#include "errordialog.h"
+
+static QtMessageHandler orig_handler;
+
+static void message_handler(QtMsgType type, const QMessageLogContext &context, const QString &message)
+{
+    switch (type)
+    {
+    case QtWarningMsg:
+    case QtCriticalMsg:
+        // Display the issue to the user
+        ErrorDialog::theInstance()->addMessage(message);
+        return;
+
+    case QtInfoMsg:
+    case QtFatalMsg:
+    case QtDebugMsg:
+        // Use standard error handler
+        break;
+    }
+    orig_handler(type, context, message);
+}
+
 
 int main(int argc, char *argv[])
 {
+    orig_handler = qInstallMessageHandler(message_handler);
+
     QApplication a(argc, argv);
     QCoreApplication::setOrganizationName("Amusing Time");
     QCoreApplication::setOrganizationDomain("amusingtime.uk");

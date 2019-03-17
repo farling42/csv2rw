@@ -28,7 +28,6 @@ void ErrorDialog::addMessage(const QString &message)
 {
     show();
     ui->listWidget->addItem(message);
-    qDebug() << "ERROR:" << message;
 }
 
 void ErrorDialog::clear()
