@@ -343,6 +343,7 @@ void RWSnippet::write_asset(QXmlStreamWriter *writer, const QString &asset) cons
  */
 void RWSnippet::write_ext_object(QXmlStreamWriter *writer, const QString &exttype, const QString &asset) const
 {
+    if (asset.isEmpty()) return;
     writer->writeStartElement("ext_object");
     writer->writeAttribute("name", QFileInfo(asset).fileName().right(NAME_TYPE_LENGTH));
     writer->writeAttribute("type", exttype);
@@ -352,6 +353,7 @@ void RWSnippet::write_ext_object(QXmlStreamWriter *writer, const QString &exttyp
 
 void RWSnippet::write_smart_image(QXmlStreamWriter *writer, const QString &asset) const
 {
+    if (asset.isEmpty()) return;
     writer->writeStartElement("smart_image");
     writer->writeAttribute("name", QFileInfo(asset).fileName().right(NAME_TYPE_LENGTH));
     write_asset(writer, asset);
