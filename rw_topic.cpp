@@ -175,6 +175,8 @@ QDataStream& operator<<(QDataStream &stream, const RWTopic &topic)
     for (auto elem : topic.findChildren<RWContentsItem*>())
     {
         stream << elem->structure->name();
+        stream << QString(elem->metaObject()->className());
+
         // Use the correct outputter
         if (RWSection *section = qobject_cast<RWSection*>(elem))
             stream << *section;
@@ -198,7 +200,8 @@ QDataStream& operator>>(QDataStream &stream, RWTopic &topic)
     QMap<QString,RWContentsItem*> contents;
     for (auto child: topic.findChildren<RWContentsItem*>())
     {
-        contents.insert(child->structure->name(), child);
+        QString mapname{QString("%1:%2").arg(child->metaObject()->className()).arg(child->structure->name())};
+        contents.insert(mapname, child);
     }
 
     // read base class items
@@ -213,17 +216,18 @@ QDataStream& operator>>(QDataStream &stream, RWTopic &topic)
     // read contents for children
     while (true)
     {
-        QString name;
+        QString name, classname;
         stream >> name;
         if (name == END_MARKER) break;
+        stream >> classname;
 
         // Find the named child
-        RWContentsItem *elem = contents.value(name, nullptr);
-        if (!elem)
+        RWContentsItem* elem = contents.value(classname + ":" + name, nullptr);
+        if (elem == nullptr)
         {
-            qWarning() << "RWTopic>> failed to find RWContentsItem for" << name;
+            qWarning() << "RWTopic>> failed to find RWContentsItem for" << classname + ":" + name;
             stream.setStatus(QDataStream::ReadCorruptData);
-            break;
+            return stream;
         }
 
         // Use correct reader
