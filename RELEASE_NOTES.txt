@@ -1,3 +1,53 @@
+v2.4.2
+This is a bug fix release. It is now possible to save projects that use column 14 from the table, and the saved project includes the parentage that you've set up.
+No projects saved with an earlier version can be loaded into this version.
+
+v2.4.1
+This version is a bug fix release which gets the Save Project action to save data in a format that can be read properly by Load Project.
+
+v2.4
+The internal warnings and critical messages are now reported in an error window - e.g. when a source data cell doesn't match a known value for tag, then this is reported in the error window.
+It is also now possible to configure a field to fill in the annotation for an asset snippet type without requiring you to also configure a field for that actual asset type (e.g. picture or smart image).
+
+v2.3
+When reading an Excel spreadsheet, the default cell formatting is used as a starting point when trying to determine what formatting should be applied to text within each cell.
+
+v2.2
+Annotations will now be produced on all snippet types (except multi-line and labeled text types).
+Numeric fields will now be checked that they contain only characters allowed in numbers.
+
+v2.1
+When generating aliases, the tool now checks that the name of the alias does not match either the topic title or an alias within the same topic.
+A warning is displayed, and the alias is not added to the RWexport file.
+(This prevents a crash of Realm Works during import.)
+
+v2.0
+GM Directions can now be generated from the import data.
+The tool is now a 64-bit tool (and uses the latest Qt 5.12.0).
+The tool has been renamed to RWImporter since it handles more than only CSV files.
+
+v1.49
+This fixes a bug (introduced in 1.45) where a topic was being created more than once under different parents, where the name of parent is a shorter version of another parent.
+
+v1.48
+An error dialog will be displayed if the same ROW of the source data would generate more than one topic in the output file. An output file will still be generated, but Realm Works will fail to import the file.
+A restriction was added when implementing relationships (in 1.46) which meant that each ROW of the source data can only generic one topic in the output file (otherwise it would be impossible to know with which of multiple topics a relationship was being created.)
+
+v1.47
+Remove Minion_To_Master and Offspring_To_Parent relationships, since they are ignored by Realm Works on import.
+Create one relationship for each match between the KEY field and the SEARCH column.
+Add placeholder text to the relationship field boxes.
+
+v1.46
+This version introduces relationships. This allows you to specify a particular column of the table which will contain a value that can be linked to another row of the table.
+(Note: old saved projects will not load into this version.)
+The names of the relationships are currently based on the actual relationship which will be put into the XML file, rather than the "human friendly" names which are used inside Realm Works.
+There are two fields which need to be filled in with a column. The first field identifies which column in the current row provides a search value. The second field identifies the column which will be searched (across the entire dataset) for a matching value - if a row is found, then a relationship will be created to that other topic.
+(Note that if you are using selective parents and don't the other topic doesn't end up in the output file, then RW will generate an error during import.)
+
+v1.45
+Don't try to treat a parent topic title as a regular expression. It will now be treated as a fixed string, so "special" characters can now be used in topic titles (such as parentheses).
+
 v1.44
 All categories are now shown in the category drop-down list (sub-categories were previously being skipped).
 It is now possible to set attributes on the public name of the topic/article (e.g. auto-accept, case-matching, match-priority and show-in-nav-pane).
