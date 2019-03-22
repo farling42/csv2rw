@@ -129,7 +129,7 @@ bool MainWindow::save_project(const QString &filename)
 {
     //qDebug() << "Saving project to" << filename;
     QFile file(filename);
-    if (!file.open(QFile::WriteOnly|QFile::Text)) return false;
+    if (!file.open(QFile::WriteOnly)) return false;
     QDataStream stream(&file);
     stream << ui->csvFilename->text();
     stream << ui->structureFilename->text();
@@ -160,7 +160,7 @@ bool MainWindow::load_project(const QString &filename)
 {
     //qDebug() << "Loading project from" << filename;
     QFile file(filename);
-    if (!file.open(QFile::ReadOnly|QFile::Text)) return false;
+    if (!file.open(QFile::ReadOnly)) return false;
     QDataStream stream(&file);
 
     QString value;

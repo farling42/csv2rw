@@ -269,7 +269,7 @@ QDataStream& operator>>(QDataStream &stream, RWTopic &topic)
     stream >> count;
     while (count--)
     {
-        //RWTopic *parent = new RWTopic;
+        // Create an RWTopic of the appropriate category
         QString category_name;
         stream >> category_name;
 
@@ -282,7 +282,6 @@ QDataStream& operator>>(QDataStream &stream, RWTopic &topic)
                 break;
             }
         }
-        qDebug() << "reading parent" << category_name << ", found" << new_category;
         if (new_category == nullptr) return stream;
         RWTopic *parent = qobject_cast<RWTopic*>(new_category->createContentsTree());
 
