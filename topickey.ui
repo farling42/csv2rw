@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>215</width>
-    <height>81</height>
+    <height>82</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -23,14 +23,14 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QComboBox" name="csvColumn">
+      <widget class="QComboBox" name="dataColumn">
        <property name="sizeAdjustPolicy">
         <enum>QComboBox::AdjustToContents</enum>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="csvValue">
+      <widget class="QComboBox" name="dataValue">
        <property name="sizeAdjustPolicy">
         <enum>QComboBox::AdjustToContents</enum>
        </property>

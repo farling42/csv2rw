@@ -47,7 +47,7 @@ public slots:
     void setSelectedValue(const QString &value);
 
 private slots:
-    void on_csvColumn_currentIndexChanged(int column);
+    void on_dataColumn_currentIndexChanged(int column);
 
 private:
     Ui::TopicKey *ui;

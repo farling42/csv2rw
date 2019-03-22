@@ -116,7 +116,7 @@ void RWTopic::writeStartToContents(QXmlStreamWriter *writer, const QModelIndex &
         // Add alias snippets as the first entry within the topic,
         // but only generate aliases for those entries that have a non-empty string.
         // This allows a user to specify several different aliases in the GUI each using a different set of attributes,
-        // and then use a different CSV column for each particular alias.
+        // and then use a different data column for each particular alias.
         // (Ensure that all aliases are different, and also different from the topic's main title
         QStringList known_names(public_name);
         for (auto alias: aliases)

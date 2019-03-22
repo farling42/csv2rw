@@ -76,9 +76,9 @@ MainWindow::MainWindow(QWidget *parent) :
     // Set up the full CSV view
     proxy = new QSortFilterProxyModel;
     proxy->setSourceModel(csv_full_model);
-    ui->csvContentsTableView->setModel(proxy);
+    ui->dataContentsTableView->setModel(proxy);
 #ifdef SHOW_FORMATTING
-    ui->csvContentsTableView->setItemDelegate(new HtmlItemDelegate);
+    ui->dataContentsTableView->setItemDelegate(new HtmlItemDelegate);
 #endif
     // Set up the list of headers
     header_model = new QStringListModel;
@@ -87,7 +87,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->addRelationship->setEnabled(false);
 
     // Set some icons that can't be set in Qt Creator
-    ui->loadCsvButton->setIcon(style()->standardIcon(QStyle::SP_FileDialogStart));
+    ui->loadDataButton->setIcon(style()->standardIcon(QStyle::SP_FileDialogStart));
     ui->loadStructureButton->setIcon(style()->standardIcon(QStyle::SP_FileDialogStart));
     ui->generateButton->setIcon(style()->standardIcon(QStyle::SP_DialogSaveButton));
     ui->generateButton->setEnabled(false);
@@ -131,7 +131,7 @@ bool MainWindow::save_project(const QString &filename)
     QFile file(filename);
     if (!file.open(QFile::WriteOnly)) return false;
     QDataStream stream(&file);
-    stream << ui->csvFilename->text();
+    stream << ui->dataFilename->text();
     stream << ui->structureFilename->text();
     stream << ui->categoryComboBox->currentText();  // name of topic currently on display
     rw_structure.saveState(stream);
@@ -168,7 +168,7 @@ bool MainWindow::load_project(const QString &filename)
 
     // Read parameters in order
     stream >> value;
-    if (!load_csv(value)) return false;
+    if (!load_data(value)) return false;
     stream >> value;
     if (!load_structure(value)) return false;
     stream >> current_topic;
@@ -254,7 +254,7 @@ void MainWindow::fileQuit()
     qApp->quit();
 }
 
-bool MainWindow::load_csv(const QString &filename)
+bool MainWindow::load_data(const QString &filename)
 {
     //qDebug() << "MainWindow::load_csv" << filename;
     QSettings settings;
@@ -279,7 +279,7 @@ bool MainWindow::load_csv(const QString &filename)
         excel_full_model = new ExcelXlsxModel(filename, this);
         model = excel_full_model;
     }
-    ui->csvFilename->setText(filename);
+    ui->dataFilename->setText(filename);
 
     // Remember the CSV directory
     settings.setValue(CSV_DIRECTORY_PARAM, QFileInfo(filename).absolutePath());
@@ -303,13 +303,13 @@ bool MainWindow::load_csv(const QString &filename)
     return true;
 }
 
-void MainWindow::on_loadCsvButton_pressed()
+void MainWindow::on_loadDataButton_pressed()
 {
     QSettings settings;
     // Prompt use to select a CSV file
     QString filename = QFileDialog::getOpenFileName(this, tr("CSV File"), /*dir*/ settings.value(CSV_DIRECTORY_PARAM).toString(), /*template*/ tr("CSV Files (*.csv);;Excel Workbook (*.xlsx)"));
     if (filename.isEmpty()) return;
-    load_csv(filename);
+    load_data(filename);
 }
 
 bool MainWindow::load_structure(const QString &filename)

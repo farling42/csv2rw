@@ -34,12 +34,12 @@ TopicKey::TopicKey(QWidget *parent) :
         // Get the list of column names
         QStringList columns;
         int max = model->columnCount();
-        ui->csvColumn->clear();
+        ui->dataColumn->clear();
         columns.append("--All--");
         for (int col=0; col<max; col++)
             columns.append(model->headerData(col, Qt::Horizontal).toString());
-        ui->csvColumn->addItems(columns);
-        ui->csvValue->clear();
+        ui->dataColumn->addItems(columns);
+        ui->dataValue->clear();
     }
 }
 
@@ -55,28 +55,28 @@ void TopicKey::setModel(QAbstractItemModel *the_model)
 
 int TopicKey::selectedColumn() const
 {
-    return ui->csvColumn->currentIndex() - 1;
+    return ui->dataColumn->currentIndex() - 1;
 }
 
 QString TopicKey::selectedValue() const
 {
-    return ui->csvValue->currentText();
+    return ui->dataValue->currentText();
 }
 
 void TopicKey::setSelectedColumn(int column)
 {
-    ui->csvColumn->setCurrentIndex(column+1);
+    ui->dataColumn->setCurrentIndex(column+1);
 }
 
 void TopicKey::setSelectedValue(const QString &value)
 {
-    ui->csvValue->setCurrentText(value);
+    ui->dataValue->setCurrentText(value);
 }
 
-void TopicKey::on_csvColumn_currentIndexChanged(int column)
+void TopicKey::on_dataColumn_currentIndexChanged(int column)
 {
     // populate csvValue with the possible different values from the CSV model
-    ui->csvValue->clear();
+    ui->dataValue->clear();
 
     // Get the unique set of values from the selected column
     if (column == 0)  return;
@@ -88,5 +88,5 @@ void TopicKey::on_csvColumn_currentIndexChanged(int column)
     int max = model->rowCount();
     for (int row=0; row<max; row++)
         values.insert(model->index(row,column).data().toString());
-    ui->csvValue->addItems(values.toList());
+    ui->dataValue->addItems(values.toList());
 }

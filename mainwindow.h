@@ -50,7 +50,7 @@ public Q_SLOTS:
     void saveProject();
     void saveProjectAs();
     void fileQuit();
-    void on_loadCsvButton_pressed();
+    void on_loadDataButton_pressed();
     void on_loadStructureButton_pressed();
     void on_categoryComboBox_currentIndexChanged(const QString&);
 
@@ -84,7 +84,7 @@ private:
     bool save_project(const QString &filename);
     void set_project_filename(const QString &filename);
     bool load_structure(const QString &filename);
-    bool load_csv(const QString &filename);
+    bool load_data(const QString &filename);
     void set_current_topic(const QString &selection);
 };
 
