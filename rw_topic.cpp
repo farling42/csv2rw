@@ -24,6 +24,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "rw_partition.h"
 #include "rw_relationship.h"
 #include "errordialog.h"
+#include "realmworksstructure.h"
+
 #include <QXmlStreamWriter>
 #include <QMetaEnum>
 #include <QModelIndex>
@@ -190,6 +192,20 @@ QDataStream& operator<<(QDataStream &stream, const RWTopic &topic)
     stream << topic.relationships.count();
     for (auto relationship: topic.relationships)
         stream << *relationship;
+
+    // write parents (they won't have children!)
+    stream << topic.parents.count();
+    for (auto parent : topic.parents)
+    {
+        stream << parent->structure->name();
+        stream << *dynamic_cast<const RWContentsItem*>(parent);
+        // write this class items
+        stream << parent->p_public_name.namefield();
+        stream << parent->p_prefix;
+        stream << parent->p_suffix;
+        stream << parent->p_key_column;
+        stream << parent->p_key_value;
+    }
     return stream;
 }
 
@@ -247,6 +263,37 @@ QDataStream& operator>>(QDataStream &stream, RWTopic &topic)
         RWRelationship *relationship = new RWRelationship;
         stream >> *relationship;
         topic.relationships.append(relationship);
+    }
+
+    // read parents (they won't have children!)
+    stream >> count;
+    while (count--)
+    {
+        //RWTopic *parent = new RWTopic;
+        QString category_name;
+        stream >> category_name;
+
+        RWCategory *new_category = nullptr;
+        for (auto category: RealmWorksStructure::theInstance()->categories)
+        {
+            if (category->name() == category_name)
+            {
+                new_category = category;
+                break;
+            }
+        }
+        qDebug() << "reading parent" << category_name << ", found" << new_category;
+        if (new_category == nullptr) return stream;
+        RWTopic *parent = qobject_cast<RWTopic*>(new_category->createContentsTree());
+
+        stream >> *dynamic_cast<RWContentsItem*>(parent);
+        // read this class items
+        stream >> parent->p_public_name.namefield();
+        stream >> parent->p_prefix;
+        stream >> parent->p_suffix;
+        stream >> parent->p_key_column;
+        stream >> parent->p_key_value;
+        topic.parents.append(parent);
     }
     return stream;
 }

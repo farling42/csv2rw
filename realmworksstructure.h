@@ -36,7 +36,7 @@ class QDataStream;
 class RealmWorksStructure
 {
 public:
-    RealmWorksStructure() {}
+    RealmWorksStructure();
 
 public Q_SLOTS:
     void loadFile(QIODevice*);
@@ -46,6 +46,8 @@ public Q_SLOTS:
 
     void saveState(QDataStream&);
     void loadState(QDataStream&);
+
+    static RealmWorksStructure *theInstance();
 
     int format_version;
     int game_system_id;

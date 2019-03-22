@@ -43,6 +43,18 @@ static void dump_tree(int indent, RWStructureItem *parent)
 }
 #endif
 
+static RealmWorksStructure *the_instance = nullptr;
+
+RealmWorksStructure::RealmWorksStructure()
+{
+    the_instance = this;
+}
+
+RealmWorksStructure *RealmWorksStructure::theInstance()
+{
+    return the_instance;
+}
+
 /**
  * @brief RealmWorksStructure::loadFile
  * @param file
