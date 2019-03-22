@@ -80,7 +80,7 @@ void RWSnippet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
         const QString gm_dir    = gmDirections().valueString(index);
         const QString asset     = filename().valueString(index);
         const QString finish_date = finishDate().valueString(index);
-        const QString digits = number().valueString(index);
+        QString digits = number().valueString(index);
 
         if (!structure->id().isEmpty()) writer->writeAttribute("facet_id", structure->id());
         writer->writeAttribute("type", snip_type_enum.valueToKey(facet->snippetType()));
@@ -142,11 +142,27 @@ void RWSnippet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
                 if (!digits.isEmpty())
                 {
                     bool ok;
+#if 1
                     digits.toFloat(&ok);
                     if (!ok)
                         qWarning() << tr("Non-numeric characters in numeric field: %1").arg(digits);
                     else
                         writer->writeTextElement(CONTENTS_TOKEN, digits);
+#else
+                    const QLocale &locale = QLocale::system();
+                    locale.toFloat(digits, &ok);
+                    if (!ok)
+                        qWarning() << tr("Non-numeric characters in numeric field: %1").arg(digits);
+                    else
+                    {
+                        // Handle locale details:
+                        // Remove occurrences of the group character;
+                        // Replace the locale's decimal point with the ISO '.' character
+                        digits.remove(locale.groupSeparator());
+                        digits.replace(locale.decimalPoint(),'.');
+                        writer->writeTextElement(CONTENTS_TOKEN, digits);
+                    }
+#endif
                 }
                 break;
 
