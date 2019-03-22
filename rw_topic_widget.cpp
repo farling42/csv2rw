@@ -83,7 +83,7 @@ RWTopicWidget::RWTopicWidget(RWTopic *topic, QAbstractItemModel *columns, bool i
     QPushButton   *addName = new QPushButton("+Name");
 
     addName->setToolTip("Adds a True Name/Other Name\n"
-                        "Any name whose CSV cell is empty will not be created in RealmWorks.\n"
+                        "Any name whose data cell is empty will not be created in RealmWorks.\n"
                         "This allows different sets of attributes to set for different alternative names.");
 
     // Should the category be marked as revealed
@@ -243,7 +243,7 @@ void RWTopicWidget::set_key_tooltip()
     if (p_key == nullptr) return;
 
     if (p_topic->keyColumn() < 0)
-        p_key->setToolTip("Choose a subset of CSV rows.\nChoose which rows of the table will be used to create one of these topics");
+        p_key->setToolTip("Choose a subset of data rows.\nChoose which rows of the table will be used to create one of these topics");
     else
         p_key->setToolTip(QString("This topic will be created for rows where:\n%1 = '%2'").arg(p_columns->index(p_topic->keyColumn(), 0).data().toString()).arg(p_topic->keyValue()));
 }
@@ -333,11 +333,11 @@ QWidget *RWTopicWidget::add_section(QList<int> sections, QAbstractItemModel *col
     FieldLineEdit *second_multiple = new FieldLineEdit(section->secondMultiple());
     FieldLineEdit *last_multiple   = new FieldLineEdit(section->lastMultiple());
     first_multiple->setPlaceholderText("First Section header");
-    first_multiple->setToolTip("Select the CSV column to use for the first heading");
+    first_multiple->setToolTip("Select the data column to use for the first heading");
     second_multiple->setPlaceholderText("Second Section header");
-    second_multiple->setToolTip("If defined, sets the CSV column for the second heading when creating multiple sections");
+    second_multiple->setToolTip("If defined, sets the data column for the second heading when creating multiple sections");
     last_multiple->setPlaceholderText("Last Section header");
-    last_multiple->setToolTip("If defined, sets the last CSV column to be used when creating multiple sections");
+    last_multiple->setToolTip("If defined, sets the last data column to be used when creating multiple sections");
     if (section->firstMultiple().modelColumn() >= 0)
         first_multiple->setText(column_name(columns, section->firstMultiple().modelColumn()));
     if (section->secondMultiple().modelColumn() >= 0)

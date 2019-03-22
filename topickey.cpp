@@ -75,7 +75,7 @@ void TopicKey::setSelectedValue(const QString &value)
 
 void TopicKey::on_dataColumn_currentIndexChanged(int column)
 {
-    // populate csvValue with the possible different values from the CSV model
+    // populate dataValue with the possible different values from the data model
     ui->dataValue->clear();
 
     // Get the unique set of values from the selected column

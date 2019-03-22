@@ -45,8 +45,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "rw_relationship.h"
 #include "rw_relationship_widget.h"
 
-static const QString CSV_PROJECT_PARAM("csvProjectDirectory");
-static const QString CSV_DIRECTORY_PARAM("csvDirectory");
+static const QString PROJECT_DIRECTORY_PARAM("csvProjectDirectory");
+static const QString DATA_DIRECTORY_PARAM("csvDirectory");
 static const QString STRUCTURE_DIRECTORY_PARAM("structureDirectory");
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -73,7 +73,7 @@ MainWindow::MainWindow(QWidget *parent) :
     else if (sep == ';')
         ui->actionUse_Semicolon->setChecked(true);
 
-    // Set up the full CSV view
+    // Set up the full data view
     proxy = new QSortFilterProxyModel;
     proxy->setSourceModel(csv_full_model);
     ui->dataContentsTableView->setModel(proxy);
@@ -210,13 +210,13 @@ void MainWindow::loadProject()
     QSettings settings;
 
     // Offer a file open dialog
-    QString filename = QFileDialog::getOpenFileName(this, tr("RWImport Project File"), /*dir*/ settings.value(CSV_PROJECT_PARAM).toString(), /*template*/ tr("RWImport Project Files (*.csv2rw)"));
+    QString filename = QFileDialog::getOpenFileName(this, tr("RWImport Project File"), /*dir*/ settings.value(PROJECT_DIRECTORY_PARAM).toString(), /*template*/ tr("RWImport Project Files (*.csv2rw)"));
     if (filename.isEmpty()) return;
     // read the contents of the selected file
     if (load_project(filename))
     {
         set_project_filename(filename);
-        settings.setValue(CSV_PROJECT_PARAM, QFileInfo(filename).absolutePath());
+        settings.setValue(PROJECT_DIRECTORY_PARAM, QFileInfo(filename).absolutePath());
     }
 }
 
@@ -238,13 +238,13 @@ void MainWindow::saveProjectAs()
     // Open a file open dialog
     QString filename = QFileDialog::getSaveFileName(this,
                                                     /*caption*/ tr("RWImport Project File"),
-                                                    /*dir*/ settings.value(CSV_PROJECT_PARAM).toString() + '/' + rw_structure.details_name + ".csv2rw",
+                                                    /*dir*/ settings.value(PROJECT_DIRECTORY_PARAM).toString() + '/' + rw_structure.details_name + ".csv2rw",
                                                     /*filter*/ tr("RWImport Project Files (*.csv2rw)"));
     if (filename.isEmpty()) return;
     if (save_project(filename))
     {
         set_project_filename(filename);
-        settings.setValue(CSV_PROJECT_PARAM, QFileInfo(filename).absolutePath());
+        settings.setValue(PROJECT_DIRECTORY_PARAM, QFileInfo(filename).absolutePath());
     }
 }
 
@@ -256,7 +256,7 @@ void MainWindow::fileQuit()
 
 bool MainWindow::load_data(const QString &filename)
 {
-    //qDebug() << "MainWindow::load_csv" << filename;
+    //qDebug() << "MainWindow::load_data" << filename;
     QSettings settings;
 
     QAbstractItemModel *model;
@@ -281,10 +281,10 @@ bool MainWindow::load_data(const QString &filename)
     }
     ui->dataFilename->setText(filename);
 
-    // Remember the CSV directory
-    settings.setValue(CSV_DIRECTORY_PARAM, QFileInfo(filename).absolutePath());
+    // Remember the data directory
+    settings.setValue(DATA_DIRECTORY_PARAM, QFileInfo(filename).absolutePath());
 
-    // Switch to the CSV directory, in case we need to load images.
+    // Switch to the data directory, in case we need to load images.
     QDir::setCurrent(QFileInfo(filename).absolutePath());
 
     // Put headers into the header model
@@ -295,7 +295,7 @@ bool MainWindow::load_data(const QString &filename)
     }
     header_model->setStringList(headers);
 
-    //qDebug() << "Model size: " << csv_full_model->rowCount() << "rows and" << csv_full_model->columnCount() << "columns";
+    //qDebug() << "Model size: " << model->rowCount() << "rows and" << model->columnCount() << "columns";
     ui->generateButton->setEnabled(rw_structure.categories.size() > 0);
     TopicKey::setModel(model);
     proxy->setSourceModel(model);
@@ -306,8 +306,8 @@ bool MainWindow::load_data(const QString &filename)
 void MainWindow::on_loadDataButton_pressed()
 {
     QSettings settings;
-    // Prompt use to select a CSV file
-    QString filename = QFileDialog::getOpenFileName(this, tr("CSV File"), /*dir*/ settings.value(CSV_DIRECTORY_PARAM).toString(), /*template*/ tr("CSV Files (*.csv);;Excel Workbook (*.xlsx)"));
+    // Prompt use to select a data file
+    QString filename = QFileDialog::getOpenFileName(this, tr("Data File"), /*dir*/ settings.value(DATA_DIRECTORY_PARAM).toString(), /*template*/ tr("CSV Files (*.csv);;Excel Workbook (*.xlsx)"));
     if (filename.isEmpty()) return;
     load_data(filename);
 }
@@ -353,7 +353,7 @@ void MainWindow::on_loadStructureButton_pressed()
 {
     QSettings settings;
 
-    // Prompt use to select a CSV file
+    // Prompt use to select a data file
     QString filename = QFileDialog::getOpenFileName(this, tr("Structure File"), /*dir*/ settings.value(STRUCTURE_DIRECTORY_PARAM).toString(), /*template*/ tr("Realm Works® Structure Files (*.rwstructure)"));
     if (filename.isEmpty()) return;
     load_structure(filename);
@@ -488,11 +488,11 @@ void MainWindow::on_generateButton_clicked()
 
 void MainWindow::showBriefHelp()
 {
-    static QString help_text = tr("There are various steps to converting your CSV data into a Realm Works® import file\n\n"
-            "Step 1: Use the 'Load 'CSV' button to choose the file containing your data in CSV file format. The first line in the file should contain the header for each column.\n\n"
+    static QString help_text = tr("There are various steps to converting your data data into a Realm Works® import file\n\n"
+            "Step 1: Use the 'Load Data' button to choose the file containing your data in data file format. The first line in the file should contain the header for each column.\n\n"
             "Step 2: Use the 'Load Structure' to select the Realm Works structure file containing the structure that you've exported from Realm Works.\n\n"
-            "Step 3: Choose the category/article that you want to have created within Realm Works from your CSV data.\n\n"
-            "(Hint: the bottom panel shows the information that has been loaded from your CSV file, so you can check which fields contain which data.)\n\n"
+            "Step 3: Choose the category/article that you want to have created within Realm Works from your data.\n\n"
+            "(Hint: the bottom panel shows the information that has been loaded from your data file, so you can check which fields contain which data.)\n\n"
             "Step 4: Drag each of the field names from the left panel to the appropriate place within the category/article template in the right panel.\n\n"
             "Step 5: Press the 'Generate' to produce the Realm Works® .rwexport file which you can load into your Realm Works database.")
             ;
