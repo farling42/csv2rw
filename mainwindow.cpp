@@ -29,6 +29,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QSortFilterProxyModel>
 #include <QStringListModel>
 #include <QSettings>
+#include <QCloseEvent>
 #include <rw_topic_widget.h>
 
 #include "rw_topic.h"
@@ -56,7 +57,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
 
     base_window_title = QString("%1 V%2").arg(windowTitle()).arg(qApp->applicationVersion());
-    setWindowTitle(base_window_title);
+    setWindowTitle(base_window_title + "[*]");
 
     csv_full_model = new CsvModel(this);
     QActionGroup *separators = new QActionGroup(this);
@@ -111,9 +112,10 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionLoad, &QAction::triggered, this, &MainWindow::loadProject);
     connect(ui->actionSave, &QAction::triggered, this, &MainWindow::saveProject);
     connect(ui->actionSave_AS, &QAction::triggered, this, &MainWindow::saveProjectAs);
-    connect(ui->actionQuit, &QAction::triggered, this, &MainWindow::fileQuit);
     connect(ui->actionBriefHelp, &QAction::triggered, this, &MainWindow::showBriefHelp);
     connect(ui->actionAbout_RWImport, &QAction::triggered, this, &MainWindow::showAbout);
+
+    connect(&rw_structure, &RealmWorksStructure::modificationDone, [=]{setWindowModified(true);});
 }
 
 MainWindow::~MainWindow()
@@ -124,7 +126,7 @@ MainWindow::~MainWindow()
 void MainWindow::set_project_filename(const QString &filename)
 {
     project_name = filename;
-    setWindowTitle(base_window_title + " : " + filename);
+    setWindowTitle(base_window_title + " : " + filename + "[*]");
 }
 
 bool MainWindow::save_project(const QString &filename)
@@ -155,6 +157,7 @@ bool MainWindow::save_project(const QString &filename)
             stream << *topic;
         }
     }
+    setWindowModified(false);
     return true;
 }
 
@@ -204,6 +207,7 @@ bool MainWindow::load_project(const QString &filename)
     }
     ui->categoryComboBox->setCurrentText(current_topic);
 
+    setWindowModified(false);
     return true;
 }
 
@@ -248,12 +252,6 @@ void MainWindow::saveProjectAs()
         set_project_filename(filename);
         settings.setValue(PROJECT_DIRECTORY_PARAM, QFileInfo(filename).absolutePath());
     }
-}
-
-void MainWindow::fileQuit()
-{
-    // Prompt if we have an unsaved project
-    qApp->quit();
 }
 
 bool MainWindow::load_data(const QString &filename)
@@ -412,6 +410,22 @@ void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selectio
         connect(widget, &RWRelationshipWidget::deleteRequested, [=]() { delete_relationship(widget); });
         relationships.append(widget);
         ui->relationshipWidget->layout()->addWidget(widget);
+    }
+}
+
+void MainWindow::closeEvent(QCloseEvent *event)
+{
+    if (isWindowModified() &&
+            QMessageBox::critical(this,
+                                  /*title*/ tr("Project not Saved"),
+                                  /*text*/ tr("The project has not been saved.\nAre you sure that you want to quit?"),
+                                  /*buttons*/ QMessageBox::Yes|QMessageBox::No) != QMessageBox::Yes)
+    {
+        event->ignore();
+    }
+    else
+    {
+        event->accept();
     }
 }
 

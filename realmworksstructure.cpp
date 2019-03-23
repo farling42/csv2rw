@@ -45,7 +45,7 @@ static void dump_tree(int indent, RWStructureItem *parent)
 
 static RealmWorksStructure *the_instance = nullptr;
 
-RealmWorksStructure::RealmWorksStructure()
+RealmWorksStructure::RealmWorksStructure(QObject *parent) : QObject(parent)
 {
     the_instance = this;
 }

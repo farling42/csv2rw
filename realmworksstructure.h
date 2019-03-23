@@ -20,7 +20,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include <QObject>
-#include <QFile>
+#include <QDataStream>
 #include <QXmlStreamReader>
 #include <QAbstractItemModel>
 
@@ -33,10 +33,12 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 class QProgressDialog;
 class QDataStream;
 
-class RealmWorksStructure
+class RealmWorksStructure : public QObject
 {
+    Q_OBJECT
+
 public:
-    RealmWorksStructure();
+    explicit RealmWorksStructure(QObject *parent = nullptr);
 
 public Q_SLOTS:
     void loadFile(QIODevice*);
@@ -47,6 +49,7 @@ public Q_SLOTS:
     void saveState(QDataStream&);
     void loadState(QDataStream&);
 
+public:
     static RealmWorksStructure *theInstance();
 
     int format_version;
@@ -66,6 +69,9 @@ public Q_SLOTS:
     QString details_credits;
     QString details_legal;
     QString details_other_notes;
+
+signals:
+    void modificationDone();
 
 private:
     QString namespace_uri;

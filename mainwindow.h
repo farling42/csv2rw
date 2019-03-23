@@ -41,7 +41,7 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow();
+    ~MainWindow() override;
 
     QStringList parseCSV(const QString &string);
 
@@ -49,10 +49,12 @@ public Q_SLOTS:
     void loadProject();
     void saveProject();
     void saveProjectAs();
-    void fileQuit();
     void on_loadDataButton_pressed();
     void on_loadStructureButton_pressed();
     void on_categoryComboBox_currentIndexChanged(const QString&);
+
+protected:
+    virtual void closeEvent(QCloseEvent *event) override;
 
 private slots:
     void on_generateButton_clicked();

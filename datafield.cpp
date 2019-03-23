@@ -17,7 +17,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "datafield.h"
-
+#include "realmworksstructure.h"
 #include <QDataStream>
 
 int DataField::p_column_offset{0};
@@ -52,14 +52,19 @@ bool DataField::isDefined() const
 
 void DataField::setModelColumn(int column)
 {
+    if (p_model_column == column) return;
+
     p_model_column = column;
     p_fixed_text.clear();
+    emit RealmWorksStructure::theInstance()->modificationDone();
 }
 
 void DataField::setFixedText(const QString &text)
 {
+    if (p_fixed_text == text) return;
     p_model_column = -1;
     p_fixed_text = text;
+    emit RealmWorksStructure::theInstance()->modificationDone();
 }
 
 QDataStream& operator<<(QDataStream &stream, const DataField &item)
