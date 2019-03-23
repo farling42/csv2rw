@@ -45,7 +45,7 @@ void FileDetails::showEvent(QShowEvent *event)
     ui->summary->setPlainText(rw_structure->details_summary);
     ui->description->setPlainText(rw_structure->details_description);
     ui->requirements->setPlainText(rw_structure->details_requirements);
-    ui->credits->setPlainText(rw_structure->details_requirements);
+    ui->credits->setPlainText(rw_structure->details_credits);
     ui->legal->setPlainText(rw_structure->details_legal);
     ui->otherNotes->setPlainText(rw_structure->details_other_notes);
 }
