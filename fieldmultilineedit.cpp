@@ -31,7 +31,13 @@ FieldMultiLineEdit::FieldMultiLineEdit(DataField &datafield, QWidget *parent) :
 {
     //setAcceptDrops(true);
     setContextMenuPolicy(Qt::NoContextMenu);
-    setMode(Mode_Empty);
+    if (datafield.isDefined() && !datafield.fixedText().isEmpty())
+    {
+        setPlainText(datafield.fixedText());
+        setMode(Mode_Fixed);
+    }
+    else
+        setMode(Mode_Empty);
     // We need the field to start at 1 line high,
     // and stretch in height as more text is added.
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);

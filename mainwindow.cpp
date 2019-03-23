@@ -55,7 +55,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    base_window_title = QString("%1   v%2").arg(windowTitle()).arg(qApp->applicationVersion());
+    base_window_title = QString("%1 V%2").arg(windowTitle()).arg(qApp->applicationVersion());
     setWindowTitle(base_window_title);
 
     csv_full_model = new CsvModel(this);

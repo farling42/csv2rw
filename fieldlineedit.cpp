@@ -31,7 +31,13 @@ FieldLineEdit::FieldLineEdit(DataField &datafield, QWidget *parent) :
 {
     setAcceptDrops(true);
     setContextMenuPolicy(Qt::NoContextMenu);
-    setMode(Mode_Empty);
+    if (datafield.isDefined() && !datafield.fixedText().isEmpty())
+    {
+        setMode(Mode_Fixed);
+        setText(datafield.fixedText());
+    }
+    else
+        setMode(Mode_Empty);
     connect(this, &QLineEdit::textEdited, this, &FieldLineEdit::text_changed);
 }
 

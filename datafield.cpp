@@ -53,10 +53,12 @@ bool DataField::isDefined() const
 void DataField::setModelColumn(int column)
 {
     p_model_column = column;
+    p_fixed_text.clear();
 }
 
 void DataField::setFixedText(const QString &text)
 {
+    p_model_column = -1;
     p_fixed_text = text;
 }
 
