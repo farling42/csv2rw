@@ -79,6 +79,7 @@ private:
     QList<RWRelationshipWidget*> relationships;
     FileDetails *file_details{nullptr};
     QMap<QString, RWTopic*> p_all_topics;
+    QString base_window_title;
     QString project_name;
     bool load_project(const QString &filename);
     bool save_project(const QString &filename);

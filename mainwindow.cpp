@@ -55,7 +55,8 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    setWindowTitle(QString("%1   v%2").arg(windowTitle()).arg(qApp->applicationVersion()));
+    base_window_title = QString("%1   v%2").arg(windowTitle()).arg(qApp->applicationVersion());
+    setWindowTitle(base_window_title);
 
     csv_full_model = new CsvModel(this);
     QActionGroup *separators = new QActionGroup(this);
@@ -123,6 +124,7 @@ MainWindow::~MainWindow()
 void MainWindow::set_project_filename(const QString &filename)
 {
     project_name = filename;
+    setWindowTitle(base_window_title + " : " + filename);
 }
 
 bool MainWindow::save_project(const QString &filename)
