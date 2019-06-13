@@ -134,7 +134,7 @@ QString RWContentsItem::xmlSpan(const QString &text, bool bold, bool italic, boo
     // Prevent "<" being interpreted as the start of an element, but not if the entire field looks like XML/HTML
     if (!buffer.startsWith('<') || !buffer.endsWith('>'))
     {
-        buffer.replace("<", "&lt;");
+        buffer = buffer.toHtmlEscaped();   //.replace("<", "&lt;");
     }
 
     // Parse for possible URLs, remembering style for future text

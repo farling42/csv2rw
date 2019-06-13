@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-VERSION = 2.6
+VERSION = 2.6.1
 
 # Found at https://github.com/dbzhang800/QtXlsxWriter
 # (with one tweak to XlsCell to add a richString() method)
