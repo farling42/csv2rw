@@ -89,6 +89,7 @@ private:
     bool load_structure(const QString &filename);
     bool load_data(const QString &filename, const QString &worksheet = QString());
     void set_current_topic(const QString &selection);
+    bool discardChanges(const QString &msg);
 };
 
 #endif // MAINWINDOW_H

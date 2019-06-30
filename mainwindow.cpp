@@ -49,6 +49,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 static const QString PROJECT_DIRECTORY_PARAM("csvProjectDirectory");
 static const QString DATA_DIRECTORY_PARAM("csvDirectory");
+static const QString DATA_EXTENSION_PARAM("dataExtension");
 static const QString STRUCTURE_DIRECTORY_PARAM("structureDirectory");
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -224,6 +225,8 @@ void MainWindow::loadProject()
 {
     QSettings settings;
 
+    if (!discardChanges(tr("Discard changes and load new project?"))) return;
+
     // Offer a file open dialog
     QString filename = QFileDialog::getOpenFileName(this, tr("RWImport Project File"), /*dir*/ settings.value(PROJECT_DIRECTORY_PARAM).toString(), /*template*/ tr("RWImport Project Files (*.csv2rw)"));
     if (filename.isEmpty()) return;
@@ -292,7 +295,8 @@ bool MainWindow::load_data(const QString &filename, const QString &worksheet)
         if (sheet_names.size() > 1)
         {
             QString sheet = worksheet.isEmpty() ? excel_full_model->currentSheetName() : worksheet;
-            if (!worksheet.isEmpty()) excel_full_model->selectSheet(worksheet);
+            if (!worksheet.isEmpty()) excel_full_model->selectSheet(sheet);
+
             ui->sheetName->clear();
             ui->sheetName->addItems(sheet_names);
             ui->sheetName->setCurrentText(sheet);
@@ -300,9 +304,18 @@ bool MainWindow::load_data(const QString &filename, const QString &worksheet)
             connect(ui->sheetName, &QComboBox::currentTextChanged, excel_full_model,
                     [=](const QString &sheetname)
             {
-                excel_full_model->selectSheet(sheetname);
-                // Reload structure to clear out all the field mappings
-                if (!p_all_topics.isEmpty()) load_structure(ui->structureFilename->text());
+                if (sheetname != excel_full_model->currentSheetName() &&
+                    discardChanges(tr("Discard changes and switch to worksheet %1?").arg(sheetname)))
+                {
+                    excel_full_model->selectSheet(sheetname);
+                    // Reload structure to clear out all the field mappings
+                    if (!p_all_topics.isEmpty()) load_structure(ui->structureFilename->text());
+                }
+                else
+                {
+                    // Revert name
+                    ui->sheetName->setCurrentText(excel_full_model->currentSheetName());
+                }
             });
         }
         else
@@ -329,6 +342,8 @@ bool MainWindow::load_data(const QString &filename, const QString &worksheet)
     TopicKey::setModel(model);
     proxy->setSourceModel(model);
 
+    setWindowModified(false);
+
     return true;
 }
 
@@ -336,10 +351,19 @@ bool MainWindow::load_data(const QString &filename, const QString &worksheet)
 void MainWindow::on_loadDataButton_pressed()
 {
     QSettings settings;
+
+    if (!discardChanges(tr("Discard changes and load new data?"))) return;
+
     // Prompt use to select a data file
-    QString filename = QFileDialog::getOpenFileName(this, tr("Data File"), /*dir*/ settings.value(DATA_DIRECTORY_PARAM).toString(), /*template*/ tr("CSV Files (*.csv);;Excel Workbook (*.xlsx)"));
+    QString selected_filter = settings.value(DATA_EXTENSION_PARAM).toString();
+    QString filename = QFileDialog::getOpenFileName(this,
+                                                    /*caption*/ tr("Data File"),
+                                                    /*dir*/ settings.value(DATA_DIRECTORY_PARAM).toString(),
+                                                    /*template*/ tr("CSV Files (*.csv);;Excel Workbook (*.xlsx)"),
+                                                    /*selectedFilter*/ &selected_filter);
+    qDebug() << "load data: selected filter =" << selected_filter;
     if (filename.isEmpty()) return;
-    load_data(filename);
+    if (load_data(filename)) settings.setValue(DATA_EXTENSION_PARAM, selected_filter);
 }
 
 bool MainWindow::load_structure(const QString &filename)
@@ -376,12 +400,17 @@ bool MainWindow::load_structure(const QString &filename)
     ui->addRelationship->setEnabled(true);
     ui->generateButton->setEnabled(proxy->sourceModel()->rowCount() > 0);
     ui->fileDetails->setEnabled(true);
+
+    setWindowModified(false);
+
     return true;
 }
 
 void MainWindow::on_loadStructureButton_pressed()
 {
     QSettings settings;
+
+    if (!discardChanges(tr("Discard changes and load new structure?"))) return;
 
     // Prompt use to select a data file
     QString filename = QFileDialog::getOpenFileName(this, tr("Structure File"), /*dir*/ settings.value(STRUCTURE_DIRECTORY_PARAM).toString(), /*template*/ tr("Realm Works® Structure Files (*.rwstructure)"));
@@ -444,19 +473,28 @@ void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selectio
     }
 }
 
+
+bool MainWindow::discardChanges(const QString &msg)
+{
+    if (!isWindowModified()) return true;
+
+    return QMessageBox::critical
+            (this,
+             /*title*/ tr("Project not Saved"),
+             /*text*/ tr("The project has not been saved.\n%1").arg(msg),
+            /*buttons*/ QMessageBox::Yes|QMessageBox::No) == QMessageBox::Yes;
+}
+
+
 void MainWindow::closeEvent(QCloseEvent *event)
 {
-    if (isWindowModified() &&
-            QMessageBox::critical(this,
-                                  /*title*/ tr("Project not Saved"),
-                                  /*text*/ tr("The project has not been saved.\nAre you sure that you want to quit?"),
-                                  /*buttons*/ QMessageBox::Yes|QMessageBox::No) != QMessageBox::Yes)
+    if (discardChanges("Are you sure that you want to quit?"))
     {
-        event->ignore();
+        event->accept();
     }
     else
     {
-        event->accept();
+        event->ignore();
     }
 }
 
