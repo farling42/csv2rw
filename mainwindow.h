@@ -51,7 +51,7 @@ public Q_SLOTS:
     void saveProjectAs();
     void on_loadDataButton_pressed();
     void on_loadStructureButton_pressed();
-    void on_categoryComboBox_currentIndexChanged(const QString&);
+    void on_categoryComboBox_currentTextChanged(const QString&);
 
 protected:
     virtual void closeEvent(QCloseEvent *event) override;

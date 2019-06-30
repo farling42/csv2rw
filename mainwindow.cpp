@@ -175,8 +175,8 @@ bool MainWindow::load_project(const QString &filename)
     QDataStream stream(&file);
 
     QString datafile;
-    QString structurefile;
     QString worksheet;
+    QString structurefile;
     QString current_topic;
 
     // Read parameters in order
@@ -185,8 +185,16 @@ bool MainWindow::load_project(const QString &filename)
     stream >> structurefile;
     stream >> current_topic;
 
-    if (!load_data(datafile, worksheet)) return false;
-    if (!load_structure(structurefile)) return false;
+    if (!load_data(datafile, worksheet))
+    {
+        QMessageBox::critical(this, tr("Load Project Failed"), tr("Failed to load data from %1").arg(datafile));
+        return false;
+    }
+    if (!load_structure(structurefile))
+    {
+        QMessageBox::critical(this, tr("Load Project Failed"), tr("Failed to load structure from %1").arg(structurefile));
+        return false;
+    }
     rw_structure.loadState(stream);
 
     // Get the list of configured topics
@@ -216,6 +224,8 @@ bool MainWindow::load_project(const QString &filename)
         }
     }
     ui->categoryComboBox->setCurrentText(current_topic);
+    // Force loading of correct field mappings
+    on_categoryComboBox_currentTextChanged(current_topic);
 
     setWindowModified(false);
     return true;
@@ -418,7 +428,7 @@ void MainWindow::on_loadStructureButton_pressed()
     load_structure(filename);
 }
 
-void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selection)
+void MainWindow::on_categoryComboBox_currentTextChanged(const QString &selection)
 {
     //qDebug() << "MainWindow::on_categoryComboBox_currentIndexChanged:" << selection;
     if (selection.isEmpty()) return;
