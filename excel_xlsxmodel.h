@@ -37,6 +37,12 @@ public:
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
+    QStringList sheetNames() const;
+    QString currentSheetName() const;
+
+public slots:
+    void selectSheet(const QString &sheetname);
+
 private:
     struct PrivateData *p;
 };

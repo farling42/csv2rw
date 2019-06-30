@@ -179,3 +179,20 @@ QVariant ExcelXlsxModel::data(const QModelIndex &index, int role) const
     }
     return QVariant();
 }
+
+QStringList ExcelXlsxModel::sheetNames() const
+{
+    return p->doc.sheetNames();
+}
+
+QString ExcelXlsxModel::currentSheetName() const
+{
+    return p->doc.currentSheet()->sheetName();
+}
+
+void ExcelXlsxModel::selectSheet(const QString &sheetname)
+{
+    beginResetModel();
+    p->doc.selectSheet(sheetname);
+    endResetModel();
+}

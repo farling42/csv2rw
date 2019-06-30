@@ -24,6 +24,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QDebug>
 #include <QMessageBox>
 #include <QFile>
+#include <QComboBox>
 #include <QTextStream>
 #include <QFileDialog>
 #include <QSortFilterProxyModel>
@@ -116,6 +117,9 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui->actionAbout_RWImport, &QAction::triggered, this, &MainWindow::showAbout);
 
     connect(&rw_structure, &RealmWorksStructure::modificationDone, [=]{setWindowModified(true);});
+
+    // Some options not available at startup
+    ui->sheetBox->hide();
 }
 
 MainWindow::~MainWindow()
@@ -136,6 +140,7 @@ bool MainWindow::save_project(const QString &filename)
     if (!file.open(QFile::WriteOnly)) return false;
     QDataStream stream(&file);
     stream << ui->dataFilename->text();
+    stream << ui->sheetName->currentText();
     stream << ui->structureFilename->text();
     stream << ui->categoryComboBox->currentText();  // name of topic currently on display
     rw_structure.saveState(stream);
@@ -168,15 +173,19 @@ bool MainWindow::load_project(const QString &filename)
     if (!file.open(QFile::ReadOnly)) return false;
     QDataStream stream(&file);
 
-    QString value;
+    QString datafile;
+    QString structurefile;
+    QString worksheet;
     QString current_topic;
 
     // Read parameters in order
-    stream >> value;
-    if (!load_data(value)) return false;
-    stream >> value;
-    if (!load_structure(value)) return false;
+    stream >> datafile;
+    stream >> worksheet;
+    stream >> structurefile;
     stream >> current_topic;
+
+    if (!load_data(datafile, worksheet)) return false;
+    if (!load_structure(structurefile)) return false;
     rw_structure.loadState(stream);
 
     // Get the list of configured topics
@@ -254,7 +263,7 @@ void MainWindow::saveProjectAs()
     }
 }
 
-bool MainWindow::load_data(const QString &filename)
+bool MainWindow::load_data(const QString &filename, const QString &worksheet)
 {
     //qDebug() << "MainWindow::load_data" << filename;
     QSettings settings;
@@ -271,6 +280,7 @@ bool MainWindow::load_data(const QString &filename)
         }
         csv_full_model->readCSV(file);
         model = csv_full_model;
+        ui->sheetBox->hide();
     }
     else
     {
@@ -278,6 +288,25 @@ bool MainWindow::load_data(const QString &filename)
         if (excel_full_model) delete excel_full_model;
         excel_full_model = new ExcelXlsxModel(filename, this);
         model = excel_full_model;
+        QStringList sheet_names = excel_full_model->sheetNames();
+        if (sheet_names.size() > 1)
+        {
+            QString sheet = worksheet.isEmpty() ? excel_full_model->currentSheetName() : worksheet;
+            if (!worksheet.isEmpty()) excel_full_model->selectSheet(worksheet);
+            ui->sheetName->clear();
+            ui->sheetName->addItems(sheet_names);
+            ui->sheetName->setCurrentText(sheet);
+            ui->sheetBox->show();
+            connect(ui->sheetName, &QComboBox::currentTextChanged, excel_full_model,
+                    [=](const QString &sheetname)
+            {
+                excel_full_model->selectSheet(sheetname);
+                // Reload structure to clear out all the field mappings
+                if (!p_all_topics.isEmpty()) load_structure(ui->structureFilename->text());
+            });
+        }
+        else
+            ui->sheetBox->show();
     }
     ui->dataFilename->setText(filename);
 
@@ -302,6 +331,7 @@ bool MainWindow::load_data(const QString &filename)
 
     return true;
 }
+
 
 void MainWindow::on_loadDataButton_pressed()
 {
@@ -362,6 +392,7 @@ void MainWindow::on_loadStructureButton_pressed()
 void MainWindow::on_categoryComboBox_currentIndexChanged(const QString &selection)
 {
     //qDebug() << "MainWindow::on_categoryComboBox_currentIndexChanged:" << selection;
+    if (selection.isEmpty()) return;
 
     RWCategory *choice = nullptr;
     for (auto category: rw_structure.categories)

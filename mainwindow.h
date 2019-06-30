@@ -87,7 +87,7 @@ private:
     bool save_project(const QString &filename);
     void set_project_filename(const QString &filename);
     bool load_structure(const QString &filename);
-    bool load_data(const QString &filename);
+    bool load_data(const QString &filename, const QString &worksheet = QString());
     void set_current_topic(const QString &selection);
 };
 
