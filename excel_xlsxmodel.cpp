@@ -153,7 +153,7 @@ QVariant ExcelXlsxModel::data(const QModelIndex &index, int role) const
 
             // Escape any "<" that might be in the cell, to avoid interpreting it as markup.
             // How do we allow HTML to be imported from the CELL?
-            QString escaped = rich.fragmentText(i).replace("<", "&lt;");
+            QString escaped = rich.fragmentText(i).toHtmlEscaped();
 
             // Handle multiple paragraphs in the cell, the tool always double line-break so that users
             // don't have to manually remove line breaks
