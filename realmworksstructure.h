@@ -54,7 +54,7 @@ public:
 
     int format_version;
     int game_system_id;
-    RWStructureItem *export_element;
+    RWStructureItem *export_element{nullptr};
     QList<RWCategory*> categories;
     QList<RWDomain*> domains;
 
@@ -70,11 +70,16 @@ public:
     QString details_legal;
     QString details_other_notes;
 
+    int formatVersion() const;
+    void forceFormatVersion(int version);
+
 signals:
     void modificationDone();
 
 private:
     QString namespace_uri;
+    int force_format_version{-1};
+    int orig_format_version{-1};
     RWStructureItem *read_element(QXmlStreamReader *reader, RWStructureItem *parent);
     void writeParentToStructure(QProgressDialog &progress, QXmlStreamWriter *writer,
                                 const RWTopic* body_topic,

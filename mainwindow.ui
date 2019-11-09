@@ -571,6 +571,7 @@
     <addaction name="actionUse_Comma"/>
     <addaction name="actionUse_Semicolon"/>
     <addaction name="actionUse_Windows_List_Separator"/>
+    <addaction name="actionForce_Format_3"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuOptions"/>
@@ -662,6 +663,14 @@
    </property>
    <property name="toolTip">
     <string>Use a semicolon as the field separator in CSV files</string>
+   </property>
+  </action>
+  <action name="actionForce_Format_3">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>Force XML format 3</string>
    </property>
   </action>
  </widget>

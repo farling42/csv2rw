@@ -119,6 +119,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(&rw_structure, &RealmWorksStructure::modificationDone, [=]{setWindowModified(true);});
 
+    // Read current (Default) option
+    on_actionForce_Format_3_toggled(ui->actionForce_Format_3->isChecked());
+
     // Some options not available at startup
     ui->sheetBox->hide();
 }
@@ -163,6 +166,8 @@ bool MainWindow::save_project(const QString &filename)
             stream << *topic;
         }
     }
+    // Optional extra check box saved
+    stream << ui->actionForce_Format_3->isChecked();
     setWindowModified(false);
     return true;
 }
@@ -223,6 +228,17 @@ bool MainWindow::load_project(const QString &filename)
             stream.setStatus(QDataStream::ReadCorruptData);
         }
     }
+
+    // Some optional addition stuff
+    if (!stream.atEnd())
+    {
+        // Optional flag that contains ForceFormat3 flag
+        bool flag;
+        stream >> flag;
+        ui->actionForce_Format_3->setChecked(flag);
+        on_actionForce_Format_3_toggled(flag);
+    }
+
     ui->categoryComboBox->setCurrentText(current_topic);
     // Force loading of correct field mappings
     on_categoryComboBox_currentTextChanged(current_topic);
@@ -656,6 +672,11 @@ void MainWindow::on_addRelationship_clicked()
     relationships.append(widget);
     current_topic->relationships.append(widget->relationship());
     ui->relationshipWidget->layout()->addWidget(widget);
+}
+
+void MainWindow::on_actionForce_Format_3_toggled(bool checked)
+{
+    rw_structure.forceFormatVersion(checked ? 3 : 0);
 }
 
 void MainWindow::delete_relationship(RWRelationshipWidget *w_conn)

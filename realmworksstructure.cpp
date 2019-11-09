@@ -82,6 +82,13 @@ void RealmWorksStructure::loadFile(QIODevice *device)
     dump_tree (0, export_element);
 #endif
 
+    // Maybe force a specific version
+    orig_format_version = export_element->attribute("format_version").toInt();
+    if (force_format_version > 0)
+    {
+        forceFormatVersion(force_format_version);
+    }
+
     // Now find the partitions and domains in the structure
     RWStructureItem *main_structure = export_element->findChild<RWStructure*>(QString(), Qt::FindDirectChildrenOnly);
     categories = main_structure->findChildren<RWCategory*>();   // not simply childItems, since some might be sub-categories
@@ -387,3 +394,22 @@ void RealmWorksStructure::writeParentToStructure(QProgressDialog &progress,
         }
     }
 }
+
+
+/**
+ * @brief
+ * Realm Works version 254 has a bug in that exports set format_version 4,
+ * but imports only allow up to version 3.
+ *
+ * @param version the version to force (set to 0 to not force the version)
+ */
+void RealmWorksStructure::forceFormatVersion(int version)
+{
+    force_format_version = version;
+
+    if (export_element)
+    {
+        export_element->setAttribute("format_version", QString::number((version > 0) ? version : orig_format_version));
+    }
+}
+

@@ -66,6 +66,7 @@ private slots:
     void showAbout();
 
     void on_addRelationship_clicked();
+    void on_actionForce_Format_3_toggled(bool checked);
     void delete_relationship(RWRelationshipWidget*);
 
 private:

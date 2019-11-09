@@ -59,6 +59,40 @@ void RWStructureItem::writeToStructure(QXmlStreamWriter *writer)
     writer->writeEndElement();
 }
 
+QStringRef RWStructureItem::attribute(const QString &qualifiedName) const
+{
+    return p_attributes.value(qualifiedName);
+}
+
+void RWStructureItem::setAttribute(const QString &qualifiedName, const QString &value)
+{
+    // QXmlStreamAttribute doesn't have a setValue method,
+    // so we have to recreate p_attributes from scratch.
+    if (p_attributes.hasAttribute(qualifiedName))
+    {
+        QXmlStreamAttributes old_values;
+        p_attributes.swap(old_values);
+        for (const QXmlStreamAttribute &attr: old_values)
+        {
+            // Keep order the same
+            if (attr.qualifiedName() == qualifiedName)
+            {
+                p_attributes.append(QXmlStreamAttribute(qualifiedName, value));
+            }
+            else
+            {
+                p_attributes.append(attr);
+            }
+        }
+    }
+    else
+    {
+        // Not in the element yet, so simply append a new attribute.
+        // (Let's hope order doesn't matter.)
+        p_attributes.append(QXmlStreamAttribute(qualifiedName, value));
+    }
+}
+
 void RWStructureItem::writeChildrenToStructure(QXmlStreamWriter *writer)
 {
     for (auto child: childItems<RWStructureItem*>())

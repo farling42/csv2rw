@@ -62,6 +62,9 @@ public:
     inline QString namespaceUri() const { return p_namespace_uri; }
     const QXmlStreamAttributes &attributes() const { return p_attributes; }
 
+    QStringRef attribute(const QString &qualifiedName) const;
+    void setAttribute(const QString &qualifiedName, const QString &value);
+
     template<typename T>
     inline QList<T> childItems() const { return findChildren<T>(QString(), Qt::FindDirectChildrenOnly); }
 
