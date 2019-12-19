@@ -19,6 +19,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "rw_alias.h"
 
 #include <QMetaEnum>
+#include <QDataStream>
 #include <QXmlStreamWriter>
 
 static QMetaEnum case_matching_enum   = QMetaEnum::fromType<RWAlias::CaseMatching>();
@@ -62,4 +63,31 @@ void RWAlias::writeToContents(QXmlStreamWriter *writer, const QModelIndex &index
         if (p_is_revealed)  writer->writeAttribute("is_revealed",  "true");
         writer->writeEndElement();
     }
+}
+
+QDataStream& operator<<(QDataStream &stream, const RWAlias &alias)
+{
+    stream << alias.p_name_field;
+    stream << alias.p_is_auto_accept;
+    stream << (int)alias.p_case_matching;
+    stream << (int)alias.p_match_priority;
+    stream << alias.p_is_show_nav_pane;
+    stream << alias.p_is_true_name;
+    stream << alias.p_is_revealed;
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream &stream, RWAlias &alias)
+{
+    int enum_value;
+    stream >> alias.p_name_field;
+    stream >> alias.p_is_auto_accept;
+    stream >> enum_value;
+    alias.p_case_matching = RWAlias::CaseMatching(enum_value);
+    stream >> enum_value;
+    alias.p_match_priority = RWAlias::MatchPriority(enum_value);
+    stream >> alias.p_is_show_nav_pane;
+    stream >> alias.p_is_true_name;
+    stream >> alias.p_is_revealed;
+    return stream;
 }

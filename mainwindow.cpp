@@ -137,12 +137,16 @@ void MainWindow::set_project_filename(const QString &filename)
     setWindowTitle(base_window_title + " : " + filename + "[*]");
 }
 
+const QString VERSION_LABEL{"VERSION"};
+
 bool MainWindow::save_project(const QString &filename)
 {
     //qDebug() << "Saving project to" << filename;
     QFile file(filename);
     if (!file.open(QFile::WriteOnly)) return false;
     QDataStream stream(&file);
+    stream << VERSION_LABEL;
+    stream << 0x0209;   // save file version number
     stream << ui->dataFilename->text();
     stream << ui->sheetName->currentText();
     stream << ui->structureFilename->text();
@@ -184,8 +188,17 @@ bool MainWindow::load_project(const QString &filename)
     QString structurefile;
     QString current_topic;
 
-    // Read parameters in order
+    // Read parameters in order (Versions 2.9 onwards has VERSION as first keyword)
+    int save_file_version = 0x0208;
     stream >> datafile;
+    if (datafile == VERSION_LABEL)  // Save versions from v2.8 and earlier didn't have this keyword
+    {
+        stream >> save_file_version;
+        stream >> datafile;
+    }
+    qApp->setProperty("saveVersion", save_file_version);
+    qDebug() << "Loading save file in format" << QString::number(save_file_version, 16);
+
     stream >> worksheet;
     stream >> structurefile;
     stream >> current_topic;

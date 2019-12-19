@@ -22,6 +22,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QObject>
 #include "datafield.h"
 
+class QDataStream;
 class QXmlStreamWriter;
 class QModelIndex;
 
@@ -67,7 +68,11 @@ private:
     bool p_is_true_name;
     bool p_is_revealed;
     DataField p_name_field;
-
+    friend QDataStream& operator<<(QDataStream&, const RWAlias&);
+    friend QDataStream& operator>>(QDataStream&, RWAlias&);
 };
+
+extern QDataStream& operator<<(QDataStream&, const RWAlias&);
+extern QDataStream& operator>>(QDataStream&, RWAlias&);
 
 #endif // RW_ALIAS_H

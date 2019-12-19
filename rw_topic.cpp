@@ -31,6 +31,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include <QModelIndex>
 #include <QDebug>
 #include <QDataStream>
+#include <QCoreApplication>
 
 #include "rw_contents_item.h"   // TODO - remove this?
 
@@ -173,6 +174,12 @@ QDataStream& operator<<(QDataStream &stream, const RWTopic &topic)
     stream << topic.p_suffix;
     stream << topic.p_key_column;
     stream << topic.p_key_value;
+    // Write name aliases (in version 0x0209 onwards)
+    stream << topic.aliases.count();
+    for (auto alias : topic.aliases)
+    {
+        stream << *alias;
+    }
     // write children
     for (auto elem : topic.findChildren<RWContentsItem*>())
     {
@@ -211,6 +218,9 @@ QDataStream& operator<<(QDataStream &stream, const RWTopic &topic)
 
 QDataStream& operator>>(QDataStream &stream, RWTopic &topic)
 {
+    int count;
+    int save_version = qApp->property("saveVersion").toInt();
+
     //qDebug() << "RWTopic>>" << topic.structure->name();
     // Collect the structure->name() of each child into a look-up table
     QMap<QString,RWContentsItem*> contents;
@@ -228,6 +238,19 @@ QDataStream& operator>>(QDataStream &stream, RWTopic &topic)
     stream >> topic.p_suffix;
     stream >> topic.p_key_column;
     stream >> topic.p_key_value;
+
+    // read name aliases (only present from app version 2.9 and later)
+    if (save_version >= 0x0209)
+    {
+        stream >> count;
+        qDebug() << "Reading" << count << "aliases";
+        while (count--)
+        {
+            RWAlias *alias = new RWAlias;
+            stream >> *alias;
+            topic.aliases.append(alias);
+        }
+    }
 
     // read contents for children
     while (true)
@@ -256,7 +279,6 @@ QDataStream& operator>>(QDataStream &stream, RWTopic &topic)
     }
 
     // read relationships
-    int count;
     stream >> count;
     while (count--)
     {
