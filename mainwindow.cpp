@@ -52,7 +52,7 @@ static const QString DATA_DIRECTORY_PARAM("csvDirectory");
 static const QString DATA_EXTENSION_PARAM("dataExtension");
 static const QString STRUCTURE_DIRECTORY_PARAM("structureDirectory");
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(const QString &filename, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
@@ -124,6 +124,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     // Some options not available at startup
     ui->sheetBox->hide();
+
+    // An optional starting filename might have been supplied.
+    if (!filename.isEmpty())
+    {
+        load_project(filename);
+    }
 }
 
 MainWindow::~MainWindow()
@@ -257,24 +263,27 @@ bool MainWindow::load_project(const QString &filename)
     on_categoryComboBox_currentTextChanged(current_topic);
 
     setWindowModified(false);
+    set_project_filename(filename);
+    QSettings settings;
+    settings.setValue(PROJECT_DIRECTORY_PARAM, QFileInfo(filename).absolutePath());
     return true;
 }
 
 void MainWindow::loadProject()
 {
-    QSettings settings;
+    QString filename;
 
     if (!discardChanges(tr("Discard changes and load new project?"))) return;
 
     // Offer a file open dialog
-    QString filename = QFileDialog::getOpenFileName(this, tr("RWImport Project File"), /*dir*/ settings.value(PROJECT_DIRECTORY_PARAM).toString(), /*template*/ tr("RWImport Project Files (*.csv2rw)"));
-    if (filename.isEmpty()) return;
-    // read the contents of the selected file
-    if (load_project(filename))
+    // (Ensure settings is destroyed before load_project is called)
     {
-        set_project_filename(filename);
-        settings.setValue(PROJECT_DIRECTORY_PARAM, QFileInfo(filename).absolutePath());
+        QSettings settings;
+        filename = QFileDialog::getOpenFileName(this, tr("RWImport Project File"), /*dir*/ settings.value(PROJECT_DIRECTORY_PARAM).toString(), /*template*/ tr("RWImport Project Files (*.csv2rw)"));
+        if (filename.isEmpty()) return;
     }
+    // read the contents of the selected file
+    load_project(filename);
 }
 
 void MainWindow::saveProject()

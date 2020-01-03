@@ -52,7 +52,10 @@ int main(int argc, char *argv[])
     QCoreApplication::setOrganizationDomain("amusingtime.uk");
     QCoreApplication::setApplicationName("RWImporter");
 
-    MainWindow w;
+    // Optional command-line argument specifying the file to be opened.
+    QString filename;
+    if (argc > 1) filename = QString::fromLatin1(argv[1]);
+    MainWindow w(filename);
     w.show();
 
     return a.exec();

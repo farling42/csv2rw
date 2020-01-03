@@ -40,7 +40,7 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    explicit MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(const QString &filename = QString(), QWidget *parent = nullptr);
     ~MainWindow() override;
 
     QStringList parseCSV(const QString &string);

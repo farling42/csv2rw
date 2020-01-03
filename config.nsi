@@ -6,6 +6,10 @@
 !define APPNAME      "Realm Works Importer"
 !define COMPANYNAME  "Amusing Time"
 !define DESCRIPTION  "A tool to help bulk import data into Realm Works"
+!define FILEEXT      ".csv2rw"
+!define EXTNAME      "RWImport.csv2rw"
+!define EXTDESC      "RWImport Project File"
+!define EXENAME     "RealmWorksImport"
 
 #define name of installer
 Name "${COMPANYNAME} - ${APPNAME}"
@@ -42,11 +46,11 @@ Section
 
    # Get the version of the file we just installed
    var /GLOBAL VERSION
-   ${GetFileVersion} "$INSTDIR\RealmWorksImport.exe" $VERSION
+   ${GetFileVersion} "$INSTDIR\${EXENAME}.exe" $VERSION
 
    # Start Menu
    CreateDirectory "$SMPROGRAMS\${COMPANYNAME}"
-   CreateShortCut  "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}.lnk" "$INSTDIR\RealmWorksImport.exe"
+   CreateShortCut  "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}.lnk" "$INSTDIR\${EXENAME}.exe"
 
    # create a shortcut named "new shortcut" in the start menu programs directory
    # point the new shortcut at the program uninstaller
@@ -63,6 +67,15 @@ Section
    WriteRegDWORD HKLM "${ARP}" "NoModify" 1
    WriteRegDWORD HKLM "${ARP}" "NoRepair" 1
 
+   # Register the extension
+   WriteRegStr HKCR "${FILEEXT}" "" "${EXTNAME}"
+   WriteRegStr HKCR "${EXTNAME}" "" "${EXTDESC}"
+   #WriteRegStr HKCR "${EXTNAME}\DefaultIcon" "" "$INSTDIR\${EXENAME}.exe,0"
+   WriteRegStr HKCR "${EXTNAME}\shell\open\command" "" '"$INSTDIR\${EXENAME}.exe" "%1"'
+   WriteRegStr HKLM "Software\RegisteredApplications" "${EXENAME}" "$INSTDIR\${EXENAME}.exe"
+   WriteRegStr HKCU "Software\RegisteredApplications" "${EXENAME}" "$INSTDIR\${EXENAME}.exe"
+   WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\${FILEEXT}\OpenWithList" "a" "$INSTDIR\${EXENAME}.exe"
+
    # Set estimated size
    ${GetSize} "$INSTDIR" "/S=0K" $0 $1 $2
    IntFmt $0 "0x%08X" $0
@@ -75,6 +88,14 @@ SectionEnd
 
 # uninstaller section start
 Section "uninstall"
+
+    # Unregister the file extension
+    DeleteRegKey HKCR "${FILEEXT}"
+    DeleteRegKey HKCR "${EXTNAME}"
+    #DeleteRegKey HKLM "${FILEEXT}"
+    DeleteRegValue HKLM "Software\RegisteredApplications" "${EXENAME}"
+    DeleteRegValue HKCU "Software\RegisteredApplications" "${EXENAME}"
+    DeleteRegKey HKCU "Software\Microsoft\Windows\CurrentVersion\Explorer\FileExts\${FILEEXT}"
 
     # Remove Start Menu launcher
     Delete "$SMPROGRAMS\${COMPANYNAME}\${APPNAME}.lnk"
