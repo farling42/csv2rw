@@ -702,7 +702,7 @@ void MainWindow::parent_topics_changed()
 void MainWindow::showAbout()
 {
     static QString about_text = tr("Realm Works® Importer\n\n"
-                                   "Copyright (C) 2017-2019 Martin Smith\n\n"
+                                   "Copyright (C) 2017-2020 Martin Smith\n\n"
                                    "Version %1").arg(qApp->applicationVersion());
     QMessageBox::information(this, tr("About"), about_text);
 }

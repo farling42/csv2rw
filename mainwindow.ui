@@ -304,8 +304,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>372</width>
-                  <height>194</height>
+                  <width>368</width>
+                  <height>206</height>
                  </rect>
                 </property>
                </widget>
@@ -571,6 +571,7 @@
     <addaction name="actionUse_Comma"/>
     <addaction name="actionUse_Semicolon"/>
     <addaction name="actionUse_Windows_List_Separator"/>
+    <addaction name="separator"/>
     <addaction name="actionForce_Format_3"/>
    </widget>
    <addaction name="menuFile"/>
