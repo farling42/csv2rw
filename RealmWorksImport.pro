@@ -4,11 +4,12 @@
 #
 #-------------------------------------------------
 
-VERSION = 2.10
+VERSION = 2.11
 
 # Found at https://github.com/dbzhang800/QtXlsxWriter
 # (with one tweak to XlsCell to add a richString() method)
 include (3rdparty/QtXlsxWriter/src/xlsx/qtxlsx.pri)
+include (3rdparty/yaml-cpp/yaml-cpp.pri)
 
 QT       += core gui network xmlpatterns
 
@@ -18,12 +19,15 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = RealmWorksImport
 TEMPLATE = app
 
+INCLUDEPATH += 3rdparty/yaml-cpp/include/
+
 # You can also make your code fail to compile if you use deprecated APIs.
 # In order to do so, uncomment the following line.
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x051200
 
-SOURCES += main.cpp\
+SOURCES += main.cpp \
+    jsonmodel.cpp \
         mainwindow.cpp \
     csvmodel.cpp \
     realmworksstructure.cpp \
@@ -51,10 +55,12 @@ SOURCES += main.cpp\
     htmlitemdelegate.cpp \
     rw_relationship.cpp \
     rw_relationship_widget.cpp \
-    errordialog.cpp
+    errordialog.cpp \
+    yamlmodel.cpp
 
 HEADERS  += mainwindow.h \
     csvmodel.h \
+    jsonmodel.h \
     realmworksstructure.h \
     rw_domain.h \
     rw_category.h \
@@ -81,7 +87,8 @@ HEADERS  += mainwindow.h \
     htmlitemdelegate.h \
     rw_relationship.h \
     rw_relationship_widget.h \
-    errordialog.h
+    errordialog.h \
+    yamlmodel.h
 
 FORMS    += mainwindow.ui \
     filedetails.ui \

@@ -21,6 +21,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "csvmodel.h"
+#include "yamlmodel.h"
+#include "jsonmodel.h"
+
 #include <QDebug>
 #include <QMessageBox>
 #include <QFile>
@@ -62,6 +65,9 @@ MainWindow::MainWindow(const QString &filename, QWidget *parent) :
     setWindowTitle(base_window_title + "[*]");
 
     csv_full_model = new CsvModel(this);
+    yaml_model = new YamlModel(this);
+    json_model = new JsonModel(this);
+
     QActionGroup *separators = new QActionGroup(this);
     separators->addAction(ui->actionUse_Comma);
     separators->addAction(ui->actionUse_Semicolon);
@@ -333,7 +339,7 @@ bool MainWindow::load_data(const QString &filename, const QString &worksheet)
         model = csv_full_model;
         ui->sheetBox->hide();
     }
-    else
+    else if (filename.endsWith((".xslx")))
     {
         // Excel file
         if (excel_full_model) delete excel_full_model;
@@ -368,6 +374,37 @@ bool MainWindow::load_data(const QString &filename, const QString &worksheet)
         }
         else
             ui->sheetBox->show();
+    }
+    else if (filename.endsWith(".yaml"))
+    {
+        if (!yaml_model->readFile(filename))
+        {
+            qWarning() << tr("Failed to read YAML file") << filename;
+            return false;
+        }
+        model = yaml_model;
+        ui->sheetBox->hide();
+    }
+    else if (filename.endsWith(".json"))
+    {
+        QFile file(filename);
+        if (!file.open(QFile::ReadOnly))
+        {
+            qWarning() << tr("Failed to find file") << file.fileName();
+            return false;
+        }
+        if (!json_model->readFile(file))
+        {
+            qWarning() << tr("Failed to read JSON file") << file.fileName();
+            return false;
+        }
+        model = json_model;
+        ui->sheetBox->hide();
+    }
+    else
+    {
+        qCritical() << tr("Unknown File Extension") << filename;
+        return false;
     }
     ui->dataFilename->setText(filename);
 
@@ -407,7 +444,7 @@ void MainWindow::on_loadDataButton_pressed()
     QString filename = QFileDialog::getOpenFileName(this,
                                                     /*caption*/ tr("Data File"),
                                                     /*dir*/ settings.value(DATA_DIRECTORY_PARAM).toString(),
-                                                    /*template*/ tr("CSV Files (*.csv);;Excel Workbook (*.xlsx)"),
+                                                    /*template*/ tr("CSV Files (*.csv);;Excel Workbook (*.xlsx);;YAML (*.yaml);;JSON (*.json)"),
                                                     /*selectedFilter*/ &selected_filter);
     qDebug() << "load data: selected filter =" << selected_filter;
     if (filename.isEmpty()) return;

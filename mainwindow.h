@@ -34,6 +34,8 @@ class QStringListModel;
 class ParentCategoryWidget;
 class RWTopicWidget;
 class RWRelationshipWidget;
+class YamlModel;
+class JsonModel;
 
 class MainWindow : public QMainWindow
 {
@@ -74,6 +76,8 @@ private:
     QAbstractProxyModel *proxy{nullptr};
     CsvModel *csv_full_model{nullptr};
     ExcelXlsxModel *excel_full_model{nullptr};
+    YamlModel *yaml_model{nullptr};
+    JsonModel *json_model{nullptr};
     QStringListModel *header_model{nullptr};
     RealmWorksStructure rw_structure;
     RWTopicWidget *topic_widget{nullptr};
