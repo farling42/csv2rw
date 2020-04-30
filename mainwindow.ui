@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>786</width>
-    <height>593</height>
+    <height>628</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -179,6 +179,13 @@
                </property>
               </widget>
              </item>
+             <item>
+              <widget class="QPushButton" name="derivedColumns">
+               <property name="text">
+                <string>Custom Columns</string>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
           </item>
@@ -304,8 +311,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>368</width>
-                  <height>206</height>
+                  <width>372</width>
+                  <height>218</height>
                  </rect>
                 </property>
                </widget>

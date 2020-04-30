@@ -4,14 +4,14 @@
 #
 #-------------------------------------------------
 
-VERSION = 2.11
+VERSION = 2.12
 
 # Found at https://github.com/dbzhang800/QtXlsxWriter
 # (with one tweak to XlsCell to add a richString() method)
 include (3rdparty/QtXlsxWriter/src/xlsx/qtxlsx.pri)
 include (3rdparty/yaml-cpp/yaml-cpp.pri)
 
-QT       += core gui network xmlpatterns
+QT       += core gui network xmlpatterns qml
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -27,6 +27,9 @@ INCLUDEPATH += 3rdparty/yaml-cpp/include/
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x051200
 
 SOURCES += main.cpp \
+    addcolumndialog.cpp \
+    columnnamemodel.cpp \
+    derivedcolumnsproxymodel.cpp \
     jsonmodel.cpp \
         mainwindow.cpp \
     csvmodel.cpp \
@@ -59,7 +62,10 @@ SOURCES += main.cpp \
     yamlmodel.cpp
 
 HEADERS  += mainwindow.h \
+    addcolumndialog.h \
+    columnnamemodel.h \
     csvmodel.h \
+    derivedcolumnsproxymodel.h \
     jsonmodel.h \
     realmworksstructure.h \
     rw_domain.h \
@@ -91,6 +97,7 @@ HEADERS  += mainwindow.h \
     yamlmodel.h
 
 FORMS    += mainwindow.ui \
+    addcolumndialog.ui \
     filedetails.ui \
     topickey.ui \
     errordialog.ui

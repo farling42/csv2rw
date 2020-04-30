@@ -86,8 +86,8 @@ QVariant JsonModel::data(const QModelIndex &index, int role) const
     return QVariant();
 }
 
-static ValueList flatten_object(const QJsonObject &parent);
-static ValueList flatten_value(const QString &key, const QJsonValue &value);
+static ValueList flatten_object(const QJsonObject &parent, bool istop=false);
+static ValueList flatten_value(const QString &key, const QJsonValue &value, bool istop=false);
 
 static ValueList flatten_array(const QJsonArray &array)
 {
@@ -95,60 +95,79 @@ static ValueList flatten_array(const QJsonArray &array)
     int count = 0;
     for (QJsonValue value : array)
     {
+        //qDebug() << "flatten_array" << count+1;
         result.append(flatten_value(QString::number(++count), value));
     }
     return result;
 }
 
-static ValueList flatten_value(const QString &key, const QJsonValue &value)
+static ValueList flatten_value(const QString &key, const QJsonValue &value, bool istop)
 {
     ValueList result;
 
     switch(value.type())
     {
     case QJsonValue::Object:
-        result = flatten_object(value.toObject());
-        for (ValuePair &value: result)
+        //qDebug() << "flatten_value Object" << key;
+        result = flatten_object(value.toObject(), istop);
+        //qDebug() << "flatten_value Object" << key << "marking";
+        if (!istop) // If top item in JSON File is an object, don't add it to the name.
         {
-            value.column.prepend(key + '/');
+            for (ValuePair &value: result)
+            {
+                value.column.prepend(key + '/');
+            }
         }
+        //qDebug() << "flatten_value Object" << key << "done";
         break;
 
     case QJsonValue::Array:
+        //qDebug() << "flatten_value Array " << key;
         result = flatten_array(value.toArray());
-        for (ValuePair &value: result)
+        //qDebug() << "flatten_value Array " << key << "marking";
+        if (!istop)
         {
-            value.column.prepend(key + '/');
+            for (ValuePair &value: result)
+            {
+                value.column.prepend(key + '/');
+            }
         }
+        //qDebug() << "flatten_value Array " << key << "done";
         break;
 
     case QJsonValue::Bool:
+        //qDebug() << "flatten_value Bool  " << key << ":=" << value.toBool();
         result.append({ key, value.toBool() ? "true" : "false" });
         break;
 
     case QJsonValue::Double:
+        //qDebug() << "flatten_value Double" << key << ":=" << value.toDouble();
         result.append({ key, QString::number(value.toDouble()) });
         break;
 
     case QJsonValue::String:
+        //qDebug() << "flatten_value String" << key << ":=" << value.toString();
         result.append({ key, value.toString() });
         break;
 
     case QJsonValue::Null:
     case QJsonValue::Undefined:
+        //qDebug() << "flatten_value Null/Undefined" << key;
         break;
     }
 
     return result;
 }
 
-static ValueList flatten_object(const QJsonObject &parent)
+static ValueList flatten_object(const QJsonObject &parent, bool istop)
 {
     ValueList result;
 
+    //int count=0;
     for(QJsonObject::const_iterator it=parent.constBegin(); it != parent.constEnd(); ++it)
     {
-        result.append(flatten_value(it.key(), it.value()));
+        //qDebug() << "flatten_object" << ++count;
+        result.append(flatten_value(it.key(), it.value(), istop));
     }
 
     return result;
@@ -174,11 +193,11 @@ bool JsonModel::readFile(QFile &file)
     if (doc.isObject())
     {
         qDebug() << "Decoding top-level object =" << doc.object().size();
-        data = flatten_object(doc.object());
+        data = flatten_object(doc.object(), /*istop*/ true);
     }
     else if (doc.isArray())
     {
-        qDebug() << "Decoding top-level object =" << doc.array().size();
+        qDebug() << "Decoding top-level array =" << doc.array().size();
         data = flatten_array(doc.array());
     }
 
@@ -188,6 +207,7 @@ bool JsonModel::readFile(QFile &file)
         return false;
     }
 
+    qDebug() << "Flattening finished...";
     // Remove the top-level column from each entry, and transfer to the "row" field.
     for (ValuePair &value : data)
     {
@@ -195,6 +215,11 @@ bool JsonModel::readFile(QFile &file)
         if (pos < 0) continue;
         value.row = value.column.mid(0,pos).toInt();
         value.column.remove(0, pos+1);
+    }
+
+    for (auto &value: data)
+    {
+        qDebug() << "row" << value.row << ":" << value.column << ":=" << value.value;
     }
 
     // Collect all the column names: We don't want a sequence number at the top-level.

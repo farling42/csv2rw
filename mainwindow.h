@@ -30,12 +30,13 @@ class CsvModel;
 class ExcelXlsxModel;
 class FileDetails;
 class QAbstractProxyModel;
-class QStringListModel;
+class ColumnNameModel;
 class ParentCategoryWidget;
 class RWTopicWidget;
 class RWRelationshipWidget;
 class YamlModel;
 class JsonModel;
+class DerivedColumnsProxyModel;
 
 class MainWindow : public QMainWindow
 {
@@ -78,13 +79,14 @@ private:
     ExcelXlsxModel *excel_full_model{nullptr};
     YamlModel *yaml_model{nullptr};
     JsonModel *json_model{nullptr};
-    QStringListModel *header_model{nullptr};
+    ColumnNameModel *header_model{nullptr};
     RealmWorksStructure rw_structure;
     RWTopicWidget *topic_widget{nullptr};
     RWTopic *current_topic{nullptr};
     QList<ParentCategoryWidget*> parents;
     QList<RWRelationshipWidget*> relationships;
     FileDetails *file_details{nullptr};
+    DerivedColumnsProxyModel *derived_columns{nullptr};
     QMap<QString, RWTopic*> p_all_topics;
     QString base_window_title;
     QString project_name;

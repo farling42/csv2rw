@@ -23,6 +23,9 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 #include "csvmodel.h"
 #include "yamlmodel.h"
 #include "jsonmodel.h"
+#include "derivedcolumnsproxymodel.h"
+#include "columnnamemodel.h"
+#include "addcolumndialog.h"
 
 #include <QDebug>
 #include <QMessageBox>
@@ -55,6 +58,11 @@ static const QString DATA_DIRECTORY_PARAM("csvDirectory");
 static const QString DATA_EXTENSION_PARAM("dataExtension");
 static const QString STRUCTURE_DIRECTORY_PARAM("structureDirectory");
 
+/*
+ *   CSV/YAML/JSON model -> DerivedColumnsProxyModel -> QSortFilterProxyModel
+ *
+ */
+
 MainWindow::MainWindow(const QString &filename, QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -83,15 +91,24 @@ MainWindow::MainWindow(const QString &filename, QWidget *parent) :
     else if (sep == ';')
         ui->actionUse_Semicolon->setChecked(true);
 
+    derived_columns = new DerivedColumnsProxyModel(this);
+    derived_columns->setSourceModel(csv_full_model);    // temporary place holder
+
     // Set up the full data view
-    proxy = new QSortFilterProxyModel;
-    proxy->setSourceModel(csv_full_model);
+    proxy = new QSortFilterProxyModel(this);
+    proxy->setSourceModel(derived_columns);
+
+    // TEST
+    derived_columns->setColumn("derived", "row.column('name') + ' = ' + row.column('school')");
+    derived_columns->setColumn("newname", "(row.column('material') == 1) ? row.column('school') : 'pp'");
+
     ui->dataContentsTableView->setModel(proxy);
 #ifdef SHOW_FORMATTING
     ui->dataContentsTableView->setItemDelegate(new HtmlItemDelegate);
 #endif
     // Set up the list of headers
-    header_model = new QStringListModel;
+    header_model = new ColumnNameModel(this);
+    header_model->setSourceModel(derived_columns);
     ui->headerListView->setModel(header_model);
     ui->addParent->setEnabled(false);
     ui->addRelationship->setEnabled(false);
@@ -136,6 +153,18 @@ MainWindow::MainWindow(const QString &filename, QWidget *parent) :
     {
         load_project(filename);
     }
+
+    // Create the dialog box to allow for creating derived columns.
+    AddColumnDialog *acd = new AddColumnDialog(this);
+    connect(acd, &AddColumnDialog::updateColumn, derived_columns, &DerivedColumnsProxyModel::setColumn);
+    connect(acd, &AddColumnDialog::deleteColumn, derived_columns, &DerivedColumnsProxyModel::deleteColumn);
+    connect(acd, &AddColumnDialog::requestExpression,  [=](const QString &name) { acd->setExpression(derived_columns->expression(name)); });
+    connect(acd, &AddColumnDialog::requestColumnNames, [=]() { acd->setColumnNames(derived_columns->columnNames()); });
+
+    connect(ui->derivedColumns, &QPushButton::clicked, acd, &QDialog::show);
+    //connect(acd, &AddColumnDialog::, derived_columns, &DerivedColumnsProxyModel::);
+
+
 }
 
 MainWindow::~MainWindow()
@@ -158,7 +187,7 @@ bool MainWindow::save_project(const QString &filename)
     if (!file.open(QFile::WriteOnly)) return false;
     QDataStream stream(&file);
     stream << VERSION_LABEL;
-    stream << 0x0209;   // save file version number
+    stream << 0x0212;   // save file version number
     stream << ui->dataFilename->text();
     stream << ui->sheetName->currentText();
     stream << ui->structureFilename->text();
@@ -184,6 +213,9 @@ bool MainWindow::save_project(const QString &filename)
     }
     // Optional extra check box saved
     stream << ui->actionForce_Format_3->isChecked();
+    // Any custom columns
+    stream << *derived_columns;
+
     setWindowModified(false);
     return true;
 }
@@ -263,6 +295,10 @@ bool MainWindow::load_project(const QString &filename)
         ui->actionForce_Format_3->setChecked(flag);
         on_actionForce_Format_3_toggled(flag);
     }
+    if (save_file_version >= 0x0212)
+        stream >> *derived_columns;
+    else
+        derived_columns->clearColumns();
 
     ui->categoryComboBox->setCurrentText(current_topic);
     // Force loading of correct field mappings
@@ -339,7 +375,7 @@ bool MainWindow::load_data(const QString &filename, const QString &worksheet)
         model = csv_full_model;
         ui->sheetBox->hide();
     }
-    else if (filename.endsWith((".xslx")))
+    else if (filename.endsWith((".xlsx")))
     {
         // Excel file
         if (excel_full_model) delete excel_full_model;
@@ -414,18 +450,11 @@ bool MainWindow::load_data(const QString &filename, const QString &worksheet)
     // Switch to the data directory, in case we need to load images.
     QDir::setCurrent(QFileInfo(filename).absolutePath());
 
-    // Put headers into the header model
-    QStringList headers;
-    for (int row = 0; row < model->columnCount(); row++)
-    {
-        headers.append(model->headerData(row, Qt::Horizontal).toString());
-    }
-    header_model->setStringList(headers);
+    derived_columns->setSourceModel(model);
 
     //qDebug() << "Model size: " << model->rowCount() << "rows and" << model->columnCount() << "columns";
     ui->generateButton->setEnabled(rw_structure.categories.size() > 0);
     TopicKey::setModel(model);
-    proxy->setSourceModel(model);
 
     setWindowModified(false);
 
