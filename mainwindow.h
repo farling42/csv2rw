@@ -72,6 +72,10 @@ private slots:
     void on_actionForce_Format_3_toggled(bool checked);
     void delete_relationship(RWRelationshipWidget*);
 
+    void on_saveColumns_clicked();
+
+    void on_loadColumns_clicked();
+
 private:
     Ui::MainWindow *ui{nullptr};
     QAbstractProxyModel *proxy{nullptr};

@@ -57,6 +57,7 @@ static const QString PROJECT_DIRECTORY_PARAM("csvProjectDirectory");
 static const QString DATA_DIRECTORY_PARAM("csvDirectory");
 static const QString DATA_EXTENSION_PARAM("dataExtension");
 static const QString STRUCTURE_DIRECTORY_PARAM("structureDirectory");
+static const QString CUSTOM_COLUMNS_DIRECTORY_PARAM("customColumnsDirectory");
 
 /*
  *   CSV/YAML/JSON model -> DerivedColumnsProxyModel -> QSortFilterProxyModel
@@ -163,8 +164,6 @@ MainWindow::MainWindow(const QString &filename, QWidget *parent) :
 
     connect(ui->derivedColumns, &QPushButton::clicked, acd, &QDialog::show);
     //connect(acd, &AddColumnDialog::, derived_columns, &DerivedColumnsProxyModel::);
-
-
 }
 
 MainWindow::~MainWindow()
@@ -774,4 +773,36 @@ void MainWindow::delete_relationship(RWRelationshipWidget *w_conn)
     current_topic->relationships.removeAll(w_conn->relationship());
     w_conn->relationship()->deleteLater();
     w_conn->deleteLater();
+}
+
+void MainWindow::on_saveColumns_clicked()
+{
+    QSettings settings;
+    QString filename = QFileDialog::getSaveFileName(this, tr("RWImport Custom Columns File"),
+                                                    /*dir*/ settings.value(CUSTOM_COLUMNS_DIRECTORY_PARAM).toString(),
+                                                    /*template*/ tr("RWImport Custom Columns Files (*.custcol)"));
+    if (filename.isEmpty()) return;
+
+    QFile file(filename);
+    if (!file.open(QFile::WriteOnly)) return;
+
+    QDataStream stream(&file);
+    stream << *derived_columns;
+    file.close();
+}
+
+void MainWindow::on_loadColumns_clicked()
+{
+    QSettings settings;
+    QString filename = QFileDialog::getOpenFileName(this, tr("RWImport Custom Columns File"),
+                                                    /*dir*/ settings.value(CUSTOM_COLUMNS_DIRECTORY_PARAM).toString(),
+                                                    /*template*/ tr("RWImport Custom Columns Files (*.custcol)"));
+    if (filename.isEmpty()) return;
+
+    QFile file(filename);
+    if (!file.open(QFile::ReadOnly)) return;
+
+    QDataStream stream(&file);
+    stream >> *derived_columns;
+    file.close();
 }

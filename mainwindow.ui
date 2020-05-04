@@ -180,10 +180,42 @@
               </widget>
              </item>
              <item>
-              <widget class="QPushButton" name="derivedColumns">
-               <property name="text">
-                <string>Custom Columns</string>
-               </property>
+              <widget class="QWidget" name="widget_7" native="true">
+               <layout class="QHBoxLayout" name="horizontalLayout_8" stretch="1,0,0">
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
+                <item>
+                 <widget class="QPushButton" name="derivedColumns">
+                  <property name="text">
+                   <string>Manage Custom Columns</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="saveColumns">
+                  <property name="text">
+                   <string>Save Cust. Col.</string>
+                  </property>
+                 </widget>
+                </item>
+                <item>
+                 <widget class="QPushButton" name="loadColumns">
+                  <property name="text">
+                   <string>Load Cust. Col</string>
+                  </property>
+                 </widget>
+                </item>
+               </layout>
               </widget>
              </item>
             </layout>
