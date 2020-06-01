@@ -99,7 +99,7 @@ void DerivedColumnsProxyModel::setSourceModel(QAbstractItemModel *sourceModel)
 
 QVariant DerivedColumnsProxyModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    qDebug() << "headerData" << section << orientation << role;
+    //qDebug() << "headerData" << section << orientation << role;
 
     int column = section - sourceModel()->columnCount();
     if (orientation == Qt::Horizontal && column >= 0 && column < p->derivedColumns.size())
@@ -197,7 +197,7 @@ bool DerivedColumnsProxyModel::setColumn(const QString &name, const QString &js_
     newcol.columnName = name;
     newcol.jsExpression = js_expression;
     result = newcol.recalculate(&p->jsEngine, &p->helper);
-    qDebug() << "setColumn - created new column";
+    //qDebug() << "setColumn - created new column";
 
     int fullcolumn = sourceModel()->columnCount() + p->derivedColumns.count();
     beginInsertColumns(QModelIndex(), fullcolumn, fullcolumn);

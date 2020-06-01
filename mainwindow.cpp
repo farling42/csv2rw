@@ -148,6 +148,23 @@ MainWindow::MainWindow(const QString &filename, QWidget *parent) :
 
     // Some options not available at startup
     ui->sheetBox->hide();
+    ui->arrayBox->hide();
+    connect(ui->arrayName, &QComboBox::currentTextChanged, json_model,
+            [=](const QString &array_name)
+    {
+        if (array_name != json_model->currentArray() &&
+            discardChanges(tr("Discard changes and switch to worksheet %1?").arg(array_name)))
+        {
+            json_model->setArray(array_name);
+            // Reload structure to clear out all the field mappings
+            if (!p_all_topics.isEmpty()) if (!p_all_topics.isEmpty()) load_structure(ui->structureFilename->text());
+        }
+        else
+        {
+            // Revert name
+            ui->arrayName->setCurrentText(json_model->currentArray());
+        }
+    });
 
     // An optional starting filename might have been supplied.
     if (!filename.isEmpty())
@@ -186,9 +203,10 @@ bool MainWindow::save_project(const QString &filename)
     if (!file.open(QFile::WriteOnly)) return false;
     QDataStream stream(&file);
     stream << VERSION_LABEL;
-    stream << 0x0212;   // save file version number
+    stream << 0x0214;   // save file version number
     stream << ui->dataFilename->text();
     stream << ui->sheetName->currentText();
+    stream << ui->arrayName->currentText();
     stream << ui->structureFilename->text();
     stream << ui->categoryComboBox->currentText();  // name of topic currently on display
     rw_structure.saveState(stream);
@@ -228,6 +246,7 @@ bool MainWindow::load_project(const QString &filename)
 
     QString datafile;
     QString worksheet;
+    QString array_name;
     QString structurefile;
     QString current_topic;
 
@@ -243,6 +262,10 @@ bool MainWindow::load_project(const QString &filename)
     qDebug() << "Loading save file in format" << QString::number(save_file_version, 16);
 
     stream >> worksheet;
+    if (save_file_version >= 0x0214)
+    {
+        stream >> array_name;
+    }
     stream >> structurefile;
     stream >> current_topic;
 
@@ -250,6 +273,10 @@ bool MainWindow::load_project(const QString &filename)
     {
         QMessageBox::critical(this, tr("Load Project Failed"), tr("Failed to load data from %1").arg(datafile));
         return false;
+    }
+    if (derived_columns->sourceModel() == json_model)
+    {
+        json_model->setArray(array_name);
     }
     if (!load_structure(structurefile))
     {
@@ -373,6 +400,7 @@ bool MainWindow::load_data(const QString &filename, const QString &worksheet)
         csv_full_model->readCSV(file);
         model = csv_full_model;
         ui->sheetBox->hide();
+        ui->arrayBox->hide();
     }
     else if (filename.endsWith((".xlsx")))
     {
@@ -390,6 +418,8 @@ bool MainWindow::load_data(const QString &filename, const QString &worksheet)
             ui->sheetName->addItems(sheet_names);
             ui->sheetName->setCurrentText(sheet);
             ui->sheetBox->show();
+            ui->arrayBox->hide();
+
             connect(ui->sheetName, &QComboBox::currentTextChanged, excel_full_model,
                     [=](const QString &sheetname)
             {
@@ -408,7 +438,10 @@ bool MainWindow::load_data(const QString &filename, const QString &worksheet)
             });
         }
         else
+        {
             ui->sheetBox->show();
+            ui->arrayBox->hide();
+        }
     }
     else if (filename.endsWith(".yaml"))
     {
@@ -419,6 +452,7 @@ bool MainWindow::load_data(const QString &filename, const QString &worksheet)
         }
         model = yaml_model;
         ui->sheetBox->hide();
+        ui->arrayBox->hide();
     }
     else if (filename.endsWith(".json"))
     {
@@ -435,6 +469,18 @@ bool MainWindow::load_data(const QString &filename, const QString &worksheet)
         }
         model = json_model;
         ui->sheetBox->hide();
+        QStringList arrays = json_model->arrayList();
+        if (arrays.size() < 2)
+        {
+            ui->arrayBox->hide();
+        }
+        else
+        {
+            ui->arrayBox->show();
+            QString current_array = json_model->currentArray();   // before ui->arrayName triggers a value change
+            ui->arrayName->addItems(arrays);
+            ui->arrayName->setCurrentText(current_array);
+        }
     }
     else
     {

@@ -3,10 +3,12 @@
 
 #include <QAbstractItemModel>
 #include <QFile>
+#include <QJsonDocument>
 
 class JsonModel : public QAbstractItemModel
 {
     Q_OBJECT
+    Q_PROPERTY(QString currentArray READ currentArray WRITE setArray)
 
 public:
     explicit JsonModel(QObject *parent = nullptr);
@@ -26,10 +28,19 @@ public:
 
     bool readFile(QFile &file);
 
+    QStringList arrayList() const;
+    bool setArray(const QString&);
+    QString currentArray() const;
+
 private:
     QStringList headers;
     QVector<QVector<QString>> lines;
+    QJsonDocument json_doc;
+    QStringList array_names;
+    QString current_array;
     bool is_regional;
+    bool load_array(const QJsonArray &array);
+    void clear_data();
 };
 
 #endif // JSONMODEL_H

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-VERSION = 2.13
+VERSION = 2.14
 
 # Found at https://github.com/dbzhang800/QtXlsxWriter
 # (with one tweak to XlsCell to add a richString() method)
@@ -31,6 +31,7 @@ SOURCES += main.cpp \
     columnnamemodel.cpp \
     derivedcolumnsproxymodel.cpp \
     jsonmodel.cpp \
+    jsontreemodel.cpp \
         mainwindow.cpp \
     csvmodel.cpp \
     realmworksstructure.cpp \
@@ -67,6 +68,7 @@ HEADERS  += mainwindow.h \
     csvmodel.h \
     derivedcolumnsproxymodel.h \
     jsonmodel.h \
+    jsontreemodel.h \
     realmworksstructure.h \
     rw_domain.h \
     rw_category.h \

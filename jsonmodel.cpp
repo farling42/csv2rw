@@ -73,7 +73,6 @@ QVariant JsonModel::data(const QModelIndex &index, int role) const
     if (!index.isValid() || index.parent().isValid())
         return QVariant();
 
-    // FIXME: Implement me!
     if ((role == Qt::DisplayRole || role == Qt::EditRole || role == Qt::ToolTipRole) &&
             hasIndex(index.row(), index.column()))
     {
@@ -173,7 +172,16 @@ static ValueList flatten_object(const QJsonObject &parent, bool istop)
     return result;
 }
 
-bool JsonModel::readFile(QFile &file)
+void JsonModel::clear_data()
+{
+    beginResetModel();
+    headers.clear();
+    lines.clear();
+    array_names.clear();
+    endResetModel();
+}
+
+bool JsonModel::load_array(const QJsonArray &array)
 {
     // Tell users that the model is about to change.
     beginResetModel();
@@ -182,28 +190,12 @@ bool JsonModel::readFile(QFile &file)
     headers.clear();
     lines.clear();
 
-    qDebug() << "About to start reading JSON from" << file.fileName();
-
-    QByteArray fulldata = file.readAll();
-    QJsonDocument doc = QJsonDocument::fromJson(fulldata);
-    qDebug() << "Finished reading data from JSON file";
-
-    // Flatten the data
-    ValueList data;
-    if (doc.isObject())
-    {
-        qDebug() << "Decoding top-level object =" << doc.object().size();
-        data = flatten_object(doc.object(), /*istop*/ true);
-    }
-    else if (doc.isArray())
-    {
-        qDebug() << "Decoding top-level array =" << doc.array().size();
-        data = flatten_array(doc.array());
-    }
+    ValueList data = flatten_array(array);
 
     if (data.isEmpty())
     {
         qDebug() << "Data is empty";
+        endResetModel();
         return false;
     }
 
@@ -217,10 +209,12 @@ bool JsonModel::readFile(QFile &file)
         value.column.remove(0, pos+1);
     }
 
+#ifdef DEBUG
     for (auto &value: data)
     {
         qDebug() << "row" << value.row << ":" << value.column << ":=" << value.value;
     }
+#endif
 
     // Collect all the column names: We don't want a sequence number at the top-level.
     for (const ValuePair &value : data)
@@ -240,10 +234,126 @@ bool JsonModel::readFile(QFile &file)
     // Transfer data to the relevant cells in the table.
     for (const ValuePair &value: data)
     {
+        if (value.row <= 0 || value.row > lines.count())
+        {
+            qCritical() << "Invalid row" << value.row << ", max" << lines.count() << "for value" << value.value;
+            continue;
+        }
+
+        int col = headers.indexOf(value.column);
+        if (col < 0)
+        {
+            qCritical() << "Failed to find column" << value.column << "for value" << value.value;
+            continue;
+        }
+        if (col >= lines[value.row-1].size())
+        {
+            qCritical() << "col" << col << "won't fit in array of size" << lines[value.row-1].size() << "for column" << value.column << "for value" << value.value;
+            continue;
+        }
+
         lines[value.row-1][headers.indexOf(value.column)] = value.value;
     }
 
     // Parse the tree into a simple table.
     endResetModel();
     return true;
+}
+
+
+bool JsonModel::readFile(QFile &file)
+{
+    qDebug() << "About to start reading JSON from" << file.fileName();
+
+    clear_data();
+
+    QByteArray fulldata = file.readAll();
+    json_doc = QJsonDocument::fromJson(fulldata);
+    qDebug() << "Finished reading data from JSON file";
+
+    // Flatten the data
+    if (json_doc.isArray())
+    {
+        qDebug() << "Decoding top-level array =" << json_doc.array().size();
+        current_array.clear();
+        return load_array(json_doc.array());
+    }
+
+    if (json_doc.isObject())
+    {
+        qDebug() << "Decoding top-level object =" << json_doc.object().size();
+        //
+        // Find biggest array child of the parent object
+        //
+        const QJsonObject &parent = json_doc.object();
+        int largest_size = 0;
+        QString largest_array;
+        for(QJsonObject::const_iterator it=parent.constBegin(); it != parent.constEnd(); ++it)
+        {
+            //qDebug() << "flatten_object" << ++count;
+            if (it.value().isArray())
+            {
+                array_names.append(it.key());
+
+                QJsonArray this_array = it.value().toArray();
+                qDebug() << "Array" << it.key() << "has size" << this_array.size();
+
+                if (this_array.size() > largest_size)
+                {
+                    largest_size = this_array.size();
+                    largest_array = it.key();
+                    qDebug() << "Largest array" << largest_array << "of size" << largest_size;
+                }
+            }
+        }
+
+        if (largest_size == 0)
+        {
+            qCritical() << "No array found in data";
+            return false;
+        }
+
+        return setArray(largest_array);
+    }
+
+    qCritical() << "File does not have top-level array or object";
+    return false;
+}
+
+///
+/// \brief JsonModel::arrayList
+/// \return The list of arrays available in the currently selected file
+///
+QStringList JsonModel::arrayList() const
+{
+    return array_names;
+}
+
+///
+/// \brief JsonModel::setArray
+/// Loads the specified array from the current file.
+///
+/// \param array_name
+/// \return
+///
+bool JsonModel::setArray(const QString &array_name)
+{
+    const QJsonObject &parent = json_doc.object();
+    for(QJsonObject::const_iterator it=parent.constBegin(); it != parent.constEnd(); ++it)
+    {
+        if (it.key() == array_name && it.value().isArray())
+        {
+            qDebug() << "setArray is loading" << it.key();
+            current_array = array_name;
+            return load_array(it.value().toArray());
+        }
+    }
+
+    // Failed to find the named array
+    return false;
+}
+
+QString JsonModel::currentArray() const
+{
+    return current_array;
 }
