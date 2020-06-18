@@ -76,8 +76,9 @@ public:
     }
     void resetColumns()
     {
-        int count=p_model->columnCount();
         columns.clear();
+        if (p_model == nullptr) return;
+        int count=p_model->columnCount();
         for (int column = 0; column < count; column++)
         {
             columns.insert(p_model->headerData(column, Qt::Horizontal).toString(), column);
@@ -108,6 +109,16 @@ public:
         int col = columns.value(name, -1);
         if (col == -1) return QJSValue();
         return p_model->index(therow, col).data().toString();
+    }
+    ///
+    /// \brief hasColumn
+    /// Invoked from a JS script to detect the presence of the named column.
+    /// \param name the name of the column whose existence is being tested.
+    /// \return true if the named column exists in the model.
+    ///
+    Q_INVOKABLE QJSValue hasColumn(const QString &name)
+    {
+        return columns.contains(name);
     }
 private:
     QAbstractItemModel *p_model{nullptr};
