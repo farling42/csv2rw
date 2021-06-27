@@ -91,16 +91,16 @@ QVariant ExcelXlsxModel::data(const QModelIndex &index, int role) const
         int r = p->doc.dimension().firstRow() + index.row() + 1;
         int c = p->doc.dimension().firstColumn() + index.column();
         QXlsx::Cell *cell = p->doc.cellAt(r, c);
-        //qDebug() << "data: cell " << r << "," << c << "=" << (cell ? cell->value() : "<null>");
+        //if (cell) qDebug() << "data: cell " << r << "," << c << "=" << cell->value().type();
         if (!cell) return QVariant();
 
 #ifndef ALLOW_FORMATTING
         return cell->value();
 #else
-        QString text = cell->value().toString();
-        if (!cell->isRichString()) return text;
+        if (!cell->isRichString()) return cell->value();
 
         // If the entire cell is HTML, then don't process it
+        QString text = cell->value().toString();
         if (text.startsWith('<') && text.endsWith('>')) return text;
 
         // Convert rich string to HTML

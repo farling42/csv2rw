@@ -95,8 +95,9 @@ QVariant CsvModel::data(const QModelIndex &index, int role) const
 void CsvModel::readCSV(QFile &file)
 {
     QTextStream stream(&file);
+    stream.setCodec("UTF-8");               // Can we make this conditional, based on the input file?
+    stream.setAutoDetectUnicode(true);      // Might switch to UTF-16 if BOM is found.
 
-    QString line;
     beginResetModel();
 
     // Erase old data

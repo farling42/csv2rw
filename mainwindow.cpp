@@ -392,7 +392,7 @@ bool MainWindow::load_data(const QString &filename, const QString &worksheet)
     if (filename.endsWith((".csv")))
     {
         QFile file(filename);
-        if (!file.open(QFile::ReadOnly))
+        if (!file.open(QFile::ReadOnly|QFile::Text))
         {
             qWarning() << tr("Failed to find file") << file.fileName();
             return false;
