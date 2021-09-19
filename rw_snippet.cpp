@@ -18,6 +18,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 #include "rw_snippet.h"
 #include <QXmlStreamWriter>
+#include <QBuffer>
 #include <QDebug>
 #include <QModelIndex>
 #include <QMetaEnum>
@@ -38,6 +39,8 @@ static QMetaEnum snip_style_enum = QMetaEnum::fromType<RWContentsItem::SnippetSt
 static QMetaEnum snip_purpose_enum = QMetaEnum::fromType<RWContentsItem::SnippetPurpose>();
 
 const int NAME_TYPE_LENGTH = 50;
+const QString DEFAULT_IMAGE_NAME("image.png");
+const char *DEFAULT_IMAGE_FORMAT = "PNG";
 
 #define CONTENTS_TOKEN   "contents"
 
@@ -78,7 +81,7 @@ void RWSnippet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
     {
         const QString user_text = contentsText().valueString(index);
         const QString gm_dir    = gmDirections().valueString(index);
-        const QString asset     = filename().valueString(index);
+        const QVariant asset    = filename().value(index);
         const QString finish_date = finishDate().valueString(index);
         QString digits = number().valueString(index);
 
@@ -116,7 +119,7 @@ void RWSnippet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
         //  X x tag_assign
 
         // Maybe an ANNOTATION or CONTENTS
-        if (!user_text.isEmpty() || !asset.isEmpty() || !start_date.isEmpty() || !digits.isEmpty())
+        if (!user_text.isEmpty() || !asset.isNull() || !start_date.isEmpty() || !digits.isEmpty())
         {
             bool check_annotation = true;
 
@@ -266,11 +269,26 @@ void RWSnippet::writeToContents(QXmlStreamWriter *writer, const QModelIndex &ind
     writer->writeEndElement();  // snippet
 }
 
-void RWSnippet::write_asset(QXmlStreamWriter *writer, const QString &asset) const
+void RWSnippet::write_asset(QXmlStreamWriter *writer, const QVariant &asset) const
 {
-    QFile file(asset);
-    QUrl url(asset);
     const int FILENAME_TYPE_LENGTH = 200;
+    // Images can be put inside immediately
+    if (asset.type() == QVariant::Image)
+    {
+        QImage image = asset.value<QImage>();
+        writer->writeStartElement("asset");
+        writer->writeAttribute("filename", DEFAULT_IMAGE_NAME.right(FILENAME_TYPE_LENGTH));
+        QByteArray databytes;
+        QBuffer buffer(&databytes);
+        buffer.open(QIODevice::WriteOnly);
+        image.save(&buffer, DEFAULT_IMAGE_FORMAT);
+        writer->writeTextElement(CONTENTS_TOKEN, databytes.toBase64());
+        writer->writeEndElement();   // asset
+        return;
+    }
+
+    QFile file(asset.toString());
+    QUrl url(asset.toString());
     if (file.open(QFile::ReadOnly))
     {
         QFileInfo info(file);
@@ -304,7 +322,7 @@ void RWSnippet::write_asset(QXmlStreamWriter *writer, const QString &asset) cons
         }
         if (reply->error() != QNetworkReply::NoError)
         {
-            qWarning() << "Failed to locate URL:" << asset;
+            qWarning() << "Failed to locate URL:" << asset.toString();
         }
         // A redirect has ContentType of "text/html; charset=UTF-8, image/png"
         // which is an ordered comma-separated list of types.
@@ -328,7 +346,7 @@ void RWSnippet::write_asset(QXmlStreamWriter *writer, const QString &asset) cons
             // the body of the message is actually PNG binary data.
             // QPair("Server","Microsoft-IIS/8.5, Microsoft-IIS/8.5") so maybe ISS sent wrong content type
 
-            qWarning() << "Only URLs to images are supported (not" << reply->header(QNetworkRequest::ContentTypeHeader) << ")! Check source at" << asset;
+            qWarning() << "Only URLs to images are supported (not" << reply->header(QNetworkRequest::ContentTypeHeader) << ")! Check source at" << asset.toString();
             //if (reply->header(QNetworkRequest::ContentTypeHeader).toString().startsWith("text/"))
             //    qWarning() << "Body =" << reply->readAll();
             //qWarning() << "Raw Header List =" << reply->rawHeaderPairs();
@@ -338,9 +356,9 @@ void RWSnippet::write_asset(QXmlStreamWriter *writer, const QString &asset) cons
     else
     {
 #if 1
-        qWarning() << "File/URL does not exist:" + asset;
+        qWarning() << "File/URL does not exist:" + asset.toString();
 #else
-        QString message = "File/URL does not exist: " + asset;
+        QString message = "File/URL does not exist: " + asset.toString();
         static QMessageBox *warning = nullptr;
         if (warning == nullptr)
         {
@@ -359,21 +377,26 @@ void RWSnippet::write_asset(QXmlStreamWriter *writer, const QString &asset) cons
  * @param exttype one of Foreign, Statblock, Portfolio, Picture, Rich_Text, PDF, Audio, Video, HTML
  * @param filename
  */
-void RWSnippet::write_ext_object(QXmlStreamWriter *writer, const QString &exttype, const QString &asset) const
+void RWSnippet::write_ext_object(QXmlStreamWriter *writer, const QString &exttype, const QVariant &asset) const
 {
-    if (asset.isEmpty()) return;
+    if (asset.isNull()) return;
     writer->writeStartElement("ext_object");
-    writer->writeAttribute("name", QFileInfo(asset).fileName().right(NAME_TYPE_LENGTH));
+    if (asset.type() == QVariant::String)
+        writer->writeAttribute("name", QFileInfo(asset.toString()).fileName().right(NAME_TYPE_LENGTH));
+    else
+        // What name to use for QImage?
+        writer->writeAttribute("name", DEFAULT_IMAGE_NAME.right(NAME_TYPE_LENGTH));
+
     writer->writeAttribute("type", exttype);
     write_asset(writer, asset);
     writer->writeEndElement();
 }
 
-void RWSnippet::write_smart_image(QXmlStreamWriter *writer, const QString &asset) const
+void RWSnippet::write_smart_image(QXmlStreamWriter *writer, const QVariant &asset) const
 {
-    if (asset.isEmpty()) return;
+    if (asset.isNull()) return;
     writer->writeStartElement("smart_image");
-    writer->writeAttribute("name", QFileInfo(asset).fileName().right(NAME_TYPE_LENGTH));
+    writer->writeAttribute("name", QFileInfo(asset.toString()).fileName().right(NAME_TYPE_LENGTH));
     write_asset(writer, asset);
     // write_overlay (0-1)
     // write_subset_mask (0-1)

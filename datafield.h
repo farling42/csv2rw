@@ -35,7 +35,8 @@ public:
 
     int  modelColumn() const;
     QString fixedText() const;
-    QString valueString(const QModelIndex &index = QModelIndex()) const;
+    QString valueString(const QModelIndex &index = QModelIndex()) const { return value(index).toString(); };
+    QVariant value(const QModelIndex &index = QModelIndex()) const;
     bool isDefined() const;
 
 public slots:

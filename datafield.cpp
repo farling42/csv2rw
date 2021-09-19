@@ -37,10 +37,10 @@ QString DataField::fixedText() const
     return p_fixed_text;
 }
 
-QString DataField::valueString(const QModelIndex &index) const
+QVariant DataField::value(const QModelIndex &index) const
 {
     if (p_model_column >= 0)
-        return index.sibling(index.row(), modelColumn()).data().toString();
+        return index.sibling(index.row(), modelColumn()).data();
     else
         return p_fixed_text;
 }

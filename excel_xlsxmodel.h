@@ -44,7 +44,9 @@ public slots:
     void selectSheet(const QString &sheetname);
 
 private:
+    QVariant valueOfCell(int row, int column) const;
     struct PrivateData *p;
+    void loadData();
 };
 
 #endif // EXCELXLSXMODEL_H

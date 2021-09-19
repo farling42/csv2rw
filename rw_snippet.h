@@ -51,9 +51,9 @@ public:
 public slots:
 
 private:
-    void write_asset(QXmlStreamWriter *writer, const QString &filename) const;
-    void write_ext_object(QXmlStreamWriter *writer, const QString &exttype, const QString &filename) const;
-    void write_smart_image(QXmlStreamWriter *writer, const QString &filename) const;
+    void write_asset(QXmlStreamWriter *writer, const QVariant &filename) const;
+    void write_ext_object(QXmlStreamWriter *writer, const QString &exttype, const QVariant &filename) const;
+    void write_smart_image(QXmlStreamWriter *writer, const QVariant &filename) const;
     DataField p_tags;
     DataField p_label_text;   // for Labeled_Text fields
     DataField p_filename;
