@@ -1,3 +1,5 @@
+![Latest Release Download Count](https://img.shields.io/github/downloads/farling42/csv2rw/latest/module.zip)
+
 Hello RW Community,
 
 I have been quietly working on a generic CSV import tool which )hopefully) requires no programming knowledge for the user.
