@@ -1,4 +1,4 @@
-![Latest Release Download Count](https://img.shields.io/github/downloads/farling42/csv2rw/latest/module.zip)
+![Latest Release Download Count](https://img.shields.io/github/downloads/farling42/csv2rw/latest/RWimporter.exe)
 
 Hello RW Community,
 
